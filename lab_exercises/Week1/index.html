@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LootYard | Game Dev Asset Yard & Creator Talent Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <style>
+        html, body {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1 1 0%;
+            overflow-y: auto;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        main::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+        }
+
+        /* Custom Visual Snap Scrollbar */
+        .pill-scroll-container {
+            position: fixed;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .pill-indicator {
+            width: 0.625rem; /* 10px */
+            border-radius: 9999px;
+            background-color: #eadfd4;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+
+        .pill-indicator:hover {
+            background-color: #ff9f4a;
+        }
+
+        .pill-indicator.active {
+            background-color: #ff9f4a;
+        }
+
+        section {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            box-sizing: border-box;
+        }
+
+        @font-face {
+            font-family: "Magic Jasmine";
+            src: url("assets/fonts/child-hood/ChildHood.otf") format("truetype");
+        }
+
+        @keyframes shine {
+            0% { background-position: -120% 0; }
+            100% { background-position: 220% 0; }
+        }
+
+        @keyframes pulseIcon {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.18); }
+        }
+
+        @keyframes wordSwap {
+            0% { opacity: 0; transform: translateY(110%); }
+            8%, 26% { opacity: 1; transform: translateY(0); }
+            34%, 100% { opacity: 0; transform: translateY(-110%); }
+        }
+
+        @keyframes wordSwap7 {
+            0% { opacity: 0; transform: translateY(110%); }
+            1.5% { opacity: 1; transform: translateY(0); }
+            12.5% { opacity: 1; transform: translateY(0); }
+            14.28%, 100% { opacity: 0; transform: translateY(-110%); }
+        }
+
+        @keyframes floatModel {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-18px); }
+        }
+    </style>
+</head>
+<body class="bg-[#fff8f1] text-[#15110d] antialiased">
+    <!-- HTML5 Requirement: Header -->
+    <header class="sticky top-0 z-50 border-b border-[#f0e7dd] bg-[#fff8f1]/80 backdrop-blur-md">
+        <div class="flex w-full items-center justify-between px-6 py-3 lg:px-10">
+            <!-- HTML5 Requirement: Navigation Bar -->
+            <nav class="flex w-full items-center justify-between gap-6" aria-label="Primary navigation">
+                <div class="flex items-center gap-10">
+                    <a href="#" class="flex items-center gap-3" aria-label="LootYard home">
+                        <img src="assets/chestnobg.png" alt="LootYard treasure chest logo" class="h-20 w-20 object-contain">
+                        <span class="text-4xl leading-none text-[#15110d]" style="font-family: 'Magic Jasmine', cursive;">LootYard</span>
+                    </a>
+
+                    <ul id="sectionNav" class="relative hidden items-center rounded-full bg-[#fff4e8] p-1 text-base font-extrabold text-[#15110d] md:flex">
+                        <span id="navIndicator" class="absolute left-1 top-1 h-[calc(100%-0.5rem)] w-28 rounded-full bg-[#ffd2aa] opacity-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"></span>
+                        <li class="relative z-10 w-28 text-center"><a data-section-link data-index="0" href="#about" class="block rounded-full px-4 py-3 text-[#8a7564]">About</a></li>
+                        <li class="relative z-10 w-28 text-center"><a data-section-link data-index="1" href="#assets" class="block rounded-full px-4 py-3 text-[#8a7564]">Asset</a></li>
+                        <li class="relative z-10 w-28 text-center"><a data-section-link data-index="2" href="#talent" class="block rounded-full px-4 py-3 text-[#8a7564]">Talent</a></li>
+                    </ul>
+                </div>
+
+                <div class="flex items-center gap-6">
+                    <a href="#" class="text-sm font-extrabold text-[#8a7564] transition hover:text-[#ff9f4a]">Log In</a>
+                    <a id="signup" href="#" class="flex items-center gap-3 rounded-full border border-[#eadfd4] bg-white px-5 py-2.5 text-sm font-extrabold text-[#15110d] transition hover:border-[#ff9f4a] hover:bg-[#fff7ee]">
+                        <span class="grid h-8 w-8 place-items-center rounded-full bg-[#ffd2aa]">
+                            <svg class="h-4 w-4 text-[#15110d]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/>
+                            </svg>
+                        </span>
+                        Sign Up
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- HTML5 Requirement: Main Content Wrapper -->
+    <main>
+        <!-- HTML5 Requirement: Section 1 - Hero Area -->
+        <!-- HTML5 Requirement: Section 1 - Hero Area -->
+        <section id="hero" class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 py-14 lg:grid-cols-2 lg:px-10 lg:py-20 h-full w-full">
+            <article class="flex flex-col items-start w-full">
+                <h1 class="max-w-3xl text-5xl font-black leading-[1.08] tracking-tight text-[#15110d] md:text-6xl">
+                    Go on a hunt for 
+                    <span class="relative inline-block h-[1.08em] min-w-[350px] overflow-hidden align-bottom text-[#ff9f4a] sm:min-w-[580px]">
+                        <span class="absolute left-0 top-0 whitespace-nowrap [animation:wordSwap7_14s_infinite]">Free 3D models</span>
+                        <span class="absolute left-0 top-0 whitespace-nowrap opacity-0 [animation:wordSwap7_14s_infinite_2s]">Free SFX packs</span>
+                        <span class="absolute left-0 top-0 whitespace-nowrap opacity-0 [animation:wordSwap7_14s_infinite_4s]">Free scripts</span>
+                        <span class="absolute left-0 top-0 whitespace-nowrap opacity-0 [animation:wordSwap7_14s_infinite_6s]">Free Animations</span>
+                        <span class="absolute left-0 top-0 whitespace-nowrap opacity-0 [animation:wordSwap7_14s_infinite_8s]">Free Music</span>
+                        <span class="absolute left-0 top-0 whitespace-nowrap opacity-0 [animation:wordSwap7_14s_infinite_10s]">Amazing Portfolios</span>
+                        <span class="absolute left-0 top-0 whitespace-nowrap opacity-0 [animation:wordSwap7_14s_infinite_12s]">Talented people</span>
+                    </span>
+                </h1>
+
+                <p class="mt-4 text-lg font-bold text-[#5c4a3c] max-w-2xl leading-relaxed">
+                    Discover a curated library of engine-ready 3D models, sound effects, animations, and scripts designed to kickstart your next game project. Build, share, and collaborate with talented game creators globally.
+                </p>
+
+                <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3 text-xs font-semibold text-[#4a3a2e] w-full">
+                    <div class="flex items-start gap-2.5">
+                        <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#fff0df] text-[10px] font-black text-[#d97821]">1</span>
+                        <span class="leading-snug">Sign in securely as a creator, buyer, or hiring client</span>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                        <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#fff0df] text-[10px] font-black text-[#d97821]">2</span>
+                        <span class="leading-snug">Search indexed 3D models, SFX, scripts, and UI packs</span>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                        <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#fff0df] text-[10px] font-black text-[#d97821]">3</span>
+                        <span class="leading-snug">Hire creators through portfolio pages and project tickets</span>
+                    </div>
+                </div>
+
+                <a href="#assets" class="group mt-10 inline-flex items-center justify-center rounded-full bg-[#15110d] px-10 py-5 text-lg font-black text-white transition hover:bg-[#ff9f4a] hover:text-[#15110d] shadow-md hover:shadow-lg transform hover:-translate-y-0.5 duration-300">
+                    Explore
+                    <span class="inline-block transition-all duration-300 max-w-0 overflow-hidden opacity-0 group-hover:max-w-[20px] group-hover:opacity-100 group-hover:ml-2">&gt;</span>
+                </a>
+            </article>
+
+            <div class="w-full flex justify-center items-center overflow-hidden lg:translate-x-12">
+                <model-viewer
+                    src="assets/mushroom_potion.glb"
+                    alt="Floating mushroom potion 3D model"
+                    camera-orbit="35deg 72deg auto"
+                    camera-target="auto auto auto"
+                    field-of-view="18deg"
+                    scale="4.6 4.6 4.6"
+                    exposure="1.2"
+                    shadow-intensity="0.35"
+                    reveal="auto"
+                    loading="eager"
+                    interaction-prompt="none"
+                    disable-zoom
+                    disable-pan
+                    disable-tap
+                    class="block w-full h-[450px] sm:h-[540px] lg:h-[620px] max-h-[80vh] [animation:floatModel_3.4s_ease-in-out_infinite]">
+                </model-viewer>
+            </div>
+        </section>
+
+        <!-- HTML5 Requirement: Section 2 - About -->
+        <section id="about" data-stack-panel class="relative px-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] lg:px-10 h-full w-full flex flex-col justify-center py-4">
+            <div class="group relative mx-auto max-w-7xl overflow-hidden rounded-[46px] border border-[#f0e7dd] bg-white p-5 shadow-[0_18px_45px_-28px_rgba(21,17,13,0.35)] lg:p-6 w-full h-[76vh] min-h-[550px] flex items-center my-auto">
+                <div class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:animate-[shine_3s_infinite] group-hover:opacity-100 [background:linear-gradient(120deg,rgba(255,255,255,0)_35%,rgba(255,210,170,0.65)_50%,rgba(255,255,255,0)_65%)] [background-size:220%_100%]"></div>
+                <div class="relative z-10 grid grid-cols-1 items-center gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:h-full w-full">
+                    <article class="flex flex-col lg:justify-between lg:h-full lg:py-2">
+                        <div>
+                            <p class="text-xs font-black uppercase tracking-[0.28em] text-[#d97821]">About LootYard</p>
+                            <h2 class="mt-1 text-3xl font-black leading-tight tracking-tight md:text-4xl">A bigger yard for every game builder.</h2>
+                            <p class="mt-2 text-sm font-semibold leading-normal text-[#4a3a2e]">
+                                LootYard is a Full Stack Development lab concept for a virtual marketplace where teams can discover ready-to-use game assets, verify creators, host portfolios, and turn freelance requests into trackable hiring tickets.
+                            </p>
+                        </div>
+                        <div class="mt-4 grid grid-cols-1 gap-2.5 w-full">
+                            <div class="rounded-[24px] bg-[#fff8f1] p-3">
+                                <p class="text-xl font-black text-[#ff9f4a]">01</p>
+                                <h3 class="mt-1 text-base font-black">Marketplace Flow</h3>
+                                <p class="mt-1 text-xs font-semibold leading-normal text-[#5c4a3c]">Browse models, SFX, textures, scripts, and UI packs with file metadata, licenses, ratings, and creator credits.</p>
+                            </div>
+                            <div class="rounded-[24px] bg-[#fff8f1] p-3">
+                                <p class="text-xl font-black text-[#ff9f4a]">02</p>
+                                <h3 class="mt-1 text-base font-black">Creator Profiles</h3>
+                                <p class="mt-1 text-xs font-semibold leading-normal text-[#5c4a3c]">Showcase portfolio pieces, tool skills, availability, project tags, and contact-ready proof of previous work.</p>
+                            </div>
+                            <div class="rounded-[24px] bg-[#fff8f1] p-3">
+                                <p class="text-xl font-black text-[#ff9f4a]">03</p>
+                                <h3 class="mt-1 text-base font-black">Hiring Pipeline</h3>
+                                <p class="mt-1 text-xs font-semibold leading-normal text-[#5c4a3c]">Create a ticket, attach a brief, review candidates, track status, and mark custom asset work as delivered.</p>
+                            </div>
+                            <div class="rounded-[24px] bg-[#fff8f1] p-3">
+                                <p class="text-xl font-black text-[#ff9f4a]">04</p>
+                                <h3 class="mt-1 text-base font-black">Lab Ready Scope</h3>
+                                <p class="mt-1 text-xs font-semibold leading-normal text-[#5c4a3c]">The idea maps cleanly to auth, CRUD, search, relational data, dashboards, and admin review features.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <div class="w-full flex justify-center items-center overflow-hidden lg:h-full">
+                        <model-viewer
+                            src="assets/panda.glb"
+                            alt="Animated Panda character model"
+                            autoplay
+                            auto-rotate
+                            rotation-per-second="20deg"
+                            camera-orbit="0deg 75deg auto"
+                            camera-target="auto auto auto"
+                            field-of-view="15deg"
+                            exposure="1.15"
+                            interaction-prompt="none"
+                            disable-zoom
+                            disable-pan
+                            disable-tap
+                            class="block w-full h-[400px] sm:h-[480px] lg:h-[500px] max-h-[60vh]">
+                        </model-viewer>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- HTML5 Requirement: Section 3 - Free Assets -->
+        <section id="assets" data-stack-panel class="relative px-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] lg:px-10 h-full w-full flex flex-col justify-center py-4">
+            <div class="group relative mx-auto max-w-7xl overflow-hidden rounded-[46px] border border-[#f0e7dd] bg-white p-5 shadow-[0_18px_45px_-28px_rgba(21,17,13,0.35)] lg:p-6 w-full h-[76vh] min-h-[550px] flex items-center my-auto">
+                <div class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:animate-[shine_3s_infinite] group-hover:opacity-100 [background:linear-gradient(120deg,rgba(255,255,255,0)_35%,rgba(255,210,170,0.65)_50%,rgba(255,255,255,0)_65%)] [background-size:220%_100%]"></div>
+                <div class="relative z-10 grid grid-cols-1 items-center gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:h-full w-full">
+                    <div class="w-full flex justify-center items-center overflow-hidden lg:h-full">
+                        <model-viewer
+                            src="assets/cloud_tea.glb"
+                            alt="Cloud tea 3D model asset"
+                            auto-rotate
+                            rotation-per-second="18deg"
+                            camera-orbit="35deg 70deg auto"
+                            field-of-view="18deg"
+                            scale="2.0 2.0 2.0"
+                            exposure="1.15"
+                            interaction-prompt="none"
+                            disable-zoom
+                            disable-pan
+                            disable-tap
+                            class="block w-full h-[360px] sm:h-[430px] lg:h-[480px] max-h-[50vh] [animation:floatModel_3.6s_ease-in-out_infinite]">
+                        </model-viewer>
+                    </div>
+
+                    <article>
+                        <p class="text-xs font-black uppercase tracking-[0.28em] text-[#d97821]">Asset Index</p>
+                        <h2 class="mt-1 text-3xl font-black leading-tight tracking-tight md:text-4xl">Free assets without the messy search.</h2>
+                        <p class="mt-2 text-sm font-semibold leading-normal text-[#4a3a2e]">
+                            The Asset section is built around multi-category file indexing. A developer can filter by engine, file format, art style, license, creator, rating, and production use case.
+                        </p>
+                        <div class="mt-4 grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                            <div class="rounded-[24px] bg-[#fff8f1] p-3.5">
+                                <p class="text-xs font-black uppercase tracking-wide text-[#8a7564]">Categories</p>
+                                <p class="mt-1 text-lg font-black">Models, SFX, UI</p>
+                                <p class="mt-1 text-xs font-semibold leading-normal text-[#5c4a3c]">Organize assets into useful shelves for quick browsing.</p>
+                            </div>
+                            <div class="rounded-[24px] bg-[#fff8f1] p-3.5">
+                                <p class="text-xs font-black uppercase tracking-wide text-[#8a7564]">Downloads</p>
+                                <p class="mt-1 text-lg font-black">Engine Ready</p>
+                                <p class="mt-1 text-xs font-semibold leading-normal text-[#5c4a3c]">Show supported engines, package size, and included files.</p>
+                            </div>
+                            <div class="rounded-[24px] bg-[#fff8f1] p-3.5">
+                                <p class="text-xs font-black uppercase tracking-wide text-[#8a7564]">Quality Data</p>
+                                <p class="mt-1 text-lg font-black">Ratings + License</p>
+                                <p class="mt-1 text-xs font-semibold leading-normal text-[#5c4a3c]">Display usage terms, creator credits, preview notes, and rating totals.</p>
+                            </div>
+                            <div class="rounded-[24px] bg-[#fff8f1] p-3.5">
+                                <p class="text-xs font-black uppercase tracking-wide text-[#8a7564]">Search</p>
+                                <p class="mt-1 text-lg font-black">Fast Filters</p>
+                                <p class="mt-1 text-xs font-semibold leading-normal text-[#5c4a3c]">Filter by style, genre, engine, poly count, audio type, and file format.</p>
+                            </div>
+                        </div>
+                        <a href="#" class="group mt-5 inline-flex items-center justify-center rounded-full bg-[#ff9f4a] px-6 py-2.5 text-sm font-black text-white hover:bg-[#ff8f2e] transition-all duration-300">
+                            View assets now
+                            <span class="inline-block transition-all duration-300 max-w-0 overflow-hidden opacity-0 group-hover:max-w-[15px] group-hover:opacity-100 group-hover:ml-1.5">&gt;</span>
+                        </a>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- HTML5 Requirement: Section 4 - Hire Talent -->
+        <section id="talent" data-stack-panel class="relative px-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] lg:px-10 h-full w-full flex flex-col justify-center py-4">
+            <div class="group relative mx-auto max-w-7xl overflow-hidden rounded-[46px] border border-[#f0e7dd] bg-white p-5 shadow-[0_18px_45px_-28px_rgba(21,17,13,0.35)] lg:p-6 w-full h-[72vh] min-h-[480px] lg:min-h-[510px] flex items-center my-auto">
+                <div class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:animate-[shine_3s_infinite] group-hover:opacity-100 [background:linear-gradient(120deg,rgba(255,255,255,0)_35%,rgba(255,210,170,0.65)_50%,rgba(255,255,255,0)_65%)] [background-size:220%_100%]"></div>
+                <div class="relative z-10 grid grid-cols-1 items-center gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:h-full w-full">
+                    <article>
+                        <p class="text-xs font-black uppercase tracking-[0.28em] text-[#d97821]">Creator Talent Hub</p>
+                        <h2 class="mt-1 text-3xl font-black leading-tight tracking-tight md:text-4xl">Hire talented people with a ticket pipeline.</h2>
+                        <p class="mt-2 text-sm font-semibold leading-normal text-[#4a3a2e]">
+                            The Talent section turns freelance hiring into a structured flow: brief creation, creator matching, proposal review, milestone updates, delivery notes, and final approval.
+                        </p>
+                        <div class="mt-4 grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                            <div class="rounded-[24px] bg-[#fff8f1] p-3.5">
+                                <p class="text-xs font-black uppercase tracking-wide text-[#8a7564]">Portfolio</p>
+                                <p class="mt-1 text-lg font-black">Creator Cards</p>
+                                <p class="mt-1 text-xs font-semibold leading-normal text-[#5c4a3c]">Show work samples, skill tags, availability, pricing notes, and ratings.</p>
+                            </div>
+                            <div class="rounded-[24px] bg-[#fff8f1] p-3.5">
+                                <p class="text-xs font-black uppercase tracking-wide text-[#8a7564]">Ticket Status</p>
+                                <p class="mt-1 text-lg font-black">Brief to Ship</p>
+                                <p class="mt-1 text-xs font-semibold leading-normal text-[#5c4a3c]">Track requests through submitted, matched, in progress, review, and delivered states.</p>
+                            </div>
+                            <div class="rounded-[24px] bg-[#fff8f1] p-3.5">
+                                <p class="text-xs font-black uppercase tracking-wide text-[#8a7564]">Collaboration</p>
+                                <p class="mt-1 text-lg font-black">Milestones</p>
+                                <p class="mt-1 text-xs font-semibold leading-normal text-[#5c4a3c]">Break a custom request into manageable checkpoints and delivery reviews.</p>
+                            </div>
+                            <div class="rounded-[24px] bg-[#fff8f1] p-3.5">
+                                <p class="text-xs font-black uppercase tracking-wide text-[#8a7564]">Matching</p>
+                                <p class="mt-1 text-lg font-black">Right Creator</p>
+                                <p class="mt-1 text-xs font-semibold leading-normal text-[#5c4a3c]">Connect requests to creators by skill tags, portfolio style, and availability.</p>
+                            </div>
+                        </div>
+                        <a href="#" class="group mt-5 inline-flex items-center justify-center rounded-full bg-[#15110d] px-6 py-2.5 text-sm font-black text-white hover:bg-black transition-all duration-300">
+                            Hire talent now
+                            <span class="inline-block transition-all duration-300 max-w-0 overflow-hidden opacity-0 group-hover:max-w-[15px] group-hover:opacity-100 group-hover:ml-1.5">&gt;</span>
+                        </a>
+                    </article>
+ 
+                    <div class="w-full flex justify-center items-center overflow-hidden lg:h-full">
+                        <model-viewer
+                            src="assets/cartoon_plane.glb"
+                            alt="Cartoon plane 3D model"
+                            auto-rotate
+                            rotation-per-second="16deg"
+                            camera-orbit="45deg 72deg auto"
+                            field-of-view="20deg"
+                            scale="1.9 1.9 1.9"
+                            exposure="1.15"
+                            interaction-prompt="none"
+                            disable-zoom
+                            disable-pan
+                            disable-tap
+                            class="block w-full h-[360px] sm:h-[430px] lg:h-[480px] max-h-[50vh] [animation:floatModel_3.7s_ease-in-out_infinite]">
+                        </model-viewer>
+                    </div>
+                </div>
+            </div>
+            <!-- HTML5 Requirement: Footer -->
+            <footer class="w-full max-w-7xl mx-auto flex items-center justify-between border-t border-[#eadfd4] pt-3 pb-2 mt-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl font-bold text-[#15110d]" style="font-family: 'Magic Jasmine', cursive;">LootYard</span>
+                </div>
+                <p class="text-[10px] font-bold text-[#8a7564] text-center">
+                    &copy; 2026 LootYard. Full Stack Development Lab Project.
+                </p>
+                <div class="flex items-center gap-4">
+                    <a href="#" aria-label="Twitter/X" class="text-[#8a7564] hover:text-[#ff9f4a] transition-colors">
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                    </a>
+                    <a href="#" aria-label="GitHub" class="text-[#8a7564] hover:text-[#ff9f4a] transition-colors">
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/>
+                        </svg>
+                    </a>
+                    <a href="#" aria-label="Discord" class="text-[#8a7564] hover:text-[#ff9f4a] transition-colors">
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.094 13.094 0 0 1-1.873-.894.077.077 0 0 1-.008-.128c.126-.093.252-.19.372-.287a.075.075 0 0 1 .077-.011c3.92 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.009c.12.099.246.195.373.289a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.156 2.418z"/>
+                        </svg>
+                    </a>
+                </div>
+            </footer>
+        </section>
+    </main>
+
+    <!-- Custom Snapping Scrollbar Indicator -->
+    <div id="pillScrollbar" class="pill-scroll-container opacity-0 translate-x-10 pointer-events-none">
+        <div class="flex flex-col items-center gap-2.5 bg-white/80 backdrop-blur-md border border-[#f0e7dd] py-4 px-2 rounded-full shadow-[0_12px_30px_-15px_rgba(21,17,13,0.2)]">
+            <button data-pill="about" aria-label="Go to About section" class="pill-indicator h-6 active"></button>
+            <button data-pill="assets" aria-label="Go to Assets section" class="pill-indicator h-6"></button>
+            <button data-pill="talent" aria-label="Go to Talent section" class="pill-indicator h-6"></button>
+        </div>
+        <!-- Scroll back to top button -->
+        <button id="scrollTopBtn" aria-label="Scroll to top" class="w-9 h-9 rounded-full border border-[#f0e7dd] bg-white/80 backdrop-blur-md hover:bg-[#fff0df] hover:border-[#ff9f4a] flex items-center justify-center shadow-lg transition-all duration-300 group">
+            <svg class="w-4 h-4 text-[#8a7564] group-hover:text-[#ff9f4a] transition-colors duration-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+
+        const navIndicator = document.querySelector("#navIndicator");
+        const navLinks = document.querySelectorAll("[data-section-link]");
+        const stackPanels = document.querySelectorAll("[data-stack-panel]");
+        const trackedSections = ["hero", "about", "assets", "talent"]
+            .map((id) => document.getElementById(id))
+            .filter(Boolean);
+
+        let currentActiveLink = null;
+        let navClickLocked = true; // Lock initially to prevent initial layout reflow intersection calls
+
+        function scrollToSection(targetId) {
+            navClickLocked = true;
+            setActiveNav(targetId);
+            document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+            history.replaceState(null, "", `#${targetId}`);
+            window.setTimeout(() => {
+                navClickLocked = false;
+            }, 850);
+        }
+
+        function setActivePanel(id) {
+            stackPanels.forEach((panel) => {
+                const isActive = panel.id === id;
+                panel.style.transform = isActive ? "scale(1)" : "scale(0.94)";
+                panel.style.opacity = isActive ? "1" : "0.72";
+                panel.style.filter = isActive ? "none" : "saturate(0.92)";
+            });
+        }
+
+        function setActiveNav(id) {
+            const activeLink = document.querySelector(`[data-section-link][href="#${id}"]`);
+            
+            if (activeLink) {
+                currentActiveLink = activeLink;
+                const activeIndex = Number(activeLink.dataset.index || 0);
+                if (navIndicator) {
+                    navIndicator.style.transform = `translateX(${activeIndex * 7}rem)`;
+                    navIndicator.style.opacity = "1";
+                }
+            } else {
+                if (navIndicator) {
+                    navIndicator.style.opacity = "0";
+                }
+            }
+
+            navLinks.forEach((link) => {
+                const isActive = link === activeLink;
+                link.classList.toggle("text-[#15110d]", isActive);
+                link.classList.toggle("text-[#8a7564]", !isActive);
+            });
+
+            // Update custom scrollbar visibility
+            const pillScrollbar = document.getElementById("pillScrollbar");
+            if (pillScrollbar) {
+                if (id === "hero") {
+                    pillScrollbar.classList.add("opacity-0", "translate-x-10", "pointer-events-none");
+                } else {
+                    pillScrollbar.classList.remove("opacity-0", "translate-x-10", "pointer-events-none");
+                }
+            }
+
+            // Update highlighted pill indicator
+            document.querySelectorAll("[data-pill]").forEach((pill) => {
+                const isActive = pill.dataset.pill === id;
+                pill.classList.toggle("active", isActive);
+            });
+
+            setActivePanel(id);
+        }
+
+        window.addEventListener("load", () => {
+            setActiveNav("hero");
+            document.getElementById("hero")?.scrollIntoView({ block: "start" });
+            if (window.location.hash) {
+                history.replaceState(null, "", window.location.pathname + window.location.search);
+            }
+            // Release lock after layout snap is finalized
+            window.setTimeout(() => {
+                navClickLocked = false;
+            }, 1000);
+        });
+
+        window.addEventListener("resize", () => {
+            if (currentActiveLink) {
+                setActiveNav(currentActiveLink.getAttribute("href").slice(1));
+            } else {
+                setActiveNav("hero");
+            }
+        });
+
+        navLinks.forEach((link) => {
+            link.addEventListener("click", (event) => {
+                event.preventDefault();
+                const targetId = link.getAttribute("href").slice(1);
+                scrollToSection(targetId);
+            });
+        });
+
+        // Pill scrollbar click listeners
+        document.querySelectorAll("[data-pill]").forEach((pill) => {
+            pill.addEventListener("click", () => {
+                const targetId = pill.dataset.pill;
+                scrollToSection(targetId);
+            });
+        });
+
+        // Scroll back to top click listener
+        document.getElementById("scrollTopBtn")?.addEventListener("click", () => {
+            scrollToSection("hero");
+        });
+
+        const navObserver = new IntersectionObserver((entries) => {
+            if (navClickLocked) return;
+            const visibleEntry = entries
+                .filter((entry) => entry.isIntersecting)
+                .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+            if (visibleEntry) setActiveNav(visibleEntry.target.id);
+        }, { 
+            root: document.querySelector("main"),
+            threshold: [0.15, 0.35, 0.5, 0.7], 
+            rootMargin: "-5% 0px -15% 0px" 
+        });
+
+        trackedSections.forEach((section) => navObserver.observe(section));
+    </script>
+</body>
+</html>
