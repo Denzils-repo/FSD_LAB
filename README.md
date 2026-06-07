@@ -4,4 +4,4 @@ Loot Yard is an integrated virtual asset marketplace and creator talent pipeline
 
 Currently, the project is in its initial development phase, establishing the design system, responsive architecture, and core user interface.
 
-[Live Demo](nill)
+[Live Demo](https://denzils-repo.github.io/FSD_LAB/)
