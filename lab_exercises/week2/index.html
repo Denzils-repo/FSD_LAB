@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LootYard</title>
+    <link rel="icon" type="image/png" href="assets/chestnobg.png">
+    <link rel="shortcut icon" type="image/png" href="assets/icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --cream: #fff8f1;
+            --bark: #15110d;
+            --mango: #ff9f4a;
+            --mango-light: #ffd2aa;
+            --mango-pale: #fff0df;
+            --taupe: #8a7564;
+            --brown: #5c4a3c;
+            --card-bg: #fffcf8;
+            --border: #f0e7dd;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            background: var(--cream);
+            color: var(--bark);
+        }
+
+        main {
+            flex: 1 1 0%;
+            overflow-y: auto;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        main::-webkit-scrollbar { display: none; }
+
+        section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* Noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Typography */
+        .font-display { font-family: 'Bricolage Grotesque', sans-serif; }
+
+        @font-face {
+            font-family: "Magic Jasmine";
+            src: url("assets/fonts/child-hood/ChildHood.otf") format("truetype");
+        }
+
+        /* Scrollbar pill */
+        .pill-scroll-container {
+            position: fixed;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .pill-indicator {
+            width: 0.5rem;
+            border-radius: 9999px;
+            background-color: #e0d4c8;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+
+        .pill-indicator:hover, .pill-indicator.active {
+            background-color: var(--mango);
+            width: 0.625rem;
+        }
+
+        /* Keyframes */
+        @keyframes shine {
+            0% { background-position: -120% 0; }
+            100% { background-position: 220% 0; }
+        }
+
+        @keyframes wordSwap7 {
+            0% { opacity: 0; transform: translateY(110%); }
+            1.5% { opacity: 1; transform: translateY(0); }
+            12.5% { opacity: 1; transform: translateY(0); }
+            14.28%, 100% { opacity: 0; transform: translateY(-110%); }
+        }
+
+        @keyframes floatModel {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes floatModelSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-14px) rotate(1.5deg); }
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes orb1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(40px, -30px) scale(1.08); }
+        }
+
+        @keyframes orb2 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-30px, 25px) scale(0.94); }
+        }
+
+        /* Hero section background orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            width: 420px; height: 420px;
+            background: radial-gradient(circle, rgba(255,210,170,0.45) 0%, transparent 70%);
+            top: -80px; right: -60px;
+            animation: orb1 8s ease-in-out infinite;
+        }
+
+        .orb-2 {
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(255,159,74,0.22) 0%, transparent 70%);
+            bottom: 40px; left: -40px;
+            animation: orb2 10s ease-in-out infinite;
+        }
+
+        /* Card ambient glow — plays once on scroll-in, stays */
+        @keyframes shineIn {
+            0%   { background-position: -120% 0; opacity: 0; }
+            15%  { opacity: 1; }
+            100% { background-position: 220% 0; opacity: 1; }
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.55; }
+            50%       { opacity: 0.75; }
+        }
+
+        .card-shine::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(120deg, rgba(255,255,255,0) 30%, rgba(255,210,170,0.6) 50%, rgba(255,255,255,0) 70%);
+            background-size: 220% 100%;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+
+        .card-shine.section-visible::before {
+            animation: shineIn 1.6s cubic-bezier(0.4, 0, 0.2, 1) 0.25s forwards, glowPulse 4s ease-in-out 2s infinite;
+        }
+
+        /* Stat counter cards */
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .stat-num {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-weight: 800;
+            color: var(--bark);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--taupe);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* Tag chips */
+        .tag-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: var(--mango-pale);
+            border: 1px solid #f0d8b8;
+            border-radius: 9999px;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--brown);
+            white-space: nowrap;
+        }
+
+        /* Feature row */
+        .feature-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+        }
+
+        .feature-icon {
+            width: 2.25rem;
+            height: 2.25rem;
+            background: var(--mango-pale);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1rem;
+        }
+
+        /* Creator card */
+        .creator-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+        }
+
+        .avatar {
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-weight: 800;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            height: 4px;
+            background: #eadfd4;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, var(--mango-light), var(--mango));
+        }
+
+        /* Asset preview card */
+        .asset-preview {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1rem;
+            display: flex;
+            gap: 0.875rem;
+            align-items: center;
+        }
+
+        .asset-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        /* Steps */
+        .step-connector {
+            width: 1px;
+            height: 1.5rem;
+            background: linear-gradient(to bottom, var(--mango-light), transparent);
+            margin-left: 1.1rem;
+        }
+
+        /* Hover scale */
+        .hover-lift {
+            transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px -10px rgba(21,17,13,0.14);
+        }
+
+        /* Nav indicator */
+        #navIndicator {
+            position: absolute;
+            left: 4px;
+            top: 4px;
+            height: calc(100% - 8px);
+            width: 7rem;
+            border-radius: 9999px;
+            background: var(--mango-light);
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.3s;
+        }
+
+        /* Section transition */
+        [data-stack-panel] {
+            transition: transform 0.65s cubic-bezier(0.16,1,0.3,1), opacity 0.65s ease, filter 0.65s ease;
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--bark) 0%, var(--mango) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--bark);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            padding: 0.3rem 0.75rem;
+            border-radius: 9999px;
+        }
+
+        .badge-mango {
+            background: linear-gradient(135deg, var(--mango-light), var(--mango));
+            color: var(--bark);
+        }
+
+        /* Rating stars */
+        .stars { color: var(--mango); font-size: 0.7rem; }
+
+        /* Section label */
+        .section-label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: var(--mango);
+        }
+
+        /* Big card container */
+        .big-card {
+            position: relative;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 44px;
+            box-shadow: 0 20px 60px -30px rgba(21,17,13,0.3), 0 4px 12px -4px rgba(21,17,13,0.08);
+            overflow: hidden;
+        }
+
+        /* model-viewer wrapper */
+        .model-wrap {
+            position: relative;
+        }
+
+        /* Decorative corner badge */
+        .corner-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bark);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 0.35rem 0.8rem;
+            border-radius: 9999px;
+        }
+
+        /* Divider line */
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--border), transparent);
+            margin: 0.75rem 0;
+        }
+
+        /* Chat bubbles */
+        .chat-bubble-user {
+            background: var(--bark);
+            color: white;
+            border-radius: 18px 18px 4px 18px;
+        }
+        .chat-bubble-reply {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--bark);
+            border-radius: 18px 18px 18px 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 border-b border-[#f0e7dd] bg-[#fff8f1]/90 backdrop-blur-md">
+        <div class="flex w-full items-center justify-between px-6 py-2.5 lg:px-10">
+            <nav class="flex w-full items-center justify-between gap-6" aria-label="Primary navigation">
+                <div class="flex items-center gap-8">
+                    <a href="#" class="flex items-center gap-2.5" aria-label="LootYard home">
+                        <img src="assets/chestnobg.png" alt="LootYard treasure chest logo" class="h-16 w-16 object-contain">
+                        <span class="text-3xl leading-none text-[#15110d]" style="font-family: 'Magic Jasmine', cursive;">LootYard</span>
+                    </a>
+
+                    <ul id="sectionNav" class="relative hidden items-center rounded-full bg-[#fff4e8] p-1 font-display text-sm font-bold text-[#15110d] md:flex">
+                        <span id="navIndicator"></span>
+                        <li class="relative z-10 w-28 text-center"><a data-section-link data-index="0" href="#about" class="block rounded-full px-4 py-2.5 text-[#8a7564]">About</a></li>
+                        <li class="relative z-10 w-28 text-center"><a data-section-link data-index="1" href="#assets" class="block rounded-full px-4 py-2.5 text-[#8a7564]">Assets</a></li>
+                        <li class="relative z-10 w-28 text-center"><a data-section-link data-index="2" href="#talent" class="block rounded-full px-4 py-2.5 text-[#8a7564]">Talent</a></li>
+                    </ul>
+                </div>
+
+                <div class="flex items-center gap-5">
+                    <a href="home.html?auth=login" class="text-sm font-bold text-[#8a7564] transition hover:text-[#ff9f4a]">Log In</a>
+                    <a href="home.html?auth=signup" class="flex items-center gap-2.5 rounded-full border border-[#eadfd4] bg-white px-4 py-2 text-sm font-bold text-[#15110d] transition hover:border-[#ff9f4a] hover:bg-[#fff7ee] shadow-sm">
+                        <span class="grid h-7 w-7 place-items-center rounded-full bg-[#ffd2aa]">
+                            <svg class="h-3.5 w-3.5 text-[#15110d]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/></svg>
+                        </span>
+                        Sign Up
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- ========== HERO SECTION ========== -->
+        <section id="hero" class="w-full h-full overflow-hidden">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+
+            <div class="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-6 lg:grid-cols-2 lg:px-10 w-full h-full">
+                <article class="flex flex-col items-start w-full" style="animation: fadeSlideUp 0.8s ease both 0.1s;">
+                    <div class="badge badge-mango mb-4">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#d97821] inline-block"></span>
+                        Every asset is free — always
+                    </div>
+
+                    <h1 class="font-display max-w-3xl text-5xl font-extrabold leading-[1.15] tracking-tight text-[#15110d] md:text-[3.6rem]">
+                        The free store for <span class="relative inline-block text-[#ff9f4a]" style="min-width: 14ch; vertical-align: bottom; overflow: hidden; height: 1.15em;">
+                            <span class="absolute left-0 bottom-0 [animation:wordSwap7_14s_infinite]" style="white-space:nowrap;">Free 3D models</span>
+                            <span class="absolute left-0 bottom-0 opacity-0 [animation:wordSwap7_14s_infinite_2s]" style="white-space:nowrap;">Free SFX packs</span>
+                            <span class="absolute left-0 bottom-0 opacity-0 [animation:wordSwap7_14s_infinite_4s]" style="white-space:nowrap;">Boilerplate code</span>
+                            <span class="absolute left-0 bottom-0 opacity-0 [animation:wordSwap7_14s_infinite_6s]" style="white-space:nowrap;">Animations</span>
+                            <span class="absolute left-0 bottom-0 opacity-0 [animation:wordSwap7_14s_infinite_8s]" style="white-space:nowrap;">VFX &amp; maps</span>
+                            <span class="absolute left-0 bottom-0 opacity-0 [animation:wordSwap7_14s_infinite_10s]" style="white-space:nowrap;">Creator portfolios</span>
+                            <span class="absolute left-0 bottom-0 opacity-0 [animation:wordSwap7_14s_infinite_12s]" style="white-space:nowrap;">Indie devs</span>
+                        </span>
+                    </h1>
+
+                    <p class="mt-4 text-base font-medium text-[#5c4a3c] max-w-xl leading-relaxed">
+                        Download engine-ready 3D models, SFX, animations, scripts and UI kits — completely free, no account needed. Or hire a creator to build something custom just for your game.
+                    </p>
+
+                    <div class="mt-6 flex flex-wrap gap-3">
+                        <div class="stat-card">
+                            <span class="stat-num">12k+</span>
+                            <span class="stat-label">Free Assets</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-num">100%</span>
+                            <span class="stat-label">Always Free</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-num">2.4k</span>
+                            <span class="stat-label">Creators</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-num">0</span>
+                            <span class="stat-label">Paywalls</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <span class="tag-chip">🔷 3D Models</span>
+                        <span class="tag-chip">🎵 SFX & Music</span>
+                        <span class="tag-chip">✨ Animations</span>
+                        <span class="tag-chip">📜 Boilerplate Code</span>
+                        <span class="tag-chip">💥 VFX</span>
+                        <span class="tag-chip">🗺 Maps</span>
+                    </div>
+
+                    <div class="mt-7 flex items-center gap-4">
+                        <a href="#assets" class="group inline-flex items-center justify-center rounded-full bg-[#15110d] px-9 py-4 text-base font-black text-white transition hover:bg-[#ff9f4a] hover:text-[#15110d] shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 duration-300 font-display tracking-wide">
+                            Explore Free Assets
+                            <svg class="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                        </a>
+                        <a href="#talent" class="inline-flex items-center justify-center rounded-full border border-[#eadfd4] bg-white px-7 py-4 text-base font-bold text-[#5c4a3c] transition hover:border-[#ff9f4a] hover:text-[#ff9f4a] font-display">
+                            Hire Talent
+                        </a>
+                    </div>
+                </article>
+
+                <div class="w-full flex justify-center items-center overflow-visible relative lg:translate-x-8">
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div class="w-[420px] h-[420px] rounded-full border border-dashed border-[#f0d8b8] opacity-60" style="animation: orb2 12s ease-in-out infinite;"></div>
+                        <div class="absolute w-[320px] h-[320px] rounded-full border border-[#ffd2aa] opacity-40" style="animation: orb1 9s ease-in-out infinite;"></div>
+                    </div>
+                    <model-viewer
+                        src="assets/mushroom_potion.glb"
+                        alt="Floating mushroom potion 3D model"
+                        camera-orbit="35deg 72deg auto"
+                        camera-target="auto auto auto"
+                        field-of-view="16deg"
+                        scale="5.5 5.5 5.5"
+                        exposure="1.3"
+                        shadow-intensity="0.4"
+                        reveal="auto"
+                        loading="eager"
+                        interaction-prompt="none"
+                        disable-zoom disable-pan disable-tap
+                        class="block w-full h-[500px] sm:h-[580px] lg:h-[660px] max-h-[80vh] [animation:floatModel_3.4s_ease-in-out_infinite]">
+                    </model-viewer>
+
+                    <div class="absolute bottom-16 left-4 bg-white border border-[#f0e7dd] rounded-2xl px-3.5 py-2.5 shadow-xl flex items-center gap-2.5" style="animation: floatModelSlow 4s ease-in-out infinite 1s;">
+                        <div class="w-8 h-8 rounded-xl bg-[#fff0df] flex items-center justify-center text-base">🍄</div>
+                        <div>
+                            <p class="text-xs font-black text-[#15110d]">Mushroom Potion</p>
+                            <p class="text-[10px] font-semibold text-[#8a7564]">2.4k downloads · Free</p>
+                        </div>
+                    </div>
+
+                    <div class="absolute top-24 right-2 bg-white border border-[#f0e7dd] rounded-2xl px-3 py-2 shadow-xl" style="animation: floatModel 3.8s ease-in-out infinite 0.6s;">
+                        <p class="stars">★★★★★</p>
+                        <p class="text-[10px] font-bold text-[#5c4a3c] mt-0.5">4.9 / 5.0</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== ABOUT SECTION ========== -->
+        <section id="about" data-stack-panel class="relative px-6 lg:px-10 h-full w-full flex flex-col justify-center py-3">
+            <div class="big-card card-shine mx-auto max-w-7xl w-full h-[78vh] min-h-[560px] flex items-center p-5 lg:p-7 my-auto">
+                <div class="relative z-10 grid grid-cols-1 items-center gap-6 lg:grid-cols-[1.15fr_0.85fr] h-full w-full">
+                    <article class="flex flex-col justify-between h-full py-1">
+                        <div>
+                            <p class="section-label">What is LootYard?</p>
+                            <h2 class="font-display mt-2 text-3xl font-black leading-tight tracking-tight md:text-4xl">Three things. One place.</h2>
+                            <p class="mt-2 text-sm font-medium leading-relaxed text-[#4a3a2e] max-w-lg">
+                                LootYard is a free game asset store, a creator portfolio hub, and a hiring marketplace — all in one. Whether you're a game dev grabbing assets or a creator sharing your work, there's a place for you here.
+                            </p>
+
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <span class="badge badge-mango">Free to download</span>
+                                <span class="badge">No account to browse</span>
+                                <span class="badge">Creators get paid</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 flex flex-col gap-2.5">
+                            <div class="feature-row hover-lift">
+                                <div class="feature-icon">🆓</div>
+                                <div>
+                                    <p class="text-sm font-black">Free Asset Store</p>
+                                    <p class="text-xs font-medium text-[#5c4a3c] leading-snug mt-0.5">Every 3D model, SFX pack, script, animation and UI kit is completely free to download. No subscription, no hidden cost, no limit.</p>
+                                </div>
+                            </div>
+                            <div class="feature-row hover-lift">
+                                <div class="feature-icon">🎨</div>
+                                <div>
+                                    <p class="text-sm font-black">Creator Portfolios</p>
+                                    <p class="text-xs font-medium text-[#5c4a3c] leading-snug mt-0.5">Creators build public portfolio pages — share free assets, post preview images of paid work, and show off their skills to potential clients.</p>
+                                </div>
+                            </div>
+                            <div class="feature-row hover-lift">
+                                <div class="feature-icon">💼</div>
+                                <div>
+                                    <p class="text-sm font-black">Hire for Custom Work</p>
+                                    <p class="text-xs font-medium text-[#5c4a3c] leading-snug mt-0.5">Need something built just for your game? Post a job, match with a creator, and pay them to deliver custom assets directly to you.</p>
+                                </div>
+                            </div>
+                            <div class="feature-row hover-lift">
+                                <div class="feature-icon">🌱</div>
+                                <div>
+                                    <p class="text-sm font-black">Engine-Agnostic, Beginner-Friendly</p>
+                                    <p class="text-xs font-medium text-[#5c4a3c] leading-snug mt-0.5">Unity, Unreal, Godot, GameMaker, custom engine — it doesn't matter. Assets are tagged by compatibility so any dev can find what fits their stack.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="divider"></div>
+
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-[10px] font-bold text-[#8a7564]">3D Models</span>
+                                    <span class="text-[10px] font-black text-[#ff9f4a]">4,800+ free</span>
+                                </div>
+                                <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-[10px] font-bold text-[#8a7564]">SFX & Music</span>
+                                    <span class="text-[10px] font-black text-[#ff9f4a]">3,200+ free</span>
+                                </div>
+                                <div class="progress-bar"><div class="progress-fill" style="width:65%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-[10px] font-bold text-[#8a7564]">Scripts & UI</span>
+                                    <span class="text-[10px] font-black text-[#ff9f4a]">1,900+ free</span>
+                                </div>
+                                <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <div class="w-full flex justify-center items-center overflow-hidden lg:h-full relative">
+                        <div class="corner-badge">Live Preview</div>
+                        <model-viewer
+                            src="assets/panda.glb"
+                            alt="Animated Panda character model"
+                            autoplay
+                            auto-rotate
+                            rotation-per-second="18deg"
+                            camera-orbit="0deg 72deg auto"
+                            field-of-view="13deg"
+                            exposure="1.2"
+                            interaction-prompt="none"
+                            disable-zoom disable-pan disable-tap
+                            class="block w-full h-[400px] sm:h-[470px] lg:h-[560px] max-h-[65vh]">
+                        </model-viewer>
+
+                        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 bg-white border border-[#f0e7dd] rounded-2xl px-4 py-2.5 shadow-xl text-center whitespace-nowrap">
+                            <p class="text-xs font-black text-[#15110d]">Toy Trueno</p>
+                            <div class="flex items-center justify-center gap-2 mt-0.5">
+                                <span class="tag-chip" style="font-size:0.6rem; padding: 0.15rem 0.5rem;">Animated</span>
+                                <span class="tag-chip" style="font-size:0.6rem; padding: 0.15rem 0.5rem;">Low Poly</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== ASSETS SECTION ========== -->
+        <section id="assets" data-stack-panel class="relative px-6 lg:px-10 h-full w-full flex flex-col justify-center py-3">
+            <div class="big-card card-shine mx-auto max-w-7xl w-full h-[78vh] min-h-[560px] flex items-center p-5 lg:p-7 my-auto">
+                <div class="relative z-10 grid grid-cols-1 items-center gap-6 lg:grid-cols-[0.85fr_1.15fr] h-full w-full">
+
+                    <div class="w-full flex justify-center items-center overflow-hidden lg:h-full relative">
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div class="w-[280px] h-[280px] rounded-full" style="background: radial-gradient(circle, rgba(255,210,170,0.3) 0%, transparent 70%);"></div>
+                        </div>
+                        <model-viewer
+                            src="assets/cloud_tea.glb"
+                            alt="Cloud tea 3D model asset"
+                            auto-rotate
+                            rotation-per-second="16deg"
+                            camera-orbit="35deg 70deg auto"
+                            field-of-view="15deg"
+                            scale="2.4 2.4 2.4"
+                            exposure="1.2"
+                            interaction-prompt="none"
+                            disable-zoom disable-pan disable-tap
+                            class="block w-full h-[380px] sm:h-[440px] lg:h-[520px] max-h-[60vh] [animation:floatModel_3.6s_ease-in-out_infinite]">
+                        </model-viewer>
+
+                        <div class="absolute top-8 right-4 bg-[#15110d] text-white rounded-2xl px-3.5 py-2.5 shadow-xl" style="animation: floatModelSlow 4.2s ease-in-out infinite;">
+                            <p class="text-[10px] font-bold opacity-70">Today's Top Pick</p>
+                            <p class="text-sm font-black">Cloud Tea ☁️</p>
+                            <p class="text-[10px] font-semibold opacity-80 mt-0.5">872 downloads this week</p>
+                        </div>
+                    </div>
+
+                    <article class="flex flex-col h-full justify-between py-1">
+                        <div>
+                            <p class="section-label">Free Asset Store</p>
+                            <h2 class="font-display mt-2 text-3xl font-black leading-tight tracking-tight md:text-4xl">Every asset. Free.<br>No strings attached.</h2>
+                            <p class="mt-2 text-sm font-medium leading-relaxed text-[#4a3a2e]">
+                                Browse thousands of assets shared freely by the community — no account needed to look around. When you're ready to download, sign up for free. Every asset is free, for any engine, any language, any game.
+                            </p>
+                        </div>
+
+                        <div class="mt-3 flex flex-col gap-2">
+                            <div class="asset-preview hover-lift">
+                                <div class="asset-icon bg-[#fff0df]">🔷</div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-black truncate">Sci-Fi Environment Pack</p>
+                                        <span class="badge badge-mango ml-2" style="font-size:0.55rem;">Free</span>
+                                    </div>
+                                    <p class="text-[10px] font-medium text-[#8a7564] mt-0.5">3D Model · 14 meshes · Unity / Unreal / Godot</p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <div class="progress-bar flex-1"><div class="progress-fill" style="width:92%"></div></div>
+                                        <span class="text-[9px] font-bold text-[#ff9f4a]">4.6★</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="asset-preview hover-lift">
+                                <div class="asset-icon bg-[#f0fff4]">💥</div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-black truncate">Fire & Smoke VFX Set</p>
+                                        <span class="badge badge-mango ml-2" style="font-size:0.55rem;">Free</span>
+                                    </div>
+                                    <p class="text-[10px] font-medium text-[#8a7564] mt-0.5">VFX · Particle system · Any engine</p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <div class="progress-bar flex-1"><div class="progress-fill" style="width:88%"></div></div>
+                                        <span class="text-[9px] font-bold text-[#ff9f4a]">4.5★</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="asset-preview hover-lift">
+                                <div class="asset-icon bg-[#f0f8ff]">📜</div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-black truncate">Top-Down RPG Boilerplate</p>
+                                        <span class="badge badge-mango ml-2" style="font-size:0.55rem;">Free</span>
+                                    </div>
+                                    <p class="text-[10px] font-medium text-[#8a7564] mt-0.5">Boilerplate Code · GDScript / C# / Lua · MIT</p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <div class="progress-bar flex-1"><div class="progress-fill" style="width:95%"></div></div>
+                                        <span class="text-[9px] font-bold text-[#ff9f4a]">4.8★</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="divider"></div>
+
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-widest text-[#8a7564] mb-2">Browse by Category</p>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button class="tag-chip hover:bg-[#ffd2aa] transition-colors cursor-pointer">All</button>
+                                <button class="tag-chip hover:bg-[#ffd2aa] transition-colors cursor-pointer">3D Models</button>
+                                <button class="tag-chip hover:bg-[#ffd2aa] transition-colors cursor-pointer">SFX</button>
+                                <button class="tag-chip hover:bg-[#ffd2aa] transition-colors cursor-pointer">Music</button>
+                                <button class="tag-chip hover:bg-[#ffd2aa] transition-colors cursor-pointer">Animations</button>
+                                <button class="tag-chip hover:bg-[#ffd2aa] transition-colors cursor-pointer">Boilerplate Code</button>
+                                <button class="tag-chip hover:bg-[#ffd2aa] transition-colors cursor-pointer">VFX</button>
+                                <button class="tag-chip hover:bg-[#ffd2aa] transition-colors cursor-pointer">Maps</button>
+                            </div>
+                        </div>
+
+                        <a href="home.html" class="group mt-4 inline-flex items-center justify-center self-start rounded-full bg-[#ff9f4a] px-6 py-2.5 text-sm font-black text-white hover:bg-[#ff8f2e] transition-all duration-300 font-display shadow-md hover:shadow-lg">
+                            Browse all assets
+                            <svg class="ml-2 w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                        </a>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== TALENT SECTION ========== -->
+        <section id="talent" data-stack-panel class="relative px-6 lg:px-10 h-full w-full flex flex-col justify-center py-3">
+            <div class="big-card card-shine mx-auto max-w-7xl w-full h-[78vh] min-h-[560px] flex items-center p-5 lg:p-7 my-auto">
+                <div class="relative z-10 grid grid-cols-1 items-center gap-6 lg:grid-cols-[1.1fr_0.9fr] h-full w-full">
+                    <article class="flex flex-col gap-3 h-full py-1 min-w-0 justify-center">
+                        <div>
+                            <p class="section-label">Creator Portfolios</p>
+                            <h2 class="font-display mt-1.5 text-3xl font-black leading-tight tracking-tight md:text-[2.6rem]">Every account gets a portfolio.<br>Hiring starts with one message.</h2>
+                            <p class="mt-1.5 text-sm font-medium leading-relaxed text-[#4a3a2e] max-w-lg">
+                                Every user — creator or not — gets a public portfolio page. Browse free assets, see portfolio previews, and reach any creator with a single intro message. If they reply, the full chat unlocks.
+                            </p>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <div class="feature-row hover-lift py-2.5">
+                                <div class="feature-icon shrink-0">👤</div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-black">Public Portfolio Page</p>
+                                    <p class="text-xs font-medium text-[#5c4a3c] leading-snug mt-0.5">Free uploads, portfolio images, specialties, and client reviews — all on one page.</p>
+                                </div>
+                            </div>
+                            <div class="feature-row hover-lift py-2.5">
+                                <div class="feature-icon shrink-0">✉️</div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-black">One Message Unlocks Chat</p>
+                                    <p class="text-xs font-medium text-[#5c4a3c] leading-snug mt-0.5">Send one intro. If the creator replies, full chat opens — no job posting, no platform fee.</p>
+                                </div>
+                            </div>
+                            <div class="feature-row hover-lift py-2.5">
+                                <div class="feature-icon shrink-0">⭐</div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-black">Client Reviews</p>
+                                    <p class="text-xs font-medium text-[#5c4a3c] leading-snug mt-0.5">After a project, clients leave a review on the creator's portfolio for future visitors.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="creator-card hover-lift py-2.5 px-3">
+                                <div class="avatar bg-[#ffd2aa] w-8 h-8 text-xs shrink-0" style="color:#a0522d;">AK</div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center justify-between gap-1">
+                                        <p class="text-xs font-black truncate">Arjun Kapoor</p>
+                                        <span class="text-[9px] font-bold text-green-600 bg-green-50 rounded-full px-1.5 py-0.5 shrink-0">Open</span>
+                                    </div>
+                                    <p class="text-[9px] font-semibold text-[#8a7564] truncate">3D Artist · 34 free assets</p>
+                                    <p class="stars text-[10px] mt-0.5">★★★★★</p>
+                                </div>
+                            </div>
+                            <div class="creator-card hover-lift py-2.5 px-3">
+                                <div class="avatar bg-[#dbeafe] w-8 h-8 text-xs shrink-0" style="color:#1e40af;">SL</div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center justify-between gap-1">
+                                        <p class="text-xs font-black truncate">Sofia Larsen</p>
+                                        <span class="text-[9px] font-bold text-amber-600 bg-amber-50 rounded-full px-1.5 py-0.5 shrink-0">Busy</span>
+                                    </div>
+                                    <p class="text-[9px] font-semibold text-[#8a7564] truncate">Sound Designer · 21 SFX packs</p>
+                                    <p class="stars text-[10px] mt-0.5">★★★★☆</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 flex-wrap">
+                            <a href="home.html" class="inline-flex items-center justify-center rounded-full bg-[#15110d] px-5 py-2.5 text-sm font-black text-white hover:bg-[#ff9f4a] hover:text-[#15110d] transition-all duration-300 font-display shadow-md whitespace-nowrap">
+                                Browse portfolios
+                            </a>
+                            <a href="home.html" class="inline-flex items-center justify-center rounded-full border border-[#eadfd4] bg-white px-5 py-2.5 text-sm font-bold text-[#5c4a3c] hover:border-[#ff9f4a] hover:text-[#ff9f4a] transition-all duration-300 font-display whitespace-nowrap">
+                                Create my portfolio
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- Cartoon plane model -->
+                    <div class="w-full flex justify-center items-center overflow-hidden lg:h-full relative">
+                        <div class="corner-badge">Portfolio</div>
+                        <model-viewer
+                            src="assets/cartoon_plane.glb"
+                            alt="Cartoon plane 3D model"
+                            auto-rotate
+                            rotation-per-second="14deg"
+                            camera-orbit="45deg 72deg auto"
+                            field-of-view="18deg"
+                            scale="2.2 2.2 2.2"
+                            exposure="1.2"
+                            interaction-prompt="none"
+                            disable-zoom disable-pan disable-tap
+                            class="block w-full h-[340px] sm:h-[400px] lg:h-[480px] max-h-[55vh] [animation:floatModelSlow_4s_ease-in-out_infinite]">
+                        </model-viewer>
+
+                        <!-- Chat conversation bubbles — anchored to bottom-left, well inside bounds -->
+                        <div class="absolute bottom-6 left-4 flex flex-col gap-2" style="max-width: 240px; animation: floatModel 4.5s ease-in-out infinite 1.5s;">
+                            <!-- User message bubble (right-aligned within the column) -->
+                            <div class="self-end chat-bubble-user px-3.5 py-2.5 shadow-lg">
+                                <p class="text-[10px] font-black text-[#ffd2aa] uppercase tracking-wider mb-1">First Message</p>
+                                <p class="text-xs font-medium text-white leading-snug">"Hey, I need a low-poly aircraft for my game…"</p>
+                            </div>
+                            <!-- Creator reply bubble (left-aligned) -->
+                            <div class="self-start chat-bubble-reply px-3.5 py-2.5 shadow-lg">
+                                <div class="flex items-center gap-1.5 mb-1">
+                                    <div class="w-4 h-4 rounded-full bg-[#ffd2aa] flex items-center justify-center text-[7px] font-black" style="color:#a0522d;">AK</div>
+                                    <p class="text-[9px] font-black text-[#8a7564]">Arjun Kapoor</p>
+                                </div>
+                                <p class="text-xs font-medium text-[#15110d] leading-snug">"Yeah sure, I can do that! 🎉"</p>
+                            </div>
+                            <!-- Unlocked status pill -->
+                            <div class="self-start flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-full px-3 py-1.5 shadow-sm">
+                                <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+                                <p class="text-[10px] font-bold text-green-700">Creator replied — chat unlocked</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <footer class="w-full max-w-7xl mx-auto flex items-center justify-between border-t border-[#eadfd4] pt-3 pb-2 mt-3">
+                <div class="flex items-center gap-2">
+                    <img src="assets/chestnobg.png" alt="LootYard logo" class="h-8 w-8 object-contain">
+                    <span class="text-xl" style="font-family: 'Magic Jasmine', cursive; color:#15110d;">LootYard</span>
+                    <span class="text-[10px] font-semibold text-[#8a7564]">· Free assets, real creators</span>
+                </div>
+                <p class="text-[10px] font-bold text-[#8a7564] text-center">&copy; 2026 LootYard. All rights reserved.</p>
+                <div class="flex items-center gap-4">
+                    <a href="#" aria-label="Twitter/X" class="text-[#8a7564] hover:text-[#ff9f4a] transition-colors">
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </a>
+                    <a href="#" aria-label="GitHub" class="text-[#8a7564] hover:text-[#ff9f4a] transition-colors">
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/></svg>
+                    </a>
+                    <a href="#" aria-label="Discord" class="text-[#8a7564] hover:text-[#ff9f4a] transition-colors">
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.094 13.094 0 0 1-1.873-.894.077.077 0 0 1-.008-.128c.126-.093.252-.19.372-.287a.075.075 0 0 1 .077-.011c3.92 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.009c.12.099.246.195.373.289a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.156 2.418z"/></svg>
+                    </a>
+                </div>
+            </footer>
+        </section>
+    </main>
+
+    <!-- Pill scrollbar -->
+    <div id="pillScrollbar" class="pill-scroll-container opacity-0 translate-x-10 pointer-events-none">
+        <div class="flex flex-col items-center gap-2.5 bg-white/80 backdrop-blur-md border border-[#f0e7dd] py-4 px-2 rounded-full shadow-[0_12px_30px_-15px_rgba(21,17,13,0.2)]">
+            <button data-pill="about" aria-label="About" class="pill-indicator h-5 active"></button>
+            <button data-pill="assets" aria-label="Assets" class="pill-indicator h-5"></button>
+            <button data-pill="talent" aria-label="Talent" class="pill-indicator h-5"></button>
+        </div>
+        <button id="scrollTopBtn" aria-label="Scroll to top" class="w-9 h-9 rounded-full border border-[#f0e7dd] bg-white/80 backdrop-blur-md hover:bg-[#fff0df] hover:border-[#ff9f4a] flex items-center justify-center shadow-lg transition-all duration-300 group">
+            <svg class="w-4 h-4 text-[#8a7564] group-hover:text-[#ff9f4a] transition-colors duration-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path></svg>
+        </button>
+    </div>
+
+    <script>
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+        const navIndicator = document.querySelector("#navIndicator");
+        const navLinks = document.querySelectorAll("[data-section-link]");
+        const stackPanels = document.querySelectorAll("[data-stack-panel]");
+        const trackedSections = ["hero", "about", "assets", "talent"]
+            .map(id => document.getElementById(id)).filter(Boolean);
+
+        let currentActiveLink = null;
+        let navClickLocked = true;
+
+        function scrollToSection(targetId) {
+            navClickLocked = true;
+            setActiveNav(targetId);
+            document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+            history.replaceState(null, "", `#${targetId}`);
+            setTimeout(() => { navClickLocked = false; }, 900);
+        }
+
+        function setActivePanel(id) {
+            stackPanels.forEach(panel => {
+                const isActive = panel.id === id;
+                panel.style.transform = isActive ? "scale(1)" : "scale(0.93)";
+                panel.style.opacity = isActive ? "1" : "0.65";
+                panel.style.filter = isActive ? "none" : "saturate(0.85)";
+
+                const card = panel.querySelector('.card-shine');
+                if (card) {
+                    if (isActive && !card.classList.contains('section-visible')) {
+                        card.classList.add('section-visible');
+                    }
+                }
+            });
+        }
+
+        function setActiveNav(id) {
+            const activeLink = document.querySelector(`[data-section-link][href="#${id}"]`);
+            if (activeLink) {
+                currentActiveLink = activeLink;
+                const activeIndex = Number(activeLink.dataset.index || 0);
+                if (navIndicator) {
+                    navIndicator.style.transform = `translateX(${activeIndex * 7}rem)`;
+                    navIndicator.style.opacity = "1";
+                }
+            } else {
+                if (navIndicator) navIndicator.style.opacity = "0";
+            }
+
+            navLinks.forEach(link => {
+                const isActive = link === activeLink;
+                link.classList.toggle("text-[#15110d]", isActive);
+                link.classList.toggle("font-black", isActive);
+                link.classList.toggle("text-[#8a7564]", !isActive);
+            });
+
+            const pillScrollbar = document.getElementById("pillScrollbar");
+            if (pillScrollbar) {
+                if (id === "hero") {
+                    pillScrollbar.classList.add("opacity-0", "translate-x-10", "pointer-events-none");
+                } else {
+                    pillScrollbar.classList.remove("opacity-0", "translate-x-10", "pointer-events-none");
+                }
+            }
+
+            document.querySelectorAll("[data-pill]").forEach(pill => {
+                pill.classList.toggle("active", pill.dataset.pill === id);
+            });
+
+            setActivePanel(id);
+        }
+
+        window.addEventListener("load", () => {
+            setActiveNav("hero");
+            document.getElementById("hero")?.scrollIntoView({ block: "start" });
+            if (window.location.hash) history.replaceState(null, "", window.location.pathname + window.location.search);
+            setTimeout(() => { navClickLocked = false; }, 1000);
+        });
+
+        window.addEventListener("resize", () => {
+            const id = currentActiveLink ? currentActiveLink.getAttribute("href").slice(1) : "hero";
+            setActiveNav(id);
+        });
+
+        navLinks.forEach(link => {
+            link.addEventListener("click", e => {
+                e.preventDefault();
+                scrollToSection(link.getAttribute("href").slice(1));
+            });
+        });
+
+        document.querySelectorAll("[data-pill]").forEach(pill => {
+            pill.addEventListener("click", () => scrollToSection(pill.dataset.pill));
+        });
+
+        document.getElementById("scrollTopBtn")?.addEventListener("click", () => scrollToSection("hero"));
+
+        const navObserver = new IntersectionObserver(entries => {
+            if (navClickLocked) return;
+            const visible = entries.filter(e => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+            if (visible) setActiveNav(visible.target.id);
+        }, {
+            root: document.querySelector("main"),
+            threshold: [0.15, 0.35, 0.5, 0.7],
+            rootMargin: "-5% 0px -15% 0px"
+        });
+
+        trackedSections.forEach(s => navObserver.observe(s));
+    </script>
+</body>
+</html>

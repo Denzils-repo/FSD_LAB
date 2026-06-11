@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Pseudo Selectors – Demo</title>
+  <style>
+    /* ── Reset & Base ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --dark:   #1A1A2E;
+      --card:   #0F3460;
+      --accent: #E94560;
+      --light:  #F0F4FF;
+      --muted:  #A8B2C1;
+      --white:  #FFFFFF;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--light);
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    /* ── Header ───────────────────────────────────── */
+    header {
+      background: var(--dark);
+      color: var(--white);
+      padding: 2.5rem 2rem 2rem;
+      text-align: center;
+    }
+    header h1 { font-size: 2.6rem; letter-spacing: -1px; }
+    header h1 span { color: var(--accent); }
+    header p { color: var(--muted); margin-top: 0.5rem; font-size: 1.05rem; }
+    .tag-row {
+      display: flex; flex-wrap: wrap; gap: 0.5rem;
+      justify-content: center; margin-top: 1.2rem;
+    }
+    .tag-row code {
+      background: var(--card); color: var(--accent);
+      padding: 0.25rem 0.75rem; border-radius: 999px;
+      font-size: 0.9rem; border: 1px solid var(--accent);
+    }
+
+    /* ── Nav ──────────────────────────────────────── */
+    nav {
+      background: var(--card);
+      display: flex; flex-wrap: wrap; gap: 0;
+      justify-content: center;
+      position: sticky; top: 0; z-index: 100;
+    }
+    nav a {
+      color: var(--muted); text-decoration: none;
+      padding: 0.75rem 1.25rem; font-size: 0.9rem;
+      transition: color 0.2s, background 0.2s;
+    }
+    nav a:hover { color: var(--white); background: rgba(233,69,96,0.25); }
+    nav a:focus { outline: 3px solid var(--accent); outline-offset: -3px; color: var(--white); }
+    nav a:active { color: var(--accent); }
+
+    /* ── Main layout ──────────────────────────────── */
+    main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    /* ── Section ──────────────────────────────────── */
+    section { margin-bottom: 3rem; }
+    .section-title {
+      font-size: 1.5rem; font-weight: 700; color: var(--card);
+      border-left: 4px solid var(--accent);
+      padding-left: 0.75rem; margin-bottom: 1.25rem;
+    }
+    .section-desc { color: #555; margin-bottom: 1.2rem; font-size: 0.97rem; }
+
+    /* ── Code block ───────────────────────────────── */
+    .code-block {
+      background: #0D1117; color: #c9d1d9;
+      border-radius: 8px; padding: 1rem 1.25rem;
+      font-family: 'Courier New', monospace; font-size: 0.88rem;
+      margin: 0.75rem 0; overflow-x: auto; white-space: pre;
+    }
+    .code-block .kw  { color: #ff7b72; }
+    .code-block .sel { color: #79c0ff; }
+    .code-block .val { color: #a5d6ff; }
+    .code-block .cmt { color: #6a9955; }
+    .code-block .str { color: #98c379; }
+
+    /* ── Demo container ───────────────────────────── */
+    .demo-box {
+      background: var(--white); border-radius: 12px;
+      padding: 1.5rem; box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+      margin-bottom: 1rem;
+    }
+    .demo-label {
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--muted); margin-bottom: 0.75rem;
+    }
+
+    /* ─────────────────────────────────────────────── */
+    /* 1. USER ACTION pseudo-classes                  */
+    /* ─────────────────────────────────────────────── */
+    .btn-row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+
+    /* base button */
+    .btn {
+      padding: 0.65rem 1.6rem; border: none; border-radius: 8px;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+      background: var(--card); color: var(--white);
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+
+    /* :hover */
+    .btn:hover {
+      background: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(233,69,96,0.35);
+    }
+
+    /* :focus */
+    .btn:focus {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    /* :active */
+    .btn:active {
+      transform: translateY(0px) scale(0.97);
+      background: #c0392b;
+    }
+
+    /* ::before – inject star icon */
+    .btn-star::before { content: "★ "; }
+
+    /* link :visited */
+    .demo-links a { color: var(--card); font-weight: 600; text-decoration: none; margin-right: 1.5rem; }
+    .demo-links a:hover { color: var(--accent); text-decoration: underline; }
+    .demo-links a:visited { color: #7C3AED; }
+
+    /* ─────────────────────────────────────────────── */
+    /* 2. STRUCTURAL pseudo-classes                   */
+    /* ─────────────────────────────────────────────── */
+    .demo-list {
+      list-style: none; border-radius: 8px; overflow: hidden;
+      border: 1px solid #e0e0e0;
+    }
+    .demo-list li {
+      padding: 0.65rem 1rem; border-bottom: 1px solid #eee;
+      transition: background 0.2s;
+    }
+    .demo-list li:last-child { border-bottom: none; }
+
+    /* :first-child */
+    .demo-list li:first-child {
+      background: #EEF2FF; font-weight: 700; color: var(--card);
+    }
+    /* :last-child */
+    .demo-list li:last-child { background: #FFF0F3; color: var(--accent); font-weight: 700; }
+    /* :nth-child(2n) – even rows */
+    .demo-list li:nth-child(2n) { background: #F8FAFF; }
+    /* :nth-child(2n+1) – already handled by base, but shown in code */
+
+    /* :hover on list items */
+    .demo-list li:hover { background: #E0E7FF; cursor: default; }
+
+    /* ─────────────────────────────────────────────── */
+    /* 3. FORM / INPUT pseudo-classes                 */
+    /* ─────────────────────────────────────────────── */
+    .form-demo { display: flex; flex-direction: column; gap: 1rem; }
+    .field-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .field-group label { font-weight: 600; font-size: 0.9rem; color: var(--card); }
+
+    input[type="text"], input[type="email"] {
+      padding: 0.6rem 0.9rem; border-radius: 7px;
+      border: 2px solid #ccc; font-size: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    /* :focus */
+    input[type="text"]:focus, input[type="email"]:focus {
+      border-color: var(--card); box-shadow: 0 0 0 3px rgba(15,52,96,0.15);
+    }
+    /* :valid */
+    input[type="email"]:valid { border-color: #059669; }
+    /* :invalid (only after interaction) */
+    input[type="email"]:invalid:not(:placeholder-shown) {
+      border-color: var(--accent); background: #fff5f5;
+    }
+    /* ::placeholder */
+    input::placeholder { color: #aaa; font-style: italic; }
+
+    /* :required */
+    input:required { border-left: 4px solid var(--accent); }
+
+    /* :disabled */
+    input:disabled {
+      background: #f0f0f0; color: #aaa; cursor: not-allowed;
+      border-color: #ddd;
+    }
+    /* :checked */
+    .checkbox-row { display: flex; align-items: center; gap: 0.5rem; }
+    .checkbox-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+    .checkbox-row label { cursor: pointer; transition: color 0.2s; }
+    .checkbox-row input[type="checkbox"]:checked + label { color: var(--accent); font-weight: 700; }
+
+    /* ─────────────────────────────────────────────── */
+    /* 4. PSEUDO-ELEMENTS                             */
+    /* ─────────────────────────────────────────────── */
+    /* ::before – quote decoration */
+    .blockquote-demo {
+      position: relative; background: #EEF2FF;
+      border-radius: 8px; padding: 1.25rem 1.25rem 1.25rem 3rem;
+      font-size: 1.05rem; color: var(--card); font-style: italic;
+    }
+    .blockquote-demo::before {
+      content: "\201C";
+      position: absolute; left: 0.6rem; top: -0.2rem;
+      font-size: 4rem; color: var(--accent); font-style: normal;
+      line-height: 1;
+    }
+
+    /* ::after – badge / tag */
+    .badge-item {
+      display: inline-block; padding: 0.4rem 0.9rem;
+      background: var(--card); color: var(--white);
+      border-radius: 6px; font-weight: 600; margin: 0.3rem;
+      position: relative;
+    }
+    .badge-item.new::after {
+      content: "NEW";
+      position: absolute; top: -8px; right: -8px;
+      background: var(--accent); color: var(--white);
+      font-size: 0.6rem; font-weight: 800;
+      padding: 2px 5px; border-radius: 4px;
+    }
+
+    /* ::first-line */
+    .first-line-demo::first-line {
+      font-weight: 700; color: var(--accent); font-size: 1.1em;
+    }
+    .first-line-demo {
+      line-height: 1.8; max-width: 500px;
+      background: var(--white); padding: 1rem; border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+
+    /* ::selection */
+    ::selection { background: var(--accent); color: var(--white); }
+
+    /* ─────────────────────────────────────────────── */
+    /* 5. ACTIVITY ─ interactive task section         */
+    /* ─────────────────────────────────────────────── */
+    .activity-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 600px) { .activity-grid { grid-template-columns: 1fr; } }
+    .task-card {
+      background: var(--white); border-radius: 12px;
+      padding: 1.25rem; border: 2px solid #e0e0e0;
+      transition: border-color 0.2s;
+    }
+    .task-card:hover { border-color: var(--accent); }
+    .task-num {
+      display: inline-block; width: 28px; height: 28px;
+      background: var(--accent); color: var(--white);
+      border-radius: 6px; font-weight: 700; font-size: 0.9rem;
+      text-align: center; line-height: 28px; margin-bottom: 0.5rem;
+    }
+    .task-card h4 { font-size: 1rem; color: var(--card); margin-bottom: 0.3rem; }
+    .task-card p { font-size: 0.88rem; color: #555; }
+
+    /* ─────────────────────────────────────────────── */
+    /* Footer                                         */
+    /* ─────────────────────────────────────────────── */
+    footer {
+      background: var(--dark); color: var(--muted);
+      text-align: center; padding: 1.5rem;
+      font-size: 0.88rem;
+    }
+    footer span { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────── -->
+<header>
+  <h1>CSS <span>Pseudo Selectors</span></h1>
+  <p>Peer Learning / Share-and-Teach Demo — Interactive Buttons &amp; More</p>
+  <div class="tag-row">
+    <code>:hover</code><code>:focus</code><code>:active</code>
+    <code>:nth-child</code><code>::before</code><code>::after</code>
+    <code>:valid</code><code>:checked</code><code>::placeholder</code>
+  </div>
+</header>
+
+<!-- ── NAV ───────────────────────────────────────────── -->
+<nav aria-label="Sections">
+  <a href="#user-action">User Action</a>
+  <a href="#structural">Structural</a>
+  <a href="#forms">Form / Input</a>
+  <a href="#pseudo-elements">Pseudo-elements</a>
+  <a href="#activity">Class Activity</a>
+</nav>
+
+<main>
+
+  <!-- ── 1. USER ACTION ─────────────────────────────── -->
+  <section id="user-action">
+    <h2 class="section-title">1 · User Action Pseudo-classes</h2>
+    <p class="section-desc">These respond to what the user is doing right now — hovering, clicking, or focusing.</p>
+
+    <div class="demo-box">
+      <div class="demo-label">Try it — hover, click, or press Tab to focus</div>
+      <div class="btn-row">
+        <button class="btn">Hover Me</button>
+        <button class="btn">Click Me</button>
+        <button class="btn btn-star">With ::before</button>
+      </div>
+    </div>
+
+    <div class="code-block"><span class="cmt">/* :hover — mouse-over */</span>
+<span class="sel">.btn:hover</span> {
+  <span class="kw">background</span>: <span class="str">#E94560</span>;
+  <span class="kw">transform</span>: <span class="val">translateY(-3px)</span>;
+  <span class="kw">box-shadow</span>: <span class="val">0 6px 20px rgba(233,69,96,0.35)</span>;
+}
+
+<span class="cmt">/* :focus — keyboard/tab navigation */</span>
+<span class="sel">.btn:focus</span> {
+  <span class="kw">outline</span>: <span class="val">3px solid</span> <span class="str">#E94560</span>;
+  <span class="kw">outline-offset</span>: <span class="val">3px</span>;
+}
+
+<span class="cmt">/* :active — press/click */</span>
+<span class="sel">.btn:active</span> {
+  <span class="kw">transform</span>: <span class="val">scale(0.97)</span>;
+  <span class="kw">background</span>: <span class="str">#c0392b</span>;
+}
+
+<span class="cmt">/* ::before — inject star icon */</span>
+<span class="sel">.btn-star::before</span> {
+  <span class="kw">content</span>: <span class="str">"★ "</span>;
+}
+
+<span class="cmt">/* :visited — link already opened */</span>
+<span class="sel">a:visited</span> { <span class="kw">color</span>: <span class="str">#7C3AED</span>; }</div>
+
+    <div class="demo-box">
+      <div class="demo-label">:visited links (open one in a new tab)</div>
+      <div class="demo-links">
+        <a> href="https://developer.mozilla.org/en-US/docs/Web/CSS/:hover" target="_blank">MDN :hover</a>
+        <a> href="https://developer.mozilla.org/en-US/docs/Web/CSS/:focus" target="_blank">MDN :focus</a>
+        <a> href="https://developer.mozilla.org/en-US/docs/Web/CSS/::before" target="_blank">MDN ::before</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 2. STRUCTURAL ──────────────────────────────── -->
+  <section id="structural">
+    <h2 class="section-title">2 · Structural Pseudo-classes</h2>
+    <p class="section-desc">Pick elements based on their position in the DOM — first, last, every 2nd, etc.</p>
+
+    <div class="demo-box">
+      <div class="demo-label">List — hover over items too!</div>
+      <ul class="demo-list">
+        <li>🥇 First child — dark blue, bold</li>
+        <li>Second child — even row (light blue)</li>
+        <li>Third child — odd row</li>
+        <li>Fourth child — even row (light blue)</li>
+        <li>Fifth child — odd row</li>
+        <li>🏁 Last child — pink, bold</li>
+      </ul>
+    </div>
+
+    <div class="code-block"><span class="cmt">/* :first-child */</span>
+<span class="sel">li:first-child</span> { <span class="kw">background</span>: <span class="str">#EEF2FF</span>; <span class="kw">font-weight</span>: <span class="val">700</span>; }
+
+<span class="cmt">/* :last-child */</span>
+<span class="sel">li:last-child</span>  { <span class="kw">background</span>: <span class="str">#FFF0F3</span>; <span class="kw">color</span>: <span class="str">#E94560</span>; }
+
+<span class="cmt">/* :nth-child(2n) — every even row */</span>
+<span class="sel">li:nth-child(2n)</span> { <span class="kw">background</span>: <span class="str">#F8FAFF</span>; }
+
+<span class="cmt">/* :hover on list items */</span>
+<span class="sel">li:hover</span> { <span class="kw">background</span>: <span class="str">#E0E7FF</span>; }</div>
+  </section>
+
+  <!-- ── 3. FORM / INPUT ────────────────────────────── -->
+  <section id="forms">
+    <h2 class="section-title">3 · Form &amp; Input Pseudo-classes</h2>
+    <p class="section-desc">Target inputs by their state — focused, valid, invalid, disabled, checked.</p>
+
+    <div class="demo-box">
+      <div class="demo-label">Interact with the form below</div>
+      <div class="form-demo">
+        <div class="field-group">
+          <label for="name">Name <em>(required, :required)</em></label>
+          <input type="text" id="name" placeholder="Type your name…" required />
+        </div>
+        <div class="field-group">
+          <label for="email">Email <em>(:valid / :invalid)</em></label>
+          <input type="email" id="email" placeholder="you@example.com" required />
+        </div>
+        <div class="field-group">
+          <label for="disabled-input">Disabled field <em>(:disabled)</em></label>
+          <input type="text" id="disabled-input" value="Can't edit me" disabled />
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="agree" />
+          <label for="agree">I agree to the terms <em>(:checked)</em></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block"><span class="cmt">/* :focus — active input */</span>
+<span class="sel">input:focus</span> {
+  <span class="kw">border-color</span>: <span class="str">#0F3460</span>;
+  <span class="kw">box-shadow</span>: <span class="val">0 0 0 3px rgba(15,52,96,0.15)</span>;
+}
+
+<span class="cmt">/* :valid — correct email entered */</span>
+<span class="sel">input[type="email"]:valid</span> { <span class="kw">border-color</span>: <span class="str">#059669</span>; }
+
+<span class="cmt">/* :invalid — bad email format */</span>
+<span class="sel">input[type="email"]:invalid:not(:placeholder-shown)</span> {
+  <span class="kw">border-color</span>: <span class="str">#E94560</span>;
+  <span class="kw">background</span>: <span class="str">#fff5f5</span>;
+}
+
+<span class="cmt">/* ::placeholder — hint text style */</span>
+<span class="sel">input::placeholder</span> { <span class="kw">color</span>: <span class="str">#aaa</span>; <span class="kw">font-style</span>: <span class="val">italic</span>; }
+
+<span class="cmt">/* :required — red left border */</span>
+<span class="sel">input:required</span> { <span class="kw">border-left</span>: <span class="val">4px solid</span> <span class="str">#E94560</span>; }
+
+<span class="cmt">/* :disabled */</span>
+<span class="sel">input:disabled</span> { <span class="kw">background</span>: <span class="str">#f0f0f0</span>; <span class="kw">cursor</span>: <span class="val">not-allowed</span>; }
+
+<span class="cmt">/* :checked — style sibling label */</span>
+<span class="sel">input[type="checkbox"]:checked + label</span> {
+  <span class="kw">color</span>: <span class="str">#E94560</span>; <span class="kw">font-weight</span>: <span class="val">700</span>;
+}</div>
+  </section>
+
+  <!-- ── 4. PSEUDO-ELEMENTS ─────────────────────────── -->
+  <section id="pseudo-elements">
+    <h2 class="section-title">4 · Pseudo-elements (::)</h2>
+    <p class="section-desc">Target <em>virtual parts</em> of an element — add content, style the first line, or change selected text.</p>
+
+    <div class="demo-box">
+      <div class="demo-label">::before — decorative opening quote</div>
+      <p class="blockquote-demo">
+        CSS pseudo-selectors let you style elements based on their state or position without adding extra HTML classes or JavaScript.
+      </p>
+    </div>
+
+    <div class="demo-box">
+      <div class="demo-label">::after — "NEW" badge injected after element</div>
+      <span class="badge-item new">Feature A</span>
+      <span class="badge-item">Feature B</span>
+      <span class="badge-item new">Feature C</span>
+    </div>
+
+    <div class="demo-box">
+      <div class="demo-label">::first-line — first line styled differently; also try selecting text (::selection)</div>
+      <p class="first-line-demo">
+        This is the first line of the paragraph, styled in coral-red and bold.<br>
+        The rest of the paragraph appears in the default body style. Notice how only the
+        first rendered line gets the special treatment — not the first sentence.
+        Try selecting any text on this page to see ::selection in action!
+      </p>
+    </div>
+
+    <div class="code-block"><span class="cmt">/* ::before — quote decoration */</span>
+<span class="sel">.blockquote-demo::before</span> {
+  <span class="kw">content</span>: <span class="str">"\201C"</span>;  <span class="cmt">/* Unicode left double quote */</span>
+  <span class="kw">font-size</span>: <span class="val">4rem</span>; <span class="kw">color</span>: <span class="str">#E94560</span>;
+  <span class="kw">position</span>: <span class="val">absolute</span>; <span class="kw">left</span>: <span class="val">0.6rem</span>; <span class="kw">top</span>: <span class="val">-0.2rem</span>;
+}
+
+<span class="cmt">/* ::after — NEW badge */</span>
+<span class="sel">.badge-item.new::after</span> {
+  <span class="kw">content</span>: <span class="str">"NEW"</span>;
+  <span class="kw">position</span>: <span class="val">absolute</span>; <span class="kw">top</span>: <span class="val">-8px</span>; <span class="kw">right</span>: <span class="val">-8px</span>;
+  <span class="kw">background</span>: <span class="str">#E94560</span>; <span class="kw">color</span>: <span class="str">#fff</span>;
+  <span class="kw">font-size</span>: <span class="val">0.6rem</span>; <span class="kw">padding</span>: <span class="val">2px 5px</span>; <span class="kw">border-radius</span>: <span class="val">4px</span>;
+}
+
+<span class="cmt">/* ::first-line */</span>
+<span class="sel">p.first-line-demo::first-line</span> {
+  <span class="kw">font-weight</span>: <span class="val">700</span>; <span class="kw">color</span>: <span class="str">#E94560</span>; <span class="kw">font-size</span>: <span class="val">1.1em</span>;
+}
+
+<span class="cmt">/* ::selection — highlighted text */</span>
+<span class="sel">::selection</span> { <span class="kw">background</span>: <span class="str">#E94560</span>; <span class="kw">color</span>: <span class="str">#fff</span>; }</div>
+  </section>
+
+  <!-- ── 5. CLASS ACTIVITY ──────────────────────────── -->
+  <section id="activity">
+    <h2 class="section-title">5 · Class Activity (2 min)</h2>
+    <p class="section-desc">Open this file in VS Code and try adding each of these in the &lt;style&gt; block. Check the result live!</p>
+
+    <div class="activity-grid">
+      <div class="task-card">
+        <div class="task-num">1</div>
+        <h4>Change button color on :hover</h4>
+        <p>Make <code>.btn:hover</code> use <code>background: purple</code> instead.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-num">2</div>
+        <h4>Add blue outline on :focus</h4>
+        <p>Change <code>.btn:focus</code> outline to <code>3px solid blue</code>.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-num">3</div>
+        <h4>Highlight every 2nd list item</h4>
+        <p>Change <code>li:nth-child(2n)</code> background to <code>lightyellow</code>.</p>
+      </div>
+      <div class="task-card">
+        <div class="task-num">4</div>
+        <h4>Add ★ to all buttons via ::before</h4>
+        <p>Add <code>.btn::before { content: "★ "; }</code> and see all buttons get the star.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Built with pure HTML &amp; CSS · Topic: <span>CSS Pseudo Selectors</span> · Peer Learning / Share-and-Teach
+</footer>
+
+</body>
+</html>

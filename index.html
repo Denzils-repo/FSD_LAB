@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LootYard</title>
-    <link rel="icon" type="image/png" href="lab_exercises/Week1/assets/chestnobg.png">
-    <link rel="shortcut icon" type="image/png" href="lab_exercises/Week1/assets/icon.png">
+    <link rel="icon" type="image/png" href="lab_exercises/week2/assets/chestnobg.png">
+    <link rel="shortcut icon" type="image/png" href="lab_exercises/week2/assets/icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -75,7 +75,7 @@
 
         @font-face {
             font-family: "Magic Jasmine";
-            src: url("lab_exercises/Week1/assets/fonts/child-hood/ChildHood.otf") format("truetype");
+            src: url("lab_exercises/week2/assets/fonts/child-hood/ChildHood.otf") format("truetype");
         }
 
         /* Scrollbar pill */
@@ -450,7 +450,7 @@
             <nav class="flex w-full items-center justify-between gap-6" aria-label="Primary navigation">
                 <div class="flex items-center gap-8">
                     <a href="#" class="flex items-center gap-2.5" aria-label="LootYard home">
-                        <img src="lab_exercises/Week1/assets/chestnobg.png" alt="LootYard treasure chest logo" class="h-16 w-16 object-contain">
+                        <img src="lab_exercises/week2/assets/chestnobg.png" alt="LootYard treasure chest logo" class="h-16 w-16 object-contain">
                         <span class="text-3xl leading-none text-[#15110d]" style="font-family: 'Magic Jasmine', cursive;">LootYard</span>
                     </a>
 
@@ -463,8 +463,8 @@
                 </div>
 
                 <div class="flex items-center gap-5">
-                    <a href="#" class="text-sm font-bold text-[#8a7564] transition hover:text-[#ff9f4a]">Log In</a>
-                    <a href="#" class="flex items-center gap-2.5 rounded-full border border-[#eadfd4] bg-white px-4 py-2 text-sm font-bold text-[#15110d] transition hover:border-[#ff9f4a] hover:bg-[#fff7ee] shadow-sm">
+                    <a href="home.html?auth=login" class="text-sm font-bold text-[#8a7564] transition hover:text-[#ff9f4a]">Log In</a>
+                    <a href="home.html?auth=signup" class="flex items-center gap-2.5 rounded-full border border-[#eadfd4] bg-white px-4 py-2 text-sm font-bold text-[#15110d] transition hover:border-[#ff9f4a] hover:bg-[#fff7ee] shadow-sm">
                         <span class="grid h-7 w-7 place-items-center rounded-full bg-[#ffd2aa]">
                             <svg class="h-3.5 w-3.5 text-[#15110d]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/></svg>
                         </span>
@@ -549,7 +549,7 @@
                         <div class="absolute w-[320px] h-[320px] rounded-full border border-[#ffd2aa] opacity-40" style="animation: orb1 9s ease-in-out infinite;"></div>
                     </div>
                     <model-viewer
-                        src="lab_exercises/Week1/assets/mushroom_potion.glb"
+                        src="lab_exercises/week2/assets/mushroom_potion.glb"
                         alt="Floating mushroom potion 3D model"
                         camera-orbit="35deg 72deg auto"
                         camera-target="auto auto auto"
@@ -660,7 +660,7 @@
                     <div class="w-full flex justify-center items-center overflow-hidden lg:h-full relative">
                         <div class="corner-badge">Live Preview</div>
                         <model-viewer
-                            src="lab_exercises/Week1/assets/panda.glb"
+                            src="lab_exercises/week2/assets/panda.glb"
                             alt="Animated Panda character model"
                             autoplay
                             auto-rotate
@@ -695,7 +695,7 @@
                             <div class="w-[280px] h-[280px] rounded-full" style="background: radial-gradient(circle, rgba(255,210,170,0.3) 0%, transparent 70%);"></div>
                         </div>
                         <model-viewer
-                            src="lab_exercises/Week1/assets/cloud_tea.glb"
+                            src="lab_exercises/week2/assets/cloud_tea.glb"
                             alt="Cloud tea 3D model asset"
                             auto-rotate
                             rotation-per-second="16deg"
@@ -785,7 +785,7 @@
                             </div>
                         </div>
 
-                        <a href="#" class="group mt-4 inline-flex items-center justify-center self-start rounded-full bg-[#ff9f4a] px-6 py-2.5 text-sm font-black text-white hover:bg-[#ff8f2e] transition-all duration-300 font-display shadow-md hover:shadow-lg">
+                        <a href="home.html" class="group mt-4 inline-flex items-center justify-center self-start rounded-full bg-[#ff9f4a] px-6 py-2.5 text-sm font-black text-white hover:bg-[#ff8f2e] transition-all duration-300 font-display shadow-md hover:shadow-lg">
                             Browse all assets
                             <svg class="ml-2 w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
                         </a>
@@ -857,10 +857,10 @@
                         </div>
 
                         <div class="flex gap-2 flex-wrap">
-                            <a href="#" class="inline-flex items-center justify-center rounded-full bg-[#15110d] px-5 py-2.5 text-sm font-black text-white hover:bg-[#ff9f4a] hover:text-[#15110d] transition-all duration-300 font-display shadow-md whitespace-nowrap">
+                            <a href="home.html" class="inline-flex items-center justify-center rounded-full bg-[#15110d] px-5 py-2.5 text-sm font-black text-white hover:bg-[#ff9f4a] hover:text-[#15110d] transition-all duration-300 font-display shadow-md whitespace-nowrap">
                                 Browse portfolios
                             </a>
-                            <a href="#" class="inline-flex items-center justify-center rounded-full border border-[#eadfd4] bg-white px-5 py-2.5 text-sm font-bold text-[#5c4a3c] hover:border-[#ff9f4a] hover:text-[#ff9f4a] transition-all duration-300 font-display whitespace-nowrap">
+                            <a href="home.html" class="inline-flex items-center justify-center rounded-full border border-[#eadfd4] bg-white px-5 py-2.5 text-sm font-bold text-[#5c4a3c] hover:border-[#ff9f4a] hover:text-[#ff9f4a] transition-all duration-300 font-display whitespace-nowrap">
                                 Create my portfolio
                             </a>
                         </div>
@@ -870,7 +870,7 @@
                     <div class="w-full flex justify-center items-center overflow-hidden lg:h-full relative">
                         <div class="corner-badge">Portfolio</div>
                         <model-viewer
-                            src="lab_exercises/Week1/assets/cartoon_plane.glb"
+                            src="lab_exercises/week2/assets/cartoon_plane.glb"
                             alt="Cartoon plane 3D model"
                             auto-rotate
                             rotation-per-second="14deg"
@@ -911,7 +911,7 @@
             <!-- FOOTER -->
             <footer class="w-full max-w-7xl mx-auto flex items-center justify-between border-t border-[#eadfd4] pt-3 pb-2 mt-3">
                 <div class="flex items-center gap-2">
-                    <img src="lab_exercises/Week1/assets/chestnobg.png" alt="LootYard logo" class="h-8 w-8 object-contain">
+                    <img src="lab_exercises/week2/assets/chestnobg.png" alt="LootYard logo" class="h-8 w-8 object-contain">
                     <span class="text-xl" style="font-family: 'Magic Jasmine', cursive; color:#15110d;">LootYard</span>
                     <span class="text-[10px] font-semibold text-[#8a7564]">· Free assets, real creators</span>
                 </div>

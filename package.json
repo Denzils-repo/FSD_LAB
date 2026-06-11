@@ -1,0 +1,24 @@
+{
+  "name": "fsd_lab",
+  "version": "1.0.0",
+  "description": "Loot Yard is an integrated virtual asset marketplace and creator talent pipeline designed to serve the indie game development community. The project aims to deliver a responsive, secure, and data-driven full-stack web application optimized for efficient game asset salvage and seamless creator talent acquisition.",
+  "main": "lab2.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Denzils-repo/FSD_LAB.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Denzils-repo/FSD_LAB/issues"
+  },
+  "homepage": "https://github.com/Denzils-repo/FSD_LAB#readme",
+  "dependencies": {
+    "firebase": "^10.12.0"
+  }
+}

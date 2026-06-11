@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LootYard — Explore</title>
+    <link rel="icon" type="image/png" href="lab_exercises/week2/assets/chestnobg.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- ============================================================
+         FIREBASE SDK  (v9 compat — works in plain HTML, no bundler)
+         Replace the firebaseConfig object below with YOUR project's
+         config from: Firebase Console → Project Settings → Your apps
+    ============================================================ -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        /* ── Design tokens (same as landing page) ── */
+        :root {
+            --cream: #fff8f1;
+            --bark: #15110d;
+            --mango: #ff9f4a;
+            --mango-light: #ffd2aa;
+            --mango-pale: #fff0df;
+            --taupe: #8a7564;
+            --brown: #5c4a3c;
+            --card-bg: #fffcf8;
+            --border: #f0e7dd;
+        }
+
+        @font-face {
+            font-family: "Magic Jasmine";
+            src: url("lab_exercises/week2/assets/fonts/child-hood/ChildHood.otf") format("truetype");
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--cream);
+            color: var(--bark);
+            min-height: 100vh;
+        }
+
+        .font-display { font-family: 'Bricolage Grotesque', sans-serif; }
+
+        /* ── Noise overlay ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ── Navbar ── */
+        #navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255,248,241,0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* ── Search bar ── */
+        .search-bar {
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 9999px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .search-bar:focus-within {
+            border-color: var(--mango);
+            box-shadow: 0 0 0 3px rgba(255,159,74,0.15);
+        }
+        .search-bar input {
+            background: transparent;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ── Profile dropdown ── */
+        #profileDropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 220px;
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 20px 50px -10px rgba(21,17,13,0.18);
+            padding: 1rem;
+            display: none;
+            z-index: 200;
+        }
+        #profileDropdown.open { display: block; }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0.625rem 0;
+        }
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.45rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--brown);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            background: none;
+            border: none;
+            font-family: 'Inter', sans-serif;
+        }
+        .dropdown-item:hover { background: var(--mango-pale); color: var(--bark); }
+        .dropdown-item.danger:hover { background: #fff1f1; color: #c0392b; }
+
+        /* ── Product cards ── */
+        .product-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s;
+            position: relative;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px -12px rgba(21,17,13,0.15);
+        }
+        .product-card img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+        }
+        .card-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: var(--mango);
+            color: white;
+            font-size: 0.625rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        /* ── Product detail panel (right-side modal) ── */
+        #productPanel {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            display: none;
+        }
+        #productPanel.open { display: flex; }
+
+        #panelBackdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(21,17,13,0.35);
+            backdrop-filter: blur(4px);
+        }
+
+        #panelContent {
+            position: relative;
+            margin-left: auto;
+            width: min(600px, 100vw);
+            height: 100%;
+            background: var(--cream);
+            border-left: 1.5px solid var(--border);
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+        }
+        #productPanel.open #panelContent { transform: translateX(0); }
+
+        /* ── Auth modal ── */
+        #authModal {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        #authModal.open { display: flex; }
+
+        .auth-card {
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            width: min(420px, 90vw);
+            box-shadow: 0 32px 80px -20px rgba(21,17,13,0.25);
+            position: relative;
+            z-index: 10;
+        }
+
+        .oauth-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.625rem;
+            padding: 0.7rem 1.25rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s;
+            font-family: 'Inter', sans-serif;
+            border: 1.5px solid var(--border);
+            background: white;
+            color: var(--bark);
+        }
+        .oauth-btn:hover { background: var(--mango-pale); border-color: var(--mango-light); }
+
+        .primary-btn {
+            background: var(--bark);
+            color: white;
+            border: none;
+        }
+        .primary-btn:hover { background: var(--brown); }
+
+        .mango-btn {
+            background: var(--mango);
+            color: white;
+            border: none;
+            padding: 0.65rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: background 0.18s;
+        }
+        .mango-btn:hover { background: #f08a30; }
+
+        /* ── Section heading ── */
+        .section-heading {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--bark);
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        .section-heading::after {
+            content: '›';
+            font-size: 1.125rem;
+            color: var(--mango);
+        }
+
+        /* ── Star rating ── */
+        .stars { color: var(--mango); font-size: 0.875rem; letter-spacing: 0.05em; }
+
+        /* ── Skeleton loader ── */
+        .skeleton {
+            background: linear-gradient(90deg, #f0e7dd 25%, #faf4ef 50%, #f0e7dd 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 8px;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ── Toast ── */
+        #toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--bark);
+            color: white;
+            padding: 0.625rem 1.25rem;
+            border-radius: 9999px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            z-index: 9998;
+            transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* ── Category chips ── */
+        .cat-chip {
+            padding: 0.35rem 0.875rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1.5px solid var(--border);
+            background: white;
+            color: var(--taupe);
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .cat-chip:hover, .cat-chip.active {
+            background: var(--mango-pale);
+            border-color: var(--mango-light);
+            color: var(--bark);
+        }
+
+        /* ── Avatar ring ── */
+        .avatar-ring {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: var(--mango-pale);
+            overflow: hidden;
+            cursor: pointer;
+            transition: border-color 0.18s;
+            flex-shrink: 0;
+        }
+        .avatar-ring:hover, .avatar-ring.open-state { border-color: var(--mango); }
+        .avatar-ring img { width: 100%; height: 100%; object-fit: cover; }
+    </style>
+</head>
+<body>
+
+<!-- ================================================================
+     NAVBAR
+================================================================ -->
+<nav id="navbar">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
+
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center gap-2 flex-shrink-0">
+            <img src="lab_exercises/week2/assets/chestnobg.png" alt="LootYard" class="h-7 w-7 object-contain">
+            <span style="font-family:'Magic Jasmine',cursive;font-size:1.2rem;color:var(--bark);">LootYard</span>
+        </a>
+
+        <!-- Nav links -->
+        <div class="hidden md:flex items-center gap-5 ml-2">
+            <a href="#" id="navCategories" class="text-xs font-semibold text-[#8a7564] hover:text-[#15110d] transition-colors">Categories</a>
+            <a href="#" class="text-xs font-semibold text-[#8a7564] hover:text-[#15110d] transition-colors">Talent</a>
+        </div>
+
+        <!-- Search (API 5 — Unsplash powers the results imagery) -->
+        <div class="search-bar flex items-center gap-2 px-3.5 py-1.5 flex-1 max-w-xs ml-auto">
+            <svg class="w-3.5 h-3.5 text-[#8a7564] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+            <input id="searchInput" type="text" placeholder="Search assets…" class="text-xs flex-1 placeholder:text-[#bba898]">
+        </div>
+
+        <!-- Auth area -->
+        <div class="relative flex-shrink-0" id="authArea">
+
+            <!-- Guest state -->
+            <div id="guestButtons" class="flex items-center gap-2">
+                <button onclick="openAuth('login')" class="text-xs font-semibold text-[#8a7564] hover:text-[#15110d] transition-colors">Log in</button>
+                <button onclick="openAuth('signup')" class="mango-btn text-xs py-1.5 px-4">Sign up</button>
+            </div>
+
+            <!-- Logged-in state (hidden until auth) -->
+            <div id="userArea" class="hidden">
+                <!-- Avatar button — API 3: DiceBear / API 4: Gravatar -->
+                <button class="avatar-ring" id="avatarBtn" onclick="toggleDropdown()">
+                    <img id="avatarImg" src="" alt="avatar">
+                </button>
+
+                <!-- Profile dropdown -->
+                <div id="profileDropdown">
+                    <div class="flex items-center gap-3 pb-2">
+                        <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border border-[var(--border)]">
+                            <img id="dropdownAvatar" src="" alt="avatar" class="w-full h-full object-cover">
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-[var(--bark)] truncate" id="dropdownName">—</p>
+                            <p class="text-[10px] text-[var(--taupe)] truncate" id="dropdownEmail">—</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" onclick="showPortfolio()">View Portfolio</button>
+                    <button class="dropdown-item" onclick="showNotifications()">Notifications</button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item danger" onclick="signOut()">Log out</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</nav>
+
+
+<!-- ================================================================
+     MAIN CONTENT
+================================================================ -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+
+    <!-- Category chips -->
+    <div class="flex gap-2 overflow-x-auto pb-1 mb-8 scrollbar-hide">
+        <button class="cat-chip active" data-cat="all">All</button>
+        <button class="cat-chip" data-cat="characters">Characters</button>
+        <button class="cat-chip" data-cat="environments">Environments</button>
+        <button class="cat-chip" data-cat="props">Props</button>
+        <button class="cat-chip" data-cat="vehicles">Vehicles</button>
+        <button class="cat-chip" data-cat="weapons">Weapons</button>
+        <button class="cat-chip" data-cat="vfx">VFX</button>
+        <button class="cat-chip" data-cat="ui">UI Kits</button>
+    </div>
+
+    <!-- Most Popular -->
+    <section class="mb-10">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="section-heading">Most Popular</h2>
+            <a href="#" class="text-xs font-semibold text-[var(--taupe)] hover:text-[var(--mango)] transition-colors">See all</a>
+        </div>
+        <div id="popularGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <!-- Populated by JS -->
+        </div>
+    </section>
+
+    <!-- Recents -->
+    <section class="mb-10">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="section-heading">Recents</h2>
+            <a href="#" class="text-xs font-semibold text-[var(--taupe)] hover:text-[var(--mango)] transition-colors">See all</a>
+        </div>
+        <div id="recentsGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <!-- Populated by JS -->
+        </div>
+    </section>
+
+</main>
+
+
+<!-- ================================================================
+     FOOTER
+================================================================ -->
+<footer class="border-t border-[var(--border)] mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-2">
+            <img src="lab_exercises/week2/assets/chestnobg.png" alt="LootYard" class="h-7 w-7 object-contain">
+            <span style="font-family:'Magic Jasmine',cursive;font-size:1.1rem;color:var(--bark);">LootYard</span>
+            <span class="text-[10px] font-semibold text-[var(--taupe)]">· Free assets, real creators</span>
+        </div>
+        <p class="text-[10px] font-bold text-[var(--taupe)]">© 2026 LootYard. All rights reserved.</p>
+        <div class="flex items-center gap-4">
+            <a href="#" class="text-[var(--taupe)] hover:text-[var(--mango)] transition-colors">
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="#" class="text-[var(--taupe)] hover:text-[var(--mango)] transition-colors">
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/></svg>
+            </a>
+        </div>
+    </div>
+</footer>
+
+
+<!-- ================================================================
+     PRODUCT DETAIL PANEL (slides in from right)
+================================================================ -->
+<div id="productPanel">
+    <div id="panelBackdrop" onclick="closePanel()"></div>
+    <div id="panelContent" class="flex flex-col">
+
+        <!-- Panel header -->
+        <div class="sticky top-0 bg-[var(--cream)]/90 backdrop-blur border-b border-[var(--border)] px-6 py-3 flex items-center gap-3">
+            <button onclick="closePanel()" class="flex items-center gap-1.5 text-xs font-semibold text-[var(--taupe)] hover:text-[var(--bark)] transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg>
+                Go back
+            </button>
+        </div>
+
+        <!-- Panel body -->
+        <div class="p-6 flex flex-col gap-6">
+
+            <!-- Cover image placeholder -->
+            <div class="rounded-2xl overflow-hidden border border-[var(--border)] aspect-video bg-[var(--mango-pale)]">
+                <img id="panelImage" src="" alt="" class="w-full h-full object-cover">
+            </div>
+
+            <!-- Info -->
+            <div class="flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-4">
+                    <h1 id="panelTitle" class="font-display text-2xl font-bold text-[var(--bark)] leading-tight"></h1>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <!-- Author avatar (DiceBear) -->
+                        <img id="panelAuthorAvatar" src="" alt="" class="w-7 h-7 rounded-full border border-[var(--border)]">
+                        <span id="panelAuthor" class="text-xs font-semibold text-[var(--taupe)]"></span>
+                    </div>
+                </div>
+
+                <p id="panelDesc" class="text-sm text-[var(--taupe)] leading-relaxed"></p>
+
+                <div class="flex items-center gap-3">
+                    <div id="panelStars" class="stars"></div>
+                    <span id="panelRating" class="text-xs font-bold text-[var(--bark)]"></span>
+                    <span id="panelReviewCount" class="text-xs text-[var(--taupe)]"></span>
+                </div>
+
+                <!-- Download button — changes based on auth state -->
+                <button id="downloadBtn" onclick="handleDownload()" class="mango-btn w-full py-3 text-sm mt-1">
+                    Log in to Download
+                </button>
+            </div>
+
+            <!-- Reviews -->
+            <div>
+                <h3 class="text-xs font-bold text-[var(--taupe)] uppercase tracking-wider mb-3">Reviews</h3>
+                <div id="reviewList" class="flex flex-col gap-3 mb-4"></div>
+
+                <!-- Add comment (only shown when logged in) -->
+                <div id="commentForm" class="hidden flex items-center gap-3">
+                    <img id="commentAvatar" src="" alt="" class="w-7 h-7 rounded-full border border-[var(--border)] flex-shrink-0">
+                    <div class="flex-1 flex gap-2">
+                        <input id="commentInput" type="text" placeholder="Add a comment…"
+                            class="flex-1 text-xs px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-white outline-none focus:border-[var(--mango)] transition-colors font-inter">
+                        <button onclick="submitComment()" class="mango-btn text-xs px-4 py-2">Post</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- ================================================================
+     AUTH MODAL
+================================================================ -->
+<div id="authModal">
+    <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" onclick="closeAuth()"></div>
+
+    <div class="auth-card">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="font-display text-xl font-bold text-[var(--bark)]" id="authTitle">Welcome back</h2>
+                <p class="text-xs text-[var(--taupe)] mt-0.5" id="authSubtitle">Log in to download and review assets</p>
+            </div>
+            <button onclick="closeAuth()" class="w-8 h-8 flex items-center justify-center rounded-full border border-[var(--border)] hover:bg-[var(--mango-pale)] transition-colors text-[var(--taupe)]">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <!-- OAuth buttons -->
+        <!-- API 1: Firebase Google OAuth -->
+        <button class="oauth-btn mb-3" onclick="loginWithGoogle()">
+            <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Continue with Google
+        </button>
+
+        <!-- API 2: Firebase GitHub OAuth -->
+        <button class="oauth-btn mb-5" onclick="loginWithGitHub()">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/></svg>
+            Continue with GitHub
+        </button>
+
+        <!-- Divider -->
+        <div class="flex items-center gap-3 mb-5">
+            <div class="flex-1 h-px bg-[var(--border)]"></div>
+            <span class="text-[10px] font-bold text-[var(--taupe)] uppercase tracking-wider">or</span>
+            <div class="flex-1 h-px bg-[var(--border)]"></div>
+        </div>
+
+        <!-- Email / Password form -->
+        <div class="flex flex-col gap-3 mb-5">
+            <input id="authEmail" type="email" placeholder="Email address"
+                class="text-sm px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--mango-pale)] outline-none focus:border-[var(--mango)] transition-colors font-inter w-full">
+            <input id="authPassword" type="password" placeholder="Password"
+                class="text-sm px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--mango-pale)] outline-none focus:border-[var(--mango)] transition-colors font-inter w-full">
+            <div id="authNameRow" class="hidden">
+                <input id="authName" type="text" placeholder="Display name"
+                    class="text-sm px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--mango-pale)] outline-none focus:border-[var(--mango)] transition-colors font-inter w-full">
+            </div>
+        </div>
+
+        <button id="authSubmitBtn" class="oauth-btn primary-btn mb-4" onclick="handleEmailAuth()">Log in</button>
+
+        <p class="text-center text-xs text-[var(--taupe)]" id="authToggleText">
+            Don't have an account?
+            <button onclick="toggleAuthMode()" class="font-bold text-[var(--mango)] hover:underline">Sign up</button>
+        </p>
+        <p id="authError" class="text-center text-xs text-red-500 mt-2 hidden"></p>
+    </div>
+</div>
+
+
+<!-- ================================================================
+     TOAST
+================================================================ -->
+<div id="toast"></div>
+
+
+<!-- ================================================================
+     JAVASCRIPT
+================================================================ -->
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBxFuzLh-o7jqUr6LInMQbpkP3zny1h1kk",
+  authDomain: "lootyard-xyz.firebaseapp.com",
+  projectId: "lootyard-xyz",
+  storageBucket: "lootyard-xyz.firebasestorage.app",
+  messagingSenderId: "376623956358",
+  appId: "1:376623956358:web:79a5609ecc0888534a6c07",
+  measurementId: "G-V9FXDS2Q5Y"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+
+
+// ─── MOCK DATA & FIRESTORE DATA SEED ─────────────────────────────────
+const MOCK_PRODUCTS = [
+    { id:'p1', title:'Crystal Cave Kit',        author:'anya_3d',   category:'environments', rating:4.8, reviews:42,  desc:'A full modular kit for building crystalline underground environments. 47 unique pieces, PBR textures included.', tags:['lowpoly','fantasy','cave'] },
+    { id:'p2', title:'Sci-Fi Drone Pack',       author:'rocketboy', category:'vehicles',     rating:4.6, reviews:31,  desc:'6 drone variants with LODs, emission maps, and hover animations. Game-ready FBX + Blender source.', tags:['scifi','drone','game-ready'] },
+    { id:'p3', title:'Stylized Tree Bundle',    author:'leafwork',  category:'environments', rating:4.9, reviews:87,  desc:'18 stylized tree assets. Supports SpeedTree wind shader. Summer, autumn, and dead variants.', tags:['nature','stylized','foliage'] },
+    { id:'p4', title:'Mech Soldier Rig',        author:'ironforge', category:'characters',   rating:4.7, reviews:56,  desc:'Fully rigged bipedal mech with 12 animations. Compatible with Mixamo retargeting pipeline.', tags:['mech','rigged','animated'] },
+    { id:'p5', title:'Ancient Ruins Props',     author:'stonearch', category:'props',        rating:4.5, reviews:24,  desc:'28 weathered stone props — columns, arches, broken walls. Substance textures, 2K maps.', tags:['ruins','props','historical'] },
+    { id:'p6', title:'Neon UI Kit',             author:'pixelpush', category:'ui',           rating:4.4, reviews:19,  desc:'Cyberpunk-style HUD elements: 60+ components, Figma source, sprite sheets, After Effects animations.', tags:['ui','hud','cyberpunk'] },
+    { id:'p7', title:'Low-Poly Village',        author:'cottagly',  category:'environments', rating:4.8, reviews:103, desc:'Complete low-poly village: 40+ buildings, roads, fences, foliage. Mobile-optimized.', tags:['lowpoly','village','mobile'] },
+    { id:'p8', title:'Fire & Smoke VFX',        author:'vfxlab',    category:'vfx',          rating:4.6, reviews:38,  desc:'10 fire and smoke particle systems for Unity and Unreal. HDR flipbooks included.', tags:['vfx','fire','particles'] },
+    { id:'p9', title:'Fantasy Sword Collection',author:'bladesmth', category:'weapons',      rating:4.7, reviews:61,  desc:'12 fantasy swords with hand-painted textures. Normal maps, emissive maps, and 3 LODs each.', tags:['weapons','fantasy','painted'] },
+    { id:'p10',title:'Pixel Art Tileset',       author:'dotmatrix', category:'ui',           rating:4.5, reviews:29,  desc:'16×16 RPG tileset — 200+ tiles, animated water/lava, day/night palette swaps.', tags:['pixel','tileset','rpg'] },
+];
+
+let dbProducts = [...MOCK_PRODUCTS];
+
+async function loadProducts() {
+    try {
+        const snapshot = await db.collection('products').get();
+        const products = [];
+        snapshot.forEach(doc => {
+            products.push({ id: doc.id, ...doc.data() });
+        });
+        
+        if (products.length > 0) {
+            dbProducts = products;
+        }
+        renderGrids(dbProducts);
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        renderGrids(dbProducts);
+    }
+}
+
+
+// Unsplash Source API — keyword-based free images (API 5)
+// No key needed! Using source.unsplash.com with relevant keywords
+function unsplashUrl(product) {
+    const kwMap = {
+        environments: '3d,environment,cave,ruins',
+        vehicles:     '3d,drone,robot,technology',
+        characters:   '3d,character,figure,render',
+        props:        '3d,props,ancient,stone',
+        weapons:      '3d,sword,weapon,fantasy',
+        vfx:          'smoke,fire,particles,vfx',
+        ui:           'interface,neon,digital,hud',
+    };
+    const kw = kwMap[product.category] || '3d,game,asset,render';
+    // Deterministic seed per product so image stays consistent on reload
+    const seed = product.id;
+    return `https://source.unsplash.com/400x300/?${kw}&sig=${seed}`;
+}
+
+// DiceBear API — auto-generated avatar from username (API 3)
+function dicebearUrl(username) {
+    return `https://api.dicebear.com/8.x/thumbs/svg?seed=${encodeURIComponent(username)}&backgroundColor=ffd2aa,fff0df,ffe4c4&shapeColor=ff9f4a,c0714a`;
+}
+
+// Gravatar API — avatar from email MD5 hash (API 4)
+async function gravatarUrl(email) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(email.trim().toLowerCase());
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hash = hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
+    // d=404 means fall back to empty (we'll catch and use DiceBear)
+    return `https://www.gravatar.com/avatar/${hash}?s=80&d=404`;
+}
+
+// ─── STATE ───────────────────────────────────────────────────────
+let currentUser  = null;
+let currentProd  = null;
+let authMode     = 'login'; // 'login' | 'signup'
+
+// ─── AUTH STATE LISTENER (Firebase Auth — API 1/2) ───────────────
+auth.onAuthStateChanged(async (user) => {
+    currentUser = user;
+    if (user) {
+        document.getElementById('guestButtons').classList.add('hidden');
+        document.getElementById('userArea').classList.remove('hidden');
+        updateAvatarUI(user);
+        // Save/update user doc in Firestore (API 2 — Firestore)
+        await db.collection('users').doc(user.uid).set({
+            uid:         user.uid,
+            displayName: user.displayName || user.email.split('@')[0],
+            email:       user.email,
+            photoURL:    user.photoURL || '',
+            lastSeen:    firebase.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+        // Update download button
+        if (currentProd) updateDownloadBtn(true);
+        updateCommentUI(true);
+        closeAuth();
+    } else {
+        document.getElementById('guestButtons').classList.remove('hidden');
+        document.getElementById('userArea').classList.add('hidden');
+        if (currentProd) updateDownloadBtn(false);
+        updateCommentUI(false);
+    }
+});
+
+async function updateAvatarUI(user) {
+    const name  = user.displayName || user.email.split('@')[0];
+    const email = user.email;
+
+    // Try Gravatar first (API 4), fallback to DiceBear (API 3)
+    let avatarSrc = dicebearUrl(name);
+    if (user.photoURL) {
+        avatarSrc = user.photoURL;
+    } else {
+        try {
+            const gUrl = await gravatarUrl(email);
+            const res  = await fetch(gUrl, { method: 'HEAD' });
+            if (res.ok) avatarSrc = gUrl;
+        } catch (_) { /* fallback to DiceBear */ }
+    }
+
+    document.getElementById('avatarImg').src        = avatarSrc;
+    document.getElementById('dropdownAvatar').src   = avatarSrc;
+    document.getElementById('dropdownName').textContent  = name;
+    document.getElementById('dropdownEmail').textContent = email;
+    document.getElementById('commentAvatar').src    = avatarSrc;
+}
+
+// ─── OAUTH LOGIN ─────────────────────────────────────────────────
+async function loginWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    try {
+        await auth.signInWithPopup(provider);
+    } catch (e) { showAuthError(e.message); }
+}
+
+async function loginWithGitHub() {
+    const provider = new firebase.auth.GithubAuthProvider();
+    try {
+        await auth.signInWithPopup(provider);
+    } catch (e) { showAuthError(e.message); }
+}
+
+// ─── EMAIL AUTH ───────────────────────────────────────────────────
+async function handleEmailAuth() {
+    const email = document.getElementById('authEmail').value.trim();
+    const pass  = document.getElementById('authPassword').value;
+    const name  = document.getElementById('authName').value.trim();
+    if (!email || !pass) { showAuthError('Please fill in all fields.'); return; }
+
+    try {
+        if (authMode === 'signup') {
+            const cred = await auth.createUserWithEmailAndPassword(email, pass);
+            await cred.user.updateProfile({ displayName: name || email.split('@')[0] });
+        } else {
+            await auth.signInWithEmailAndPassword(email, pass);
+        }
+    } catch (e) {
+        const msg = e.code === 'auth/wrong-password'   ? 'Incorrect password.'
+                  : e.code === 'auth/user-not-found'   ? 'No account with that email.'
+                  : e.code === 'auth/email-already-in-use' ? 'Email already in use.'
+                  : e.message;
+        showAuthError(msg);
+    }
+}
+
+function toggleAuthMode() {
+    authMode = authMode === 'login' ? 'signup' : 'login';
+    const isSignup = authMode === 'signup';
+    document.getElementById('authTitle').textContent      = isSignup ? 'Create account'     : 'Welcome back';
+    document.getElementById('authSubtitle').textContent   = isSignup ? 'Join the LootYard community' : 'Log in to download and review assets';
+    document.getElementById('authSubmitBtn').textContent  = isSignup ? 'Sign up' : 'Log in';
+    document.getElementById('authToggleText').innerHTML   = isSignup
+        ? 'Already have an account? <button onclick="toggleAuthMode()" class="font-bold text-[var(--mango)] hover:underline">Log in</button>'
+        : 'Don\'t have an account? <button onclick="toggleAuthMode()" class="font-bold text-[var(--mango)] hover:underline">Sign up</button>';
+    document.getElementById('authNameRow').classList.toggle('hidden', !isSignup);
+    hideAuthError();
+}
+
+async function signOut() {
+    await auth.signOut();
+    closeDropdown();
+    toast('Logged out.');
+}
+
+// ─── AUTH MODAL HELPERS ───────────────────────────────────────────
+function openAuth(mode = 'login') {
+    authMode = 'login';
+    if (mode === 'signup') toggleAuthMode();
+    document.getElementById('authModal').classList.add('open');
+}
+function closeAuth() { document.getElementById('authModal').classList.remove('open'); }
+function showAuthError(msg) {
+    const el = document.getElementById('authError');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+}
+function hideAuthError() { document.getElementById('authError').classList.add('hidden'); }
+
+// ─── DROPDOWN ────────────────────────────────────────────────────
+function toggleDropdown() {
+    const dd  = document.getElementById('profileDropdown');
+    const btn = document.getElementById('avatarBtn');
+    dd.classList.toggle('open');
+    btn.classList.toggle('open-state');
+}
+function closeDropdown() {
+    document.getElementById('profileDropdown').classList.remove('open');
+    document.getElementById('avatarBtn').classList.remove('open-state');
+}
+document.addEventListener('click', e => {
+    if (!document.getElementById('userArea').contains(e.target)) closeDropdown();
+});
+
+function showPortfolio()      { toast('Portfolio coming soon!'); closeDropdown(); }
+function showNotifications()  { toast('No new notifications.'); closeDropdown(); }
+
+// ─── PRODUCT CARDS ────────────────────────────────────────────────
+function buildCard(product) {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.onclick = () => openPanel(product);
+
+    const badge = product.rating >= 4.8
+        ? `<div class="card-badge">Hot</div>` : '';
+
+    card.innerHTML = `
+        ${badge}
+        <div class="relative w-full aspect-video overflow-hidden">
+            <div class="skeleton absolute inset-0"></div>
+            <img src="${unsplashUrl(product)}" alt="${product.title}"
+                 class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500"
+                 onload="this.classList.remove('opacity-0');this.previousElementSibling.remove();"
+                 onerror="this.previousElementSibling.remove();this.src='https://placehold.co/400x300/fff0df/ff9f4a?text=${encodeURIComponent(product.title)}'">
+        </div>
+        <div class="p-3">
+            <p class="font-display text-sm font-bold text-[var(--bark)] leading-tight mb-0.5 truncate">${product.title}</p>
+            <div class="flex items-center justify-between">
+                <p class="text-[10px] text-[var(--taupe)] font-medium">@${product.author}</p>
+                <div class="flex items-center gap-1">
+                    <span class="text-[var(--mango)] text-[10px]">★</span>
+                    <span class="text-[10px] font-bold text-[var(--bark)]">${product.rating}</span>
+                </div>
+            </div>
+        </div>
+    `;
+    return card;
+}
+
+function renderGrids(products) {
+    const popular = [...products].sort((a,b) => b.reviews - a.reviews).slice(0, 5);
+    const recent  = [...products].slice(-5).reverse();
+
+    const popGrid = document.getElementById('popularGrid');
+    const recGrid = document.getElementById('recentsGrid');
+    popGrid.innerHTML = '';
+    recGrid.innerHTML = '';
+
+    popular.forEach(p => popGrid.appendChild(buildCard(p)));
+    recent.forEach(p  => recGrid.appendChild(buildCard(p)));
+}
+
+// ─── PRODUCT PANEL ────────────────────────────────────────────────
+async function openPanel(product) {
+    currentProd = product;
+    const panel = document.getElementById('productPanel');
+
+    document.getElementById('panelImage').src       = unsplashUrl(product);
+    document.getElementById('panelTitle').textContent   = product.title;
+    document.getElementById('panelAuthor').textContent  = '@' + product.author;
+    document.getElementById('panelAuthorAvatar').src    = dicebearUrl(product.author); // API 3
+    document.getElementById('panelDesc').textContent    = product.desc;
+    document.getElementById('panelRating').textContent  = product.rating;
+    document.getElementById('panelReviewCount').textContent = `(${product.reviews} reviews)`;
+    document.getElementById('panelStars').textContent   = starsHtml(product.rating);
+
+    updateDownloadBtn(!!currentUser);
+    updateCommentUI(!!currentUser);
+
+    panel.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    // Load reviews from Firestore (API 2)
+    await loadReviews(product.id);
+}
+
+function closePanel() {
+    document.getElementById('productPanel').classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(() => { currentProd = null; }, 400);
+}
+
+function starsHtml(rating) {
+    const full  = Math.floor(rating);
+    const half  = rating % 1 >= 0.5 ? 1 : 0;
+    const empty = 5 - full - half;
+    return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+}
+
+function updateDownloadBtn(loggedIn) {
+    const btn = document.getElementById('downloadBtn');
+    btn.textContent = loggedIn ? '⬇ Download' : 'Log in to Download';
+    btn.style.opacity = loggedIn ? '1' : '0.75';
+}
+
+function handleDownload() {
+    if (!currentUser) { openAuth('login'); return; }
+    toast(`Downloading "${currentProd.title}"…`);
+    // Record download in Firestore
+    db.collection('downloads').add({
+        uid:       currentUser.uid,
+        productId: currentProd.id,
+        title:     currentProd.title,
+        at:        firebase.firestore.FieldValue.serverTimestamp(),
+    });
+}
+
+function updateCommentUI(loggedIn) {
+    document.getElementById('commentForm').classList.toggle('hidden', !loggedIn);
+}
+
+// ─── REVIEWS (Firestore — API 2) ─────────────────────────────────
+async function loadReviews(productId) {
+    const list = document.getElementById('reviewList');
+    list.innerHTML = '<div class="skeleton h-10 w-full rounded-xl"></div>';
+    try {
+        const snap = await db.collection('reviews')
+            .where('productId', '==', productId)
+            .orderBy('createdAt', 'desc')
+            .limit(10)
+            .get();
+
+        list.innerHTML = '';
+        if (snap.empty) {
+            list.innerHTML = '<p class="text-xs text-[var(--taupe)] italic">No reviews yet — be the first!</p>';
+            return;
+        }
+        snap.forEach(doc => {
+            const d = doc.data();
+            list.appendChild(buildReviewEl(d));
+        });
+    } catch (e) {
+        list.innerHTML = '<p class="text-xs text-[var(--taupe)] italic">Reviews unavailable right now.</p>';
+    }
+}
+
+function buildReviewEl(d) {
+    const el = document.createElement('div');
+    el.className = 'flex items-start gap-3';
+    const avatarSrc = dicebearUrl(d.authorName || 'user'); // API 3
+    el.innerHTML = `
+        <img src="${avatarSrc}" alt="" class="w-7 h-7 rounded-full border border-[var(--border)] flex-shrink-0">
+        <div class="flex-1 bg-white border border-[var(--border)] rounded-xl px-3.5 py-2.5">
+            <div class="flex items-center justify-between mb-0.5">
+                <p class="text-[11px] font-bold text-[var(--bark)]">${d.authorName || 'Anonymous'}</p>
+                <p class="text-[10px] text-[var(--taupe)]">${d.createdAt?.toDate().toLocaleDateString() || ''}</p>
+            </div>
+            <p class="text-xs text-[var(--taupe)] leading-relaxed">${d.text}</p>
+        </div>
+    `;
+    return el;
+}
+
+async function submitComment() {
+    if (!currentUser || !currentProd) return;
+    const input = document.getElementById('commentInput');
+    const text  = input.value.trim();
+    if (!text) return;
+
+    await db.collection('reviews').add({
+        productId:  currentProd.id,
+        authorUid:  currentUser.uid,
+        authorName: currentUser.displayName || currentUser.email.split('@')[0],
+        text,
+        createdAt:  firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    input.value = '';
+    await loadReviews(currentProd.id);
+    toast('Review posted!');
+}
+
+// ─── CATEGORY FILTER ─────────────────────────────────────────────
+document.querySelectorAll('.cat-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+        document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const cat = chip.dataset.cat;
+        const filtered = cat === 'all' ? dbProducts : dbProducts.filter(p => p.category === cat);
+        renderGrids(filtered);
+    });
+});
+
+// ─── SEARCH ──────────────────────────────────────────────────────
+let searchTimeout;
+document.getElementById('searchInput').addEventListener('input', e => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        const q = e.target.value.toLowerCase();
+        const filtered = q
+            ? dbProducts.filter(p =>
+                p.title.toLowerCase().includes(q) ||
+                p.author.toLowerCase().includes(q) ||
+                p.tags.some(t => t.includes(q)))
+            : dbProducts;
+        renderGrids(filtered);
+    }, 300);
+});
+
+// ─── TOAST ───────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────
+loadProducts();
+
+// Check if we should auto-open auth modal from query params
+const urlParams = new URLSearchParams(window.location.search);
+const authAction = urlParams.get('auth');
+if (authAction === 'login' || authAction === 'signup') {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+        if (!user) {
+            openAuth(authAction);
+        }
+        unsubscribe();
+    });
+}
+</script>
+</body>
+</html>
