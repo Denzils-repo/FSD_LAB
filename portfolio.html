@@ -3,954 +3,805 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aryan Dev — Creator Portfolio · LootYard</title>
-  <meta name="description" content="Aryan Dev's game asset portfolio on LootYard — free 3D models, SFX, animations and more.">
+  <title>Creator Portfolio · LootYard</title>
+  <link rel="icon" type="image/png" href="lab_exercises/week2/assets/chestnobg.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            cream: '#fff8f1',
-            bark: '#15110d',
-            mango: '#ff9f4a',
-            'mango-soft': '#ffd2aa',
-            'mango-pale': '#fff0df',
-            taupe: '#8a7564',
-            brown: '#5c4a3c',
-          },
-          fontFamily: {
-            display: ['Bricolage Grotesque', 'sans-serif'],
-            body: ['Inter', 'sans-serif'],
-            hand: ['Caveat', 'cursive'],
-          }
-        }
-      }
+      theme: { extend: { colors: {
+        cream:'#fff8f1',bark:'#15110d',mango:'#ff9f4a','mango-soft':'#ffd2aa','mango-pale':'#fff0df',
+        taupe:'#8a7564',brown:'#5c4a3c',
+      }, fontFamily: {
+        display:['Bricolage Grotesque','sans-serif'],body:['Inter','sans-serif'],hand:['Caveat','cursive'],
+      }}}
     }
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/hung1001/font-awesome-pro@4cac1a6/css/all.css">
-
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="mock_assets.js"></script>
   <style>
-    :root {
-      --cream: #fff8f1;
-      --bark: #15110d;
-      --mango: #ff9f4a;
-      --mango-light: #ffd2aa;
-      --mango-pale: #fff0df;
-      --taupe: #8a7564;
-      --brown: #5c4a3c;
-      --card-bg: #fffcf8;
-      --border: #f0e7dd;
-    }
-    * { box-sizing: border-box; }
-    html, body {
-      background-color: var(--cream);
-      color: var(--bark);
-      font-family: 'Inter', sans-serif;
-      -webkit-font-smoothing: antialiased;
-      scroll-behavior: smooth;
-    }
-    html { scrollbar-width: thin; scrollbar-color: var(--mango) var(--cream); }
-    ::-webkit-scrollbar { width: 10px; }
-    ::-webkit-scrollbar-track { background: var(--cream); }
-    ::-webkit-scrollbar-thumb { background: var(--mango); border: 3px solid var(--cream); border-radius: 999px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--bark); }
-
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events: none; z-index: 1000;
-    }
-
-    .font-display { font-family: 'Bricolage Grotesque', sans-serif; }
-
-    @keyframes fadeSlideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes shine {
-      0%   { background-position: -120% 0; }
-      100% { background-position: 220% 0; }
-    }
-
-    .tag-chip {
-      display: inline-flex; align-items: center; gap: 0.35rem;
-      background: var(--mango-pale); border: 1px solid #f0d8b8;
-      border-radius: 9999px; padding: 0.3rem 0.75rem;
-      font-size: 0.7rem; font-weight: 700; color: var(--brown);
-      white-space: nowrap;
-    }
-    .tag-chip-sm {
-      display: inline-flex; align-items: center; gap: 0.25rem;
-      background: var(--mango-pale); border: 1px solid #f0d8b8;
-      border-radius: 9999px; padding: 0.2rem 0.6rem;
-      font-size: 0.65rem; font-weight: 700; color: var(--brown); white-space: nowrap;
-    }
-    .fa-duotone, .fad { --fa-primary-color: var(--bark) !important; --fa-secondary-color: var(--mango) !important; --fa-secondary-opacity: 0.85 !important; }
-
-    /* Card */
-    .sf-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 1.25rem;
-    }
-
-    /* Asset grid card */
-    .asset-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 1rem;
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-    }
-    .asset-card:hover {
-      transform: translateY(-3px);
-      border-color: var(--mango-light);
-      box-shadow: 0 8px 28px rgba(255,159,74,0.13);
-    }
-    .asset-thumb {
-      aspect-ratio: 1;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.6rem;
-      position: relative; overflow: hidden;
-    }
-    .asset-badge {
-      position: absolute; top: 0.5rem; left: 0.5rem;
-      background: rgba(21,17,13,0.72);
-      color: var(--cream); font-size: 0.6rem; font-weight: 800;
-      letter-spacing: 0.08em; text-transform: uppercase;
-      padding: 0.2rem 0.5rem; border-radius: 5px;
-    }
-    .asset-new-badge {
-      position: absolute; top: 0.5rem; right: 0.5rem;
-      background: var(--mango); color: var(--bark);
-      font-size: 0.6rem; font-weight: 800;
-      letter-spacing: 0.06em; text-transform: uppercase;
-      padding: 0.2rem 0.5rem; border-radius: 5px;
-    }
-
-    /* Timeline */
-    .tl-line {
-      position: absolute; left: 6px; top: 10px; bottom: 10px;
-      width: 1.5px; background: var(--border);
-    }
-    .tl-dot {
-      width: 14px; height: 14px; border-radius: 50%;
-      background: var(--cream); border: 2px solid var(--mango-light);
-      flex-shrink: 0;
-      transition: background 0.15s, border-color 0.15s;
-      cursor: pointer; z-index: 1;
-    }
-    .tl-dot.active, .tl-item:hover .tl-dot {
-      background: var(--mango); border-color: var(--mango);
-    }
-    .tl-item { cursor: pointer; }
-
-    /* Social link */
-    .social-link {
-      display: flex; align-items: center; gap: 0.6rem;
-      padding: 0.5rem 0.75rem;
-      background: var(--cream); border: 1px solid var(--border);
-      border-radius: 0.625rem; font-size: 0.8rem; font-weight: 500;
-      color: var(--bark); text-decoration: none;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .social-link:hover { border-color: var(--mango-light); background: var(--mango-pale); }
-    .social-icon {
-      width: 24px; height: 24px; border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.75rem; flex-shrink: 0;
-    }
-
-    /* Edit modal */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(21,17,13,0.5);
-      z-index: 500;
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.2s;
-    }
-    .modal-overlay.open { opacity: 1; pointer-events: auto; }
-    .modal-box {
-      background: var(--card-bg); border: 1px solid var(--border);
-      border-radius: 1.5rem; padding: 2rem; width: 420px;
-      max-width: calc(100vw - 2rem);
-      transform: translateY(12px);
-      transition: transform 0.22s;
-    }
-    .modal-overlay.open .modal-box { transform: translateY(0); }
-
-    /* Asset popup */
-    .asset-popup {
-      position: fixed; z-index: 400;
-      background: var(--card-bg); border: 1px solid var(--border);
-      border-radius: 1rem; padding: 1rem 1.1rem;
-      width: 230px;
-      box-shadow: 0 16px 48px rgba(21,17,13,0.14);
-      display: none;
-    }
-    .asset-popup.open { display: block; }
-
-    /* Sort dropdown */
-    .sort-dd {
-      position: absolute; top: calc(100% + 6px); right: 0;
-      background: var(--card-bg); border: 1px solid var(--border);
-      border-radius: 0.9rem; padding: 0.35rem; z-index: 50;
-      min-width: 170px;
-      box-shadow: 0 10px 32px rgba(21,17,13,0.1);
-      display: none;
-    }
-    .sort-dd.open { display: block; }
-    .sort-opt {
-      display: flex; align-items: center; gap: 0.5rem;
-      padding: 0.55rem 0.75rem; border-radius: 0.6rem;
-      font-size: 0.8rem; color: var(--brown); cursor: pointer;
-    }
-    .sort-opt:hover { background: var(--mango-pale); color: var(--bark); }
-    .sort-opt.active { color: var(--mango); font-weight: 700; }
-
-    /* Form inputs */
-    .sf-input {
-      width: 100%;
-      background: var(--cream); border: 1px solid var(--border);
-      border-radius: 0.625rem; padding: 0.55rem 0.75rem;
-      font-size: 0.875rem; color: var(--bark); font-family: 'Inter', sans-serif;
-      outline: none; transition: border-color 0.15s;
-    }
-    .sf-input:focus { border-color: var(--mango); }
-    .sf-label {
-      display: block; font-size: 0.68rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.07em;
-      color: var(--taupe); margin-bottom: 0.35rem;
-    }
-
-    /* Stat pill */
-    .stat-pill {
-      display: flex; flex-direction: column; align-items: center;
-      padding: 0.75rem 1rem;
-      background: var(--mango-pale); border: 1px solid #f0d8b8;
-      border-radius: 0.9rem; text-align: center; min-width: 72px;
-    }
-
-    /* Progress bar */
-    .progress-bar { height: 4px; background: #eadfd4; border-radius: 9999px; overflow: hidden; }
-    .progress-fill { height: 100%; border-radius: 9999px; background: linear-gradient(90deg, var(--mango-light), var(--mango)); }
-
-    /* POV toggle */
-    .pov-toggle {
-      display: flex; align-items: center; gap: 0.4rem;
-      background: var(--mango-pale); border: 1px solid var(--mango-light);
-      border-radius: 0.625rem; padding: 0.35rem 0.75rem;
-      font-size: 0.7rem; font-weight: 700; color: var(--brown);
-      cursor: pointer; letter-spacing: 0.04em;
-    }
-    .pov-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mango); transition: background 0.2s; }
-
-    /* Rating stars */
-    .star-filled { color: var(--mango); }
-    .star-empty  { color: #e0d5ca; }
-
-    @keyframes gridIn {
-      from { opacity: 0; transform: scale(0.97); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-    .grid-anim { animation: gridIn 0.25s ease both; }
+    :root{--cream:#fff8f1;--bark:#15110d;--mango:#ff9f4a;--mango-light:#ffd2aa;--mango-pale:#fff0df;--taupe:#8a7564;--brown:#5c4a3c;--card-bg:#fffcf8;--border:#f0e7dd;--header-h:68px;--footer-h:48px}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;overflow:hidden}
+    body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--bark)}
+    .font-display{font-family:'Bricolage Grotesque',sans-serif}
+    body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
+    #navbar{position:fixed;top:0;left:0;right:0;z-index:100;height:var(--header-h);background:rgba(255,248,241,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+    #navIndicator{position:absolute;left:4px;top:4px;height:calc(100% - 8px);width:7rem;border-radius:9999px;background:var(--mango-light);transition:transform 0.5s cubic-bezier(0.16,1,0.3,1),opacity 0.3s}
+    .search-bar{background:white;border:1.5px solid var(--border);border-radius:9999px;transition:border-color 0.2s,box-shadow 0.2s}
+    .search-bar:focus-within{border-color:var(--mango);box-shadow:0 0 0 3px rgba(255,159,74,0.15)}
+    .search-bar input{background:transparent;outline:none;font-family:'Inter',sans-serif}
+    #siteFooter{position:fixed;bottom:0;left:0;right:0;z-index:100;height:var(--footer-h);background:rgba(255,248,241,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border)}
+    #mainContent{margin-top:var(--header-h);height:calc(100vh - var(--header-h) - var(--footer-h));overflow-y:auto;overflow-x:hidden;position:relative}
+    #mainContent::-webkit-scrollbar{width:5px}#mainContent::-webkit-scrollbar-track{background:transparent}#mainContent::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    .sf-card{background:var(--card-bg);border:1.5px solid var(--border);border-radius:1.25rem}
+    .tag-chip{display:inline-flex;align-items:center;gap:0.35rem;background:var(--mango-pale);border:1px solid #f0d8b8;border-radius:9999px;padding:0.3rem 0.75rem;font-size:0.7rem;font-weight:700;color:var(--brown);white-space:nowrap}
+    .tag-chip-sm{display:inline-flex;align-items:center;gap:0.25rem;background:var(--mango-pale);border:1px solid #f0d8b8;border-radius:9999px;padding:0.2rem 0.6rem;font-size:0.65rem;font-weight:700;color:var(--brown);white-space:nowrap}
+    .stars{color:var(--mango);letter-spacing:0.04em}
+    .asset-card{background:var(--card-bg);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 400ms ease-in-out;position:relative;z-index:1}
+    .asset-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px -10px rgba(21,17,13,0.14);z-index:2}
+    .card-badge{position:absolute;top:6px;left:6px;background:var(--mango);color:white;font-size:0.6rem;font-weight:800;padding:1px 7px;border-radius:9999px;letter-spacing:0.04em;text-transform:uppercase;z-index:3}
+    .skeleton{background:linear-gradient(90deg,#f0e7dd 25%,#faf4ef 50%,#f0e7dd 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;pointer-events:none!important}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .social-link{display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.75rem;background:var(--cream);border:1px solid var(--border);border-radius:0.625rem;font-size:0.75rem;font-weight:500;color:var(--brown);text-decoration:none;transition:border-color 0.15s,background 0.15s}
+    .social-link:hover{border-color:var(--mango-light);background:var(--mango-pale)}
+    .social-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0}
+    .pov-toggle{display:flex;align-items:center;gap:0.4rem;background:var(--mango-pale);border:1px solid var(--mango-light);border-radius:0.625rem;padding:0.35rem 0.75rem;font-size:0.7rem;font-weight:700;color:var(--brown);cursor:pointer;letter-spacing:0.04em;transition:all 0.15s}
+    .pov-toggle:hover{background:var(--mango-light)}
+    .pov-dot{width:8px;height:8px;border-radius:50%;background:var(--mango);transition:background 0.2s}
+    .pov-dot.visitor{background:var(--taupe)}
+    .modal-overlay{position:fixed;inset:0;background:rgba(21,17,13,0.5);z-index:500;display:none;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s}
+    .modal-overlay.open{display:flex;opacity:1;pointer-events:auto}
+    .modal-box{background:var(--card-bg);border:1.5px solid var(--border);border-radius:1.5rem;padding:2rem;width:420px;max-width:calc(100vw - 2rem);transform:translateY(12px);transition:transform 0.22s}
+    .modal-overlay.open .modal-box{transform:translateY(0)}
+    .sf-input{width:100%;background:var(--cream);border:1px solid var(--border);border-radius:0.625rem;padding:0.55rem 0.75rem;font-size:0.875rem;color:var(--bark);font-family:'Inter',sans-serif;outline:none;transition:border-color 0.15s}
+    .sf-input:focus{border-color:var(--mango)}
+    .sf-label{display:block;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--taupe);margin-bottom:0.35rem}
+    .asset-popup{position:fixed;z-index:400;background:var(--card-bg);border:1.5px solid var(--border);border-radius:1rem;padding:1rem 1.1rem;width:260px;box-shadow:0 16px 48px rgba(21,17,13,0.14);display:none}
+    .asset-popup.open{display:block}
+    .review-card{background:var(--cream);border:1px solid var(--border);border-radius:0.875rem;padding:0.85rem 1rem}
+    .sort-dd{position:absolute;top:calc(100% + 6px);right:0;background:var(--card-bg);border:1.5px solid var(--border);border-radius:14px;padding:0.4rem;z-index:50;min-width:170px;box-shadow:0 16px 40px -10px rgba(21,17,13,0.16);opacity:0;pointer-events:none;transform:translateY(-6px);transition:all 0.2s ease}
+    .sort-dd.open{opacity:1;pointer-events:auto;transform:translateY(0)}
+    .sort-opt{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.65rem;border-radius:10px;font-size:0.75rem;font-weight:500;color:var(--brown);cursor:pointer;border:none;background:none;font-family:'Inter',sans-serif;transition:background 0.12s;text-align:left;width:100%}
+    .sort-opt:hover{background:var(--mango-pale)}
+    .sort-opt.active{color:var(--bark);font-weight:700}
+    .sort-opt.active .sort-check{opacity:1}
+    .sort-check{width:16px;height:16px;border-radius:50%;background:var(--mango);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;flex-shrink:0}
+    .not-found{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:1rem;color:var(--taupe);text-align:center;padding:2rem}
+    .not-found a{display:inline-flex;align-items:center;gap:0.5rem;padding:0.6rem 1.5rem;border-radius:9999px;background:var(--mango);color:var(--bark);font-weight:700;font-size:0.8rem;text-decoration:none;transition:all 0.15s}
+    .not-found a:hover{background:var(--bark);color:white}
+    #profileDropdown{position:absolute;top:calc(100% + 10px);right:0;width:220px;background:white;border:1.5px solid var(--border);border-radius:16px;box-shadow:0 20px 50px -10px rgba(21,17,13,0.18);padding:1rem;display:none;z-index:200}
+    #profileDropdown.open{display:block}
+    .dropdown-divider{height:1px;background:var(--border);margin:0.625rem 0}
+    .dropdown-item{display:block;width:100%;text-align:left;padding:0.45rem 0.5rem;border-radius:8px;font-size:0.8125rem;font-weight:500;color:var(--brown);cursor:pointer;transition:background 0.15s;background:none;border:none;font-family:'Inter',sans-serif}
+    .dropdown-item:hover{background:var(--mango-pale);color:var(--bark)}
+    .dropdown-item.danger:hover{background:#fff1f1;color:#c0392b}
+    .avatar-ring{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);background:var(--mango-pale);overflow:hidden;cursor:pointer;transition:border-color 0.18s;flex-shrink:0}
+    .avatar-ring:hover,.avatar-ring.open-state{border-color:var(--mango)}
+    .avatar-ring img{width:100%;height:100%;object-fit:cover;display:block}
+    #categorySelector{background-color:white;border:1.5px solid var(--border);border-radius:12px;padding:0.35rem 1.75rem 0.35rem 0.75rem;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;color:var(--brown);outline:none;cursor:pointer;transition:all 0.15s;appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a7564' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 0.6rem center;background-size:0.8em}
+    #categorySelector:hover{border-color:var(--mango-light);background-color:var(--mango-pale)}
+    .tl-line{position:absolute;left:8px;top:8px;bottom:8px;width:2px;background:linear-gradient(to bottom,var(--mango),var(--border))}
+    .tl-item{position:relative;padding-left:14px;cursor:pointer;transition:transform 0.2s ease}
+    .tl-item:hover{transform:translateX(4px)}
+    .tl-dot{position:absolute;left:-22px;top:4px;width:12px;height:12px;border-radius:50%;background:white;border:3px solid var(--mango);box-shadow:0 0 8px rgba(255,159,74,0.4);transition:all 0.2s ease;z-index:2}
+    .tl-item:hover .tl-dot{background:var(--mango);transform:scale(1.2);box-shadow:0 0 12px rgba(255,159,74,0.6)}
   </style>
 </head>
-<body class="bg-cream text-bark font-body min-h-screen relative">
+<body>
 
-<!-- ============ HEADER ============ -->
-<header class="sticky top-0 z-50 border-b border-bark/5 bg-cream/85 backdrop-blur-md">
-  <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3 lg:px-10">
-    <a href="index.html" class="flex items-center gap-2.5">
-      <span class="font-hand text-3xl font-bold leading-none text-bark [text-shadow:0.5px_0_0_currentColor]">🌰 LootYard</span>
+<!-- ═══════ HEADER ═══════ -->
+<header id="navbar">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 h-full lg:px-10">
+    <a href="home.html" class="flex items-center gap-2 flex-1" aria-label="LootYard home">
+      <img src="lab_exercises/week2/assets/chestnobg.png" alt="LootYard" class="h-10 w-10 object-contain">
+      <span class="font-hand text-2xl font-bold leading-none text-bark [text-shadow:0.5px_0_0_currentColor]">LootYard</span>
     </a>
-
-    <nav aria-label="Section navigation" class="hidden md:block">
-      <ul class="flex items-center gap-1 rounded-full bg-white/70 p-1 ring-1 ring-bark/5 text-sm font-bold text-bark">
-        <li><a href="index.html#assets" class="block rounded-full px-4 py-2 text-bark/50 hover:text-bark transition-colors">Assets</a></li>
-        <li><a href="index.html#talent" class="block rounded-full px-4 py-2 text-bark/50 hover:text-bark transition-colors">Talent</a></li>
-        <li><a href="#" class="block rounded-full px-4 py-2 text-bark bg-mango-soft/60">Portfolio</a></li>
+    <nav aria-label="Section navigation" class="relative flex justify-center">
+      <ul id="sectionNav" class="relative hidden items-center rounded-full bg-white/70 p-1 ring-1 ring-bark/5 font-body text-sm font-bold text-bark md:flex">
+        <span id="navIndicator" style="width:7rem;transform:translateX(0px);opacity:0;"></span>
+        <li class="relative z-10 text-center" style="width:7rem"><a href="home.html?tab=assets" class="block rounded-full px-4 py-2 text-bark/50 hover:text-bark transition-colors duration-300 whitespace-nowrap">Assets</a></li>
+        <li class="relative z-10 text-center" style="width:7rem"><a href="home.html?tab=talent" class="block rounded-full px-4 py-2 text-bark/50 hover:text-bark transition-colors duration-300 whitespace-nowrap">Talent</a></li>
       </ul>
     </nav>
-
-    <div class="flex items-center gap-3">
-      <button class="pov-toggle" id="povToggleBtn" onclick="togglePOV()">
-        <span class="pov-dot" id="povDot"></span>
-        <span id="povLabel">Owner view</span>
-      </button>
-      <button id="editProfileBtn" onclick="openModal('profile')" class="hidden md:flex items-center gap-2 rounded-full border border-bark/10 bg-white px-4 py-2 text-sm font-bold text-bark shadow-sm hover:-translate-y-0.5 hover:border-mango hover:shadow-md transition-all">
-        <i class="fad fa-pen-to-square text-xs"></i> Edit Profile
-      </button>
-      <div class="h-8 w-8 rounded-full bg-mango flex items-center justify-center font-bold text-sm text-bark" id="headerAvatar">AD</div>
+    <div class="flex items-center gap-4 flex-1 justify-end">
+      <div class="search-bar flex items-center gap-2 px-3 py-1.5 flex-1 max-w-xs">
+        <svg class="w-3.5 h-3.5 text-taupe flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+        <input id="searchInput" type="text" placeholder="Search assets…" class="text-xs flex-1 placeholder:text-[#bba898]" oninput="renderAssetGrid()">
+      </div>
+      <div class="relative flex-shrink-0" id="authArea">
+        <div id="guestButtons" class="flex items-center gap-3">
+          <button onclick="openAuth('login')" class="hidden text-xs font-bold text-bark/60 transition-colors hover:text-mango sm:inline">Log In</button>
+          <button onclick="openAuth('signup')" class="flex items-center gap-2 rounded-full border border-bark/10 bg-white px-3 py-1.5 text-xs font-bold text-bark shadow-sm transition-all hover:-translate-y-0.5 hover:border-mango hover:shadow-md">
+            <span class="grid h-6 w-6 place-items-center rounded-full bg-mango-soft">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="h-3 w-3 text-bark"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/></svg>
+            </span>
+            Sign Up
+          </button>
+        </div>
+        <div id="userArea" class="hidden">
+          <button class="avatar-ring" id="avatarBtn" onclick="toggleDropdown()">
+            <img id="avatarImg" src="" alt="avatar">
+          </button>
+          <div id="profileDropdown">
+            <div class="flex items-center gap-3 pb-2">
+              <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border border-[var(--border)]">
+                <img id="dropdownAvatar" src="" alt="avatar" class="w-full h-full object-cover">
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-bold text-[var(--bark)] truncate" id="dropdownName">—</p>
+                <p class="text-[10px] text-[var(--taupe)] truncate" id="dropdownEmail">—</p>
+              </div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" onclick="showPortfolio()">View Portfolio</button>
+            <button class="dropdown-item" onclick="showNotifications()">Notifications</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" onclick="signOut()">Log out</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </header>
 
-<main class="mx-auto max-w-7xl px-6 py-8 lg:px-10" style="animation: fadeSlideUp 0.5s ease both;">
+<!-- ═══════ MAIN ═══════ -->
+<main id="mainContent" class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
 
-  <!-- ============ MAIN LAYOUT ============ -->
-  <div class="grid gap-5 lg:grid-cols-[1fr_240px]">
+  <!-- NOT FOUND STATE -->
+  <div id="notFoundState" class="not-found" style="display:none;">
+    <span style="font-size:3rem;">👤</span>
+    <h2 class="font-display text-xl font-bold text-[var(--bark)]">Creator not found</h2>
+    <p class="text-sm">We couldn't find this creator profile.</p>
+    <a href="home.html">← Back to LootYard</a>
+  </div>
 
-    <!-- LEFT COLUMN -->
-    <div class="flex flex-col gap-5">
+  <!-- PROFILE CONTENT -->
+  <div id="profileContent" style="display:none;" class="flex flex-col gap-6">
 
-      <!-- INTRO CARD -->
-      <section class="sf-card p-5 relative" id="introCard">
-        <div class="flex items-start gap-4">
-          <!-- Avatar -->
-          <div class="relative group flex-shrink-0">
-            <div id="avatarCircle" class="w-20 h-20 rounded-full bg-mango-soft flex items-center justify-center font-display text-3xl font-extrabold text-bark border-2 border-mango-light cursor-pointer overflow-hidden">
-              <span id="avatarInitials">AD</span>
-            </div>
-            <button onclick="openModal('photo')" id="avatarEditBtn" class="absolute inset-0 rounded-full bg-bark/50 text-cream flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold hidden">
-              <i class="fad fa-camera"></i>
-            </button>
-          </div>
+    <!-- ── 1. INTRODUCTION CARD ── -->
+    <section class="sf-card p-6 relative overflow-hidden flex flex-col md:flex-row justify-between gap-6 items-start">
+      <div class="absolute top-4 right-4 z-10 flex items-center gap-2">
+        <button id="editIntroBtn" onclick="toast('Edit mode coming soon')" class="flex items-center gap-1.5 rounded-xl bg-[var(--bark)] px-3 py-1.5 text-xs font-bold text-[var(--cream)] hover:bg-[var(--mango)] hover:text-[var(--bark)] transition-all">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036 0l-5.656-5.656a1 1 0 1 1-1.414 0l5.656 5.656a1 1 0 0 0 1.414 0l-5.656-5.656z"/></svg>
+          Edit
+        </button>
+        <button class="pov-toggle" id="povToggleBtn" onclick="togglePOV()">
+          <span class="pov-dot" id="povDot"></span>
+          <span id="povLabel">Owner view</span>
+        </button>
+      </div>
 
-          <div class="flex-1 min-w-0">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <h1 class="font-display text-2xl font-extrabold text-bark leading-tight" id="profileName">Aryan Dev</h1>
-                <p class="text-sm text-taupe font-semibold mt-0.5" id="profileTitle">3D Artist · Game Asset Creator</p>
-              </div>
-              <!-- Owner: Edit button -->
-              <button id="editIntroBtn" onclick="openModal('profile')" class="flex-shrink-0 flex items-center gap-1.5 rounded-xl bg-bark px-3 py-1.5 text-xs font-bold text-cream hover:bg-mango hover:text-bark transition-all">
-                <i class="fad fa-pen-to-square text-xs"></i> Edit
-              </button>
-              <!-- Visitor: Commission button (hidden by default) -->
-              <button id="commissionBtn" class="flex-shrink-0 hidden flex items-center gap-1.5 rounded-xl bg-mango px-3 py-1.5 text-xs font-bold text-bark hover:bg-bark hover:text-cream transition-all" onclick="openCommissionModal()">
-                <i class="fad fa-handshake text-xs"></i> Hire me
-              </button>
-            </div>
-
-            <p class="text-sm leading-relaxed text-bark/70 mt-2 max-w-xl" id="profileBio">
-              Indie 3D artist obsessed with stylised environments and game-ready props. I make everything free forever — no accounts, no paywalls, just download and build. Available for custom commissions if you need something specific.
-            </p>
-
-            <!-- Stats row -->
-            <div class="flex flex-wrap gap-2 mt-3">
-              <div class="stat-pill">
-                <span class="font-display text-xl font-extrabold text-bark" id="statAssets">8</span>
-                <span class="text-xs text-taupe font-semibold mt-0.5">Assets</span>
-              </div>
-              <div class="stat-pill">
-                <span class="font-display text-xl font-extrabold text-bark">11.2k</span>
-                <span class="text-xs text-taupe font-semibold mt-0.5">Downloads</span>
-              </div>
-              <div class="stat-pill">
-                <span class="font-display text-xl font-extrabold text-mango">4.8 ★</span>
-                <span class="text-xs text-taupe font-semibold mt-0.5">Rating</span>
-              </div>
-              <div class="stat-pill">
-                <span class="font-display text-xl font-extrabold text-bark">Sep '25</span>
-                <span class="text-xs text-taupe font-semibold mt-0.5">Joined</span>
-              </div>
-            </div>
-          </div>
+      <div class="flex flex-col sm:flex-row gap-5 items-start flex-1">
+        <div class="relative group flex-shrink-0">
+          <img id="profileAvatar" src="" alt="Creator Avatar" class="w-24 h-24 rounded-full border-2 border-[var(--mango-light)] object-cover bg-[var(--mango-pale)]">
+          <button id="avatarEditBtn" onclick="toast('Edit mode coming soon')" class="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold">
+            Edit
+          </button>
         </div>
 
-        <!-- Skills / Tags -->
-        <div class="mt-4 pt-4 border-t border-bark/5 flex flex-wrap gap-1.5">
-          <span class="tag-chip-sm"><i class="fad fa-cube text-xs"></i> 3D Modelling</span>
-          <span class="tag-chip-sm"><i class="fad fa-swatchbook text-xs"></i> PBR Texturing</span>
-          <span class="tag-chip-sm"><i class="fad fa-music text-xs"></i> Sound Design</span>
-          <span class="tag-chip-sm"><i class="fad fa-file-code text-xs"></i> Unity C#</span>
-          <span class="tag-chip-sm"><i class="fad fa-paintbrush text-xs"></i> Blender</span>
-          <span class="tag-chip-sm"><i class="fad fa-sparkles text-xs"></i> Godot</span>
-        </div>
-      </section>
+        <div class="space-y-3 min-w-0">
+          <div>
+            <span class="text-[9px] font-black text-mango uppercase tracking-widest">Introduction</span>
+            <h1 class="font-display text-3xl font-extrabold text-[var(--bark)] leading-none mt-1" id="profileName">—</h1>
+            <p class="text-xs text-[var(--taupe)] font-semibold mt-1" id="profileTitle">—</p>
+          </div>
+          <p class="text-sm leading-relaxed text-bark/70 max-w-2xl" id="profileBio">—</p>
 
-      <!-- ASSET GRID SECTION -->
-      <section class="sf-card p-5" id="assetSection">
-
-        <!-- Controls bar -->
-        <div class="flex items-center gap-2.5 mb-4 flex-wrap">
-          <h2 class="font-display text-lg font-bold text-bark">Portfolio Assets</h2>
-          <span class="text-xs text-taupe font-semibold bg-mango-pale border border-[#f0d8b8] rounded-full px-2.5 py-0.5" id="assetCountBadge">8 assets</span>
-          <div class="ml-auto flex items-center gap-2">
-            <!-- Category filter -->
-            <div class="relative">
-              <select id="catSelect" onchange="filterAndRender()" class="appearance-none bg-cream border border-[var(--border)] rounded-xl px-3 py-1.5 text-xs font-bold text-bark pr-7 cursor-pointer focus:outline-none focus:border-mango">
-                <option value="all">All categories</option>
-                <option value="3D Mesh">3D Models</option>
-                <option value="Sound Effect">Sound FX</option>
-                <option value="Animation">Animations</option>
-                <option value="Material Texture">Textures</option>
-                <option value="Luau Script">Code / Scripts</option>
-              </select>
-              <i class="fad fa-chevron-down absolute right-2 top-1/2 -translate-y-1/2 text-taupe pointer-events-none" style="font-size:0.6rem"></i>
+          <!-- Metric stat pills -->
+          <div class="flex flex-wrap gap-2 mt-4" id="statsRow">
+            <div class="flex items-center gap-1.5 bg-[#ffd2aa] border border-[#f0d8b8] px-3.5 py-1.5 rounded-full text-xs font-bold text-[var(--brown)]">
+              <span>📦 <span id="statAssets" class="text-[var(--bark)] font-extrabold">0</span> assets</span>
             </div>
+            <div class="flex items-center gap-1.5 bg-[#ffd2aa] border border-[#f0d8b8] px-3.5 py-1.5 rounded-full text-xs font-bold text-[var(--brown)]">
+              <span>📥 <span id="statDownloads" class="text-[var(--bark)] font-extrabold">0</span> dls</span>
+            </div>
+            <div class="flex items-center gap-1.5 bg-[#ffd2aa] border border-[#f0d8b8] px-3.5 py-1.5 rounded-full text-xs font-bold text-[var(--brown)]">
+              <span>⭐ <span id="statRating" class="text-[var(--bark)] font-extrabold font-display">0</span> rating</span>
+            </div>
+            <div class="flex items-center gap-1.5 bg-[#ffd2aa] border border-[#f0d8b8] px-3.5 py-1.5 rounded-full text-xs font-bold text-[var(--brown)]">
+              <span>💬 <span id="statReviews" class="text-[var(--bark)] font-extrabold">0</span> reviews</span>
+            </div>
+          </div>
 
-            <!-- Sort -->
+          <div class="flex flex-wrap gap-1.5 pt-2" id="skillsRow"></div>
+        </div>
+      </div>
+
+      <!-- Commission box (Sketched green card on the right) -->
+      <div id="commissionArea" class="w-full md:w-64 bg-[#e6f4ea] border border-[#c2e7cd] rounded-2xl p-4 flex flex-col gap-3">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse flex-shrink-0"></span>
+          <span class="text-xs font-black text-green-800 uppercase tracking-wider">Open for commissions</span>
+        </div>
+        <div class="space-y-1.5 text-xs text-green-900/70">
+          <div class="flex justify-between"><span>Response</span><span class="font-bold text-green-900">24h</span></div>
+          <div class="flex justify-between"><span>Delivery</span><span class="font-bold text-green-900">5–10 days</span></div>
+          <div class="flex justify-between"><span>Rate</span><span class="font-bold text-green-900">From $30</span></div>
+        </div>
+        <button class="w-full rounded-xl bg-green-600 hover:bg-green-700 py-2.5 text-xs font-bold text-white transition-all shadow-sm hover:shadow flex items-center justify-center gap-1.5" onclick="openCommissionModal()">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          Hire for a project
+        </button>
+      </div>
+    </section>
+
+    <!-- ── 2. DUAL-COLUMN LAYOUT ── -->
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
+
+      <!-- LEFT COLUMN -->
+      <div class="flex flex-col gap-6">
+        <!-- Toolbar with Dropdowns -->
+        <div class="sf-card p-4 flex items-center justify-between gap-4 flex-wrap">
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-bold text-taupe uppercase tracking-wider">Type:</label>
+            <select id="categorySelector" onchange="renderAssetGrid()" class="bg-white border border-border rounded-xl px-3 py-1.5 text-xs font-bold text-bark outline-none focus:border-mango transition-colors cursor-pointer">
+              <option value="all">All Assets</option>
+              <option value="characters">Characters</option>
+              <option value="props">Props</option>
+              <option value="weapons">Weapons</option>
+              <option value="vehicles">Vehicles</option>
+              <option value="environments">Environment</option>
+              <option value="vfx">VFX</option>
+              <option value="ui">UI Kits</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-bold text-taupe uppercase tracking-wider">Sort by:</label>
             <div class="relative" id="sortContainer">
-              <button id="sortBtn" onclick="toggleSort()" class="flex items-center gap-1.5 bg-cream border border-[var(--border)] rounded-xl px-3 py-1.5 text-xs font-bold text-bark hover:bg-mango-pale hover:border-mango-light transition-colors">
-                <i class="fad fa-sliders text-xs"></i>
+              <button id="sortBtn" onclick="toggleSort()" class="flex items-center gap-1.5 bg-white border border-[var(--border)] rounded-xl px-3 py-1.5 text-xs font-bold text-[var(--bark)] hover:bg-[var(--mango-pale)] hover:border-[var(--mango-light)] transition-colors">
                 <span id="sortLabel">Newest</span>
-                <i class="fad fa-chevron-down text-taupe" style="font-size:0.6rem"></i>
+                <svg class="w-3.5 h-3.5 text-[var(--taupe)]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
               </button>
               <div class="sort-dd" id="sortDropdown">
-                <div class="sort-opt active" data-sort="newest" onclick="setSort(this,'newest','Newest')"><i class="fad fa-clock-rotate-left text-xs"></i>Newest first</div>
-                <div class="sort-opt" data-sort="popular" onclick="setSort(this,'popular','Popular')"><i class="fad fa-fire-alt text-xs"></i>Most popular</div>
-                <div class="sort-opt" data-sort="downloads" onclick="setSort(this,'downloads','Downloads')"><i class="fad fa-download text-xs"></i>Most downloaded</div>
-                <div class="sort-opt" data-sort="az" onclick="setSort(this,'az','A → Z')"><i class="fad fa-arrow-down-a-z text-xs"></i>A → Z</div>
+                <button class="sort-opt active" data-sort="newest" onclick="setSort(this,'newest','Newest')">Newest first</button>
+                <button class="sort-opt" data-sort="popular" onclick="setSort(this,'popular','Popular')">Most popular</button>
+                <button class="sort-opt" data-sort="downloads" onclick="setSort(this,'downloads','Downloads')">Most downloaded</button>
+                <button class="sort-opt" data-sort="az" onclick="setSort(this,'az','A → Z')">A → Z</button>
               </div>
-            </div>
-
-            <!-- View toggle -->
-            <div class="flex bg-cream border border-[var(--border)] rounded-xl p-0.5 gap-0.5">
-              <button id="viewGrid" onclick="setView('grid')" class="rounded-lg px-2.5 py-1.5 text-xs font-bold bg-bark text-cream transition-colors" aria-label="Grid view"><i class="fad fa-grid-2 text-xs"></i></button>
-              <button id="viewList" onclick="setView('list')" class="rounded-lg px-2.5 py-1.5 text-xs font-bold text-bark hover:bg-mango-pale transition-colors" aria-label="List view"><i class="fad fa-list text-xs"></i></button>
             </div>
           </div>
         </div>
 
         <!-- Asset grid -->
-        <div id="assetGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 grid-anim">
-          <!-- Rendered by JS -->
-        </div>
-
-        <!-- Empty state -->
-        <div id="emptyState" class="hidden py-16 text-center">
-          <div class="text-4xl mb-3">📭</div>
-          <p class="text-sm font-bold text-bark/60">No assets in this category yet.</p>
-        </div>
-
-      </section>
-
-      <!-- REVIEWS SECTION -->
-      <section class="sf-card p-5">
-        <h2 class="font-display text-lg font-bold text-bark mb-4">Community reviews</h2>
-        <div class="grid gap-3 sm:grid-cols-2">
-
-          <div class="bg-cream border border-[var(--border)] rounded-xl p-4">
-            <div class="flex items-center gap-2 mb-2">
-              <div class="w-7 h-7 rounded-full bg-mango-soft flex items-center justify-center text-xs font-bold text-bark">RK</div>
-              <div>
-                <p class="text-xs font-bold text-bark">riya_k</p>
-                <p class="text-xs text-taupe">Stone Wall Tileable · May 2026</p>
-              </div>
-              <div class="ml-auto flex gap-0.5">
-                <span class="star-filled text-xs">★★★★★</span>
-              </div>
-            </div>
-            <p class="text-xs leading-relaxed text-bark/70">Absolutely top-tier quality. The PBR maps are clean and it tiles perfectly in both Unity and Godot. Saved me hours of work.</p>
+        <section class="sf-card p-5">
+          <div class="flex items-center justify-between mb-4 border-b border-bark/5 pb-3">
+            <h2 class="font-display text-lg font-bold text-[var(--bark)]">Portfolio Assets</h2>
+            <span class="text-xs text-[var(--taupe)] font-semibold bg-[var(--mango-pale)] border border-[#f0d8b8] rounded-full px-2.5 py-0.5" id="assetCountBadge">0 assets</span>
           </div>
+          <div id="assetGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+          <div id="emptyState" class="hidden py-16 text-center"><div class="text-4xl mb-3">📭</div><p class="text-sm font-bold text-bark/60">No assets in this category.</p></div>
+        </section>
 
-          <div class="bg-cream border border-[var(--border)] rounded-xl p-4">
-            <div class="flex items-center gap-2 mb-2">
-              <div class="w-7 h-7 rounded-full bg-mango-soft flex items-center justify-center text-xs font-bold text-bark">JM</div>
-              <div>
-                <p class="text-xs font-bold text-bark">jake_m_dev</p>
-                <p class="text-xs text-taupe">Forest Cabin · May 2026</p>
-              </div>
-              <div class="ml-auto flex gap-0.5">
-                <span class="star-filled text-xs">★★★★★</span>
-              </div>
-            </div>
-            <p class="text-xs leading-relaxed text-bark/70">This cabin model is incredible for a free asset. GLB import worked straight away, textures look great in Unreal too.</p>
-          </div>
-
-          <div class="bg-cream border border-[var(--border)] rounded-xl p-4">
-            <div class="flex items-center gap-2 mb-2">
-              <div class="w-7 h-7 rounded-full bg-mango-soft flex items-center justify-center text-xs font-bold text-bark">SS</div>
-              <div>
-                <p class="text-xs font-bold text-bark">siya_s</p>
-                <p class="text-xs text-taupe">Footstep Controller · Feb 2026</p>
-              </div>
-              <div class="ml-auto flex gap-0.5">
-                <span class="star-filled text-xs">★★★★</span><span class="star-empty text-xs">★</span>
-              </div>
-            </div>
-            <p class="text-xs leading-relaxed text-bark/70">The C# script is well-commented and works perfectly out of the box. Would love a Godot GDScript version too.</p>
-          </div>
-
-          <div class="bg-cream border border-[var(--border)] rounded-xl p-4">
-            <div class="flex items-center gap-2 mb-2">
-              <div class="w-7 h-7 rounded-full bg-mango-soft flex items-center justify-center text-xs font-bold text-bark">LN</div>
-              <div>
-                <p class="text-xs font-bold text-bark">loot_ninja</p>
-                <p class="text-xs text-taupe">Low-poly Tree Set · Mar 2026</p>
-              </div>
-              <div class="ml-auto flex gap-0.5">
-                <span class="star-filled text-xs">★★★★★</span>
-              </div>
-            </div>
-            <p class="text-xs leading-relaxed text-bark/70">14 variants under 800 tris each — exactly what a mobile game developer needs. Perfect optimisation, keep it up!</p>
-          </div>
-
-        </div>
-      </section>
-
-    </div><!-- /LEFT -->
-
-    <!-- RIGHT COLUMN -->
-    <aside class="flex flex-col gap-5">
-
-      <!-- SOCIAL LINKS -->
-      <div class="sf-card p-4">
-        <p class="text-xs font-bold uppercase tracking-wider text-taupe mb-3">Social links</p>
-        <div class="flex flex-col gap-2" id="socialLinksContainer">
-          <a href="#" class="social-link" onclick="return false">
-            <div class="social-icon" style="background:#e6f1fb">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#0C447C"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/></svg>
-            </div>
-            github.com/aryandev
-            <i class="fad fa-arrow-up-right-from-square text-taupe ml-auto" style="font-size:0.65rem"></i>
-          </a>
-          <a href="#" class="social-link" onclick="return false">
-            <div class="social-icon" style="background:#e6f1fb">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#15110d"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </div>
-            @aryandev_3d
-            <i class="fad fa-arrow-up-right-from-square text-taupe ml-auto" style="font-size:0.65rem"></i>
-          </a>
-          <a href="#" class="social-link" onclick="return false">
-            <div class="social-icon" style="background:#eeedfe">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515A13 13 0 0 0 15 6a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25A19.736 19.736 0 0 0 3.677 4.37C.533 9.046-.32 13.58.099 18.057a19.9 19.9 0 0 0 5.993 3.03c.462-.63.874-1.295 1.226-1.994a13.094 13.094 0 0 1-1.873-.894.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.075.075 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892c.36.698.772 1.362 1.225 1.993a19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66z"/></svg>
-            </div>
-            Discord: aryandev#4212
-            <i class="fad fa-arrow-up-right-from-square text-taupe ml-auto" style="font-size:0.65rem"></i>
-          </a>
-          <a href="#" class="social-link" onclick="return false">
-            <div class="social-icon" style="background:#eaf3de">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#27500A"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0 5.838a4.162 4.162 0 1 0 0 8.324 4.162 4.162 0 0 0 0-8.324zm0 6.846a2.685 2.685 0 1 1 0-5.37 2.685 2.685 0 0 1 0 5.37zm5.406-7.845a.96.96 0 1 1-1.92 0 .96.96 0 0 1 1.92 0z"/></svg>
-            </div>
-            @aryandev.art
-            <i class="fad fa-arrow-up-right-from-square text-taupe ml-auto" style="font-size:0.65rem"></i>
-          </a>
-        </div>
-        <button id="addSocialBtn" class="mt-2 w-full flex items-center justify-center gap-1.5 border border-dashed border-[var(--border)] rounded-xl py-2 text-xs font-bold text-taupe hover:border-mango hover:text-mango transition-colors hidden" onclick="openModal('social')">
-          <i class="fad fa-plus text-xs"></i> Add link
-        </button>
+        <!-- Reviews -->
+        <section class="sf-card p-5">
+          <h2 class="font-display text-lg font-bold text-[var(--bark)] mb-4">Community Reviews</h2>
+          <div id="reviewsGrid" class="grid gap-3 sm:grid-cols-2"></div>
+          <div id="noReviews" class="hidden py-12 text-center"><p class="text-sm text-[var(--taupe)]">No reviews yet for this creator's assets.</p></div>
+        </section>
       </div>
 
-      <!-- TIMELINE -->
-      <div class="sf-card p-4">
-        <p class="text-xs font-bold uppercase tracking-wider text-taupe mb-3">Upload timeline</p>
-        <div class="relative" id="timelineContainer">
-          <div class="tl-line"></div>
-          <!-- Rendered by JS -->
+      <!-- RIGHT COLUMN (Socials & Timeline) -->
+      <aside class="flex flex-col gap-6">
+        <!-- Social Links -->
+        <div class="sf-card p-5">
+          <p class="text-xs font-bold uppercase tracking-wider text-[var(--taupe)] mb-3">Social links</p>
+          <div class="flex flex-col gap-2" id="socialLinksContainer"></div>
         </div>
-      </div>
 
-      <!-- AVAILABILITY -->
-      <div class="sf-card p-4">
-        <p class="text-xs font-bold uppercase tracking-wider text-taupe mb-3">Availability</p>
-        <div class="flex items-center gap-2 mb-3">
-          <span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse flex-shrink-0"></span>
-          <span class="text-sm font-bold text-bark">Open for commissions</span>
+        <!-- Work History Timeline -->
+        <div class="sf-card p-5">
+          <p class="text-xs font-bold uppercase tracking-wider text-[var(--taupe)] mb-4">Work history timeline</p>
+          <div class="relative pl-6" id="timelineContainer">
+            <div class="tl-line"></div>
+          </div>
         </div>
-        <div class="space-y-2 text-xs text-bark/70">
-          <div class="flex justify-between"><span>Typical response</span><span class="font-semibold text-bark">24h</span></div>
-          <div class="flex justify-between"><span>Avg delivery</span><span class="font-semibold text-bark">5–10 days</span></div>
-          <div class="flex justify-between"><span>Commission rate</span><span class="font-semibold text-bark">From ₹2,500</span></div>
-        </div>
-        <button id="hireBtn" class="mt-3 w-full rounded-xl bg-mango py-2 text-xs font-bold text-bark hover:bg-bark hover:text-cream transition-all hidden" onclick="openCommissionModal()">
-          <i class="fad fa-handshake mr-1.5"></i> Hire for a project
-        </button>
-        <p id="availabilityEditNote" class="mt-2 text-xs text-taupe text-center">Only you can see this panel's hire button.</p>
-      </div>
+      </aside>
 
-    </aside><!-- /RIGHT -->
+    </div>
 
   </div>
 </main>
 
-<!-- ============ FOOTER ============ -->
-<footer class="border-t border-bark/5 bg-cream mt-10">
-  <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-6 py-10 sm:flex-row lg:px-10">
-    <div class="flex items-center gap-2.5">
-      <span class="font-hand text-2xl font-bold text-bark [text-shadow:0.5px_0_0_currentColor]">🌰 LootYard</span>
-      <span class="ml-2 text-xs text-bark/40">· Free assets, real creators</span>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer id="siteFooter">
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-6 h-full lg:px-10">
+    <div class="flex items-center gap-2">
+      <img src="lab_exercises/week2/assets/chestnobg.png" alt="" class="h-6 w-6 object-contain">
+      <span class="font-hand text-base font-bold text-bark [text-shadow:0.5px_0_0_currentColor]">LootYard</span>
+      <span class="hidden sm:inline ml-1.5 text-[10px] text-bark/40">Free assets, real creators</span>
     </div>
-    <p class="text-xs text-bark/40">© 2026 LootYard. All rights reserved.</p>
-    <div class="flex gap-4 text-bark/40 text-xs">
-      <a href="#" class="hover:text-mango transition-colors">Privacy</a>
-      <a href="#" class="hover:text-mango transition-colors">Terms</a>
-      <a href="#" class="hover:text-mango transition-colors">Contact</a>
+    <p class="text-[10px] text-bark/40 hidden sm:block">© 2026 LootYard</p>
+    <div class="flex gap-3 text-bark/40">
+      <a href="#" class="hover:text-mango transition-colors" aria-label="X"><svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+      <a href="#" class="hover:text-mango transition-colors" aria-label="GitHub"><svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/></svg></a>
     </div>
   </div>
 </footer>
 
-<!-- ============ ASSET POPUP ============ -->
+<!-- ═══════ ASSET POPUP ═══════ -->
 <div class="asset-popup" id="assetPopup">
-  <button onclick="closePopup()" class="absolute top-2 right-3 text-lg text-taupe hover:text-bark leading-none">&times;</button>
-  <div class="flex items-center gap-2 mb-3">
-    <div id="ppIcon" class="w-10 h-10 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"></div>
-    <div>
-      <p class="text-sm font-bold text-bark leading-tight" id="ppName"></p>
-      <p class="text-xs text-taupe" id="ppCat"></p>
+  <button onclick="closePopup()" class="absolute top-2 right-3 text-lg text-[var(--taupe)] hover:text-[var(--bark)] leading-none cursor-pointer">&times;</button>
+  <div class="flex items-center gap-3 mb-3">
+    <img id="ppThumb" src="" alt="" class="w-12 h-12 rounded-xl object-cover border border-[var(--border)] flex-shrink-0 bg-[var(--mango-pale)]">
+    <div class="min-w-0">
+      <p class="text-sm font-bold text-[var(--bark)] leading-tight truncate" id="ppName"></p>
+      <p class="text-xs text-[var(--taupe)]" id="ppCat"></p>
     </div>
   </div>
   <div class="space-y-1.5 text-xs">
-    <div class="flex justify-between"><span class="text-taupe">Uploaded</span><span class="font-semibold text-bark" id="ppDate"></span></div>
-    <div class="flex justify-between"><span class="text-taupe">Downloads</span><span class="font-semibold text-bark" id="ppDl"></span></div>
-    <div class="flex justify-between"><span class="text-taupe">File size</span><span class="font-semibold text-bark" id="ppSize"></span></div>
-    <div class="flex justify-between"><span class="text-taupe">Engine</span><span class="font-semibold text-bark" id="ppEngine"></span></div>
+    <div class="flex justify-between"><span class="text-[var(--taupe)]">Downloads</span><span class="font-semibold text-[var(--bark)]" id="ppDl"></span></div>
+    <div class="flex justify-between"><span class="text-[var(--taupe)]">Rating</span><span class="font-semibold text-[var(--mango)]" id="ppRating"></span></div>
+    <div class="flex justify-between"><span class="text-[var(--taupe)]">Reviews</span><span class="font-semibold text-[var(--bark)]" id="ppReviews"></span></div>
   </div>
-  <p class="text-xs text-bark/70 mt-2.5 pt-2.5 border-t border-[var(--border)] leading-relaxed" id="ppDesc"></p>
+  <p class="text-xs text-bark/70 mt-2.5 pt-2.5 border-t border-[var(--border)] leading-relaxed line-clamp-3" id="ppDesc"></p>
   <div id="ppTags" class="mt-2 flex flex-wrap gap-1"></div>
-  <button class="mt-3 w-full rounded-xl bg-bark py-2 text-xs font-bold text-cream hover:bg-mango hover:text-bark transition-all flex items-center justify-center gap-1.5" id="ppDownloadBtn">
-    <i class="fad fa-download text-xs"></i> Download asset
-  </button>
 </div>
 
-<!-- ============ EDIT PROFILE MODAL ============ -->
-<div class="modal-overlay" id="profileModal" onclick="closeModalOnOverlay(event,'profileModal')">
-  <div class="modal-box">
-    <h3 class="font-display text-xl font-extrabold text-bark mb-5" id="modalTitle">Edit profile</h3>
-
-    <div id="profileFields">
-      <div class="mb-4">
-        <label class="sf-label">Display name</label>
-        <input class="sf-input" id="editName" type="text" placeholder="Your name" value="Aryan Dev">
-      </div>
-      <div class="mb-4">
-        <label class="sf-label">Title / Role</label>
-        <input class="sf-input" id="editTitle" type="text" placeholder="e.g. 3D Artist · Game Creator" value="3D Artist · Game Asset Creator">
-      </div>
-      <div class="mb-4">
-        <label class="sf-label">Bio</label>
-        <textarea class="sf-input" id="editBio" rows="4" style="resize:vertical">Indie 3D artist obsessed with stylised environments and game-ready props. I make everything free forever — no accounts, no paywalls, just download and build. Available for custom commissions if you need something specific.</textarea>
-      </div>
-    </div>
-
-    <div id="photoFields" class="hidden">
-      <div class="mb-4">
-        <label class="sf-label">Avatar initials (2 chars)</label>
-        <input class="sf-input" id="editInitials" type="text" placeholder="e.g. AD" maxlength="2" value="AD">
-      </div>
-      <div class="mb-4">
-        <label class="sf-label">Avatar background colour</label>
-        <div class="flex gap-2 flex-wrap mt-1">
-          <button class="w-7 h-7 rounded-full bg-mango-soft border-2 border-mango-light" onclick="setAvatarColor('#ffd2aa')"></button>
-          <button class="w-7 h-7 rounded-full bg-mango border-2 border-[#e88a3c]" onclick="setAvatarColor('#ff9f4a')"></button>
-          <button class="w-7 h-7 rounded-full border-2 border-[#15110d] bg-[#15110d]" onclick="setAvatarColor('#15110d','#fff8f1')"></button>
-          <button class="w-7 h-7 rounded-full border-2 border-[#378ADD] bg-[#378ADD]" onclick="setAvatarColor('#378ADD')"></button>
-          <button class="w-7 h-7 rounded-full border-2 border-[#1D9E75] bg-[#1D9E75]" onclick="setAvatarColor('#1D9E75')"></button>
-        </div>
-      </div>
-    </div>
-
-    <div id="socialFields" class="hidden">
-      <div class="mb-4">
-        <label class="sf-label">Platform</label>
-        <select class="sf-input" id="editSocialPlatform">
-          <option>GitHub</option><option>Twitter / X</option><option>Discord</option>
-          <option>Instagram</option><option>YouTube</option><option>LinkedIn</option><option>ArtStation</option>
-        </select>
-      </div>
-      <div class="mb-4">
-        <label class="sf-label">URL / Handle</label>
-        <input class="sf-input" id="editSocialURL" type="text" placeholder="https://github.com/yourname">
-      </div>
-    </div>
-
-    <div class="flex gap-2.5 justify-end mt-2">
-      <button onclick="closeModal('profileModal')" class="rounded-xl border border-[var(--border)] bg-cream px-4 py-2 text-sm font-bold text-bark hover:bg-mango-pale transition-colors">Cancel</button>
-      <button onclick="saveModal()" class="rounded-xl bg-bark px-5 py-2 text-sm font-bold text-cream hover:bg-mango hover:text-bark transition-all">Save changes</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ COMMISSION MODAL ============ -->
+<!-- ═══════ COMMISSION MODAL ═══════ -->
 <div class="modal-overlay" id="commissionModal" onclick="closeModalOnOverlay(event,'commissionModal')">
   <div class="modal-box">
-    <h3 class="font-display text-xl font-extrabold text-bark mb-1">Commission Aryan Dev</h3>
-    <p class="text-sm text-taupe mb-5">Fill in your project brief — Aryan typically responds within 24 hours.</p>
-
-    <div class="mb-4">
-      <label class="sf-label">Your name</label>
-      <input class="sf-input" id="cName" type="text" placeholder="Jane Smith">
-      <p class="text-xs text-red-500 mt-1 hidden" id="cNameErr">Name is required.</p>
-    </div>
-    <div class="mb-4">
-      <label class="sf-label">Your email</label>
-      <input class="sf-input" id="cEmail" type="email" placeholder="jane@example.com">
-      <p class="text-xs text-red-500 mt-1 hidden" id="cEmailErr">Enter a valid email address.</p>
-    </div>
-    <div class="mb-4">
-      <label class="sf-label">Project requirements</label>
-      <textarea class="sf-input" id="cReqs" rows="3" placeholder="Describe what you need — asset type, style, engine, deadline..." style="resize:vertical"></textarea>
-      <p class="text-xs text-red-500 mt-1 hidden" id="cReqsErr">Please describe your project.</p>
-    </div>
-    <div class="grid grid-cols-2 gap-3 mb-4">
-      <div>
-        <label class="sf-label">Budget</label>
-        <input class="sf-input" id="cBudget" type="text" placeholder="e.g. ₹5,000">
-      </div>
-      <div>
-        <label class="sf-label">Deadline</label>
-        <input class="sf-input" id="cDeadline" type="date">
-      </div>
-    </div>
-
-    <div id="commissionSuccess" class="hidden bg-mango-pale border border-[#f0d8b8] rounded-xl p-4 text-sm text-bark font-semibold text-center">
-      ✅ Commission request sent! Aryan will get back to you within 24 hours.
-    </div>
-
-    <div class="flex gap-2.5 justify-end mt-2" id="commissionActions">
-      <button onclick="closeModal('commissionModal')" class="rounded-xl border border-[var(--border)] bg-cream px-4 py-2 text-sm font-bold text-bark hover:bg-mango-pale transition-colors">Cancel</button>
-      <button onclick="submitCommission()" class="rounded-xl bg-mango px-5 py-2 text-sm font-bold text-bark hover:bg-bark hover:text-cream transition-all">Send request</button>
+    <h3 class="font-display text-xl font-extrabold text-[var(--bark)] mb-1" id="commTitle">Commission Request</h3>
+    <p class="text-sm text-[var(--taupe)] mb-5" id="commSubtitle"></p>
+    <div class="mb-4"><label class="sf-label">Your name</label><input class="sf-input" id="cName" type="text" placeholder="Jane Smith"><p class="text-xs text-red-500 mt-1 hidden" id="cNameErr">Name is required.</p></div>
+    <div class="mb-4"><label class="sf-label">Your email</label><input class="sf-input" id="cEmail" type="email" placeholder="jane@example.com"><p class="text-xs text-red-500 mt-1 hidden" id="cEmailErr">Enter a valid email.</p></div>
+    <div class="mb-4"><label class="sf-label">Project requirements</label><textarea class="sf-input" id="cReqs" rows="3" placeholder="Describe what you need — asset type, style, engine, deadline..." style="resize:vertical"></textarea><p class="text-xs text-red-500 mt-1 hidden" id="cReqsErr">Please describe your project.</p></div>
+    <div class="grid grid-cols-2 gap-3 mb-4"><div><label class="sf-label">Budget</label><input class="sf-input" id="cBudget" type="text" placeholder="e.g. $200"></div><div><label class="sf-label">Deadline</label><input class="sf-input" id="cDeadline" type="date"></div></div>
+    <div id="commSuccess" class="hidden bg-[var(--mango-pale)] border border-[#f0d8b8] rounded-xl p-4 text-sm text-[var(--bark)] font-semibold text-center">✅ Commission request sent! You'll hear back within 24 hours.</div>
+    <div class="flex gap-2.5 justify-end mt-2" id="commActions">
+      <button onclick="closeModal('commissionModal')" class="rounded-xl border border-[var(--border)] bg-[var(--cream)] px-4 py-2 text-sm font-bold text-[var(--bark)] hover:bg-[var(--mango-pale)] transition-colors">Cancel</button>
+      <button onclick="submitCommission()" class="rounded-xl bg-[var(--mango)] px-5 py-2 text-sm font-bold text-[var(--bark)] hover:bg-[var(--bark)] hover:text-[var(--cream)] transition-all">Send request</button>
     </div>
   </div>
 </div>
 
+<div id="toast" style="position:fixed;bottom:calc(var(--footer-h) + 0.75rem);left:50%;transform:translateX(-50%) translateY(80px);background:var(--bark);color:white;padding:0.5rem 1rem;border-radius:9999px;font-size:0.75rem;font-weight:600;z-index:9998;transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);pointer-events:none;white-space:nowrap;"></div>
 
-<!-- ============ JS ============ -->
 <script>
-  /* ---- DATA ---- */
-  var ASSETS = [
-    { id:'a1', title:'Forest Cabin', category:'3D Mesh', emoji:'🏡', bg:'#fff0df', date:'2026-05', dateLabel:'May 2026', downloads:1240, size:'14.2 MB', engine:'Unity / Unreal / Godot', desc:'Stylised log cabin with full interior. Blender source + FBX/GLB. 2K PBR maps included.', tags:['Blender','FBX','GLB','PBR','Indoor'], isNew:true },
-    { id:'a2', title:'Campfire Crackle Pack', category:'Sound Effect', emoji:'🔥', bg:'#faece7', date:'2026-04', dateLabel:'Apr 2026', downloads:890, size:'28.6 MB', engine:'Any engine', desc:'8 campfire loop variants at 24-bit WAV. All perfectly loop-ready for ambient scenes.', tags:['WAV','Loop','Ambient','Fire'] },
-    { id:'a3', title:'Low-poly Tree Set', category:'3D Mesh', emoji:'🌲', bg:'#eaf3de', date:'2026-03', dateLabel:'Mar 2026', downloads:2100, size:'6.8 MB', engine:'Unity / Godot', desc:'14 unique tree variants, all under 800 triangles. Unity & Godot prefabs included.', tags:['Low-poly','Unity','Godot','Nature'] },
-    { id:'a4', title:'Idle + Walk Rig', category:'Animation', emoji:'🎭', bg:'#e6f1fb', date:'2026-03', dateLabel:'Mar 2026', downloads:640, size:'4.4 MB', engine:'Unity / Unreal', desc:'Humanoid idle + walk animation set. 60fps, clean root motion. FBX + BVH formats.', tags:['FBX','BVH','Root motion','Humanoid'] },
-    { id:'a5', title:'Stone Wall Tileable', category:'Material Texture', emoji:'🧱', bg:'#f1efe8', date:'2026-02', dateLabel:'Feb 2026', downloads:3300, size:'22.1 MB', engine:'Any engine', desc:'Full PBR tileable stone wall. 2048×2048 maps: albedo, normal, roughness, AO, height.', tags:['PBR','Tileable','2048','Stone'] },
-    { id:'a6', title:'Footstep Controller', category:'Luau Script', emoji:'🧩', bg:'#eeedfe', date:'2026-01', dateLabel:'Jan 2026', downloads:510, size:'0.8 MB', engine:'Unity (C#)', desc:'C# Unity script — detects surface tags and plays matching footstep audio clips automatically.', tags:['C#','Unity','Audio','Scripting'] },
-    { id:'a7', title:'Dungeon Crate Stack', category:'3D Mesh', emoji:'📦', bg:'#faeeda', date:'2025-11', dateLabel:'Nov 2025', downloads:1800, size:'9.1 MB', engine:'Unity / Unreal / Godot', desc:'4 modular crate size variants with worn-wood PBR texture. Snap-ready for dungeon builders.', tags:['Modular','PBR','FBX','Dungeon'] },
-    { id:'a8', title:'Sword Hit SFX', category:'Sound Effect', emoji:'⚔️', bg:'#faece7', date:'2025-09', dateLabel:'Sep 2025', downloads:720, size:'11.3 MB', engine:'Any engine', desc:'First upload! 12 metal sword-hit variations. 44.1kHz WAV, mixed and normalised.', tags:['WAV','SFX','Combat','Metal'] },
-  ];
+/* ═══════════════════════════════════════════════════
+   SHARED CONSTANTS (duplicated from home for standalone use)
+   ═══════════════════════════════════════════════════ */
+const CREATOR_MERGE_MAP = {
+    'ironforge':'neonpulse','mossyman':'leafwork','lootmaster':'stonearch','relic_hunter':'stonearch',
+    'wizardry':'wizardry','wizard_vfx':'wizardry','plasmacut':'plasmacut','volt_vfx':'plasmacut',
+    'quantum_vfx':'plasmacut','bladesmth':'bladesmth','armoury':'bladesmth',
+    'rocketboy':'hovercraft','hovercraft':'hovercraft','dronetech':'hovercraft','sandstorm':'hovercraft',
+    'cyberui':'cyberui','pixelpush':'cyberui','menumaster':'cyberui','rpg_ui':'cyberui',
+};
+const CREATOR_DISPLAY_NAMES = {
+    'leafwork':'LeafWork Studios','neonpulse':'NeonPulse','stonearch':'StoneArch','anya_3d':'Anya 3D',
+    'bladesmth':'BladeSmith','wizardry':'Wizardry FX','plasmacut':'PlasmaCut','hovercraft':'HoverCraft',
+    'skybound':'SkyBound','vfxlab':'VFX Lab','cyberui':'CyberUI',
+};
+const CATEGORY_TITLES = {
+    'characters':'Character Artist','props':'Props Artist','weapons':'Weapon Artist',
+    'vehicles':'Vehicle Artist','environments':'Environment Artist','vfx':'VFX Artist','ui':'UI Designer',
+};
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  var currentSort = 'newest';
-  var currentCat  = 'all';
-  var currentView = 'grid';
-  var isOwner     = true;
-  var currentModal = '';
+function thumbUrl(p){ return p.thumbnailUrl || 'lab_exercises/week2/assets/chestnobg.png'; }
+function avatarUrl(u){ return `https://api.dicebear.com/8.x/thumbs/svg?seed=${encodeURIComponent(u)}&backgroundColor=ffd2aa,fff0df,ffe4c4&shapeColor=ff9f4a,c0714a`; }
 
-  /* ---- RENDER ASSETS ---- */
-  function filterAndRender() {
-    currentCat = document.getElementById('catSelect').value;
-    renderAssets();
-  }
+/* ── Generate creator data (same logic as home) ──────────── */
+function generateCreators(assets) {
+    const active = assets.filter(a => a.status !== 'coming-soon');
+    const map = {};
+    active.forEach(a => {
+        const u = a.creator;
+        if (!map[u]) map[u] = { username:u, assetIds:[], categories:new Set(), allTags:[], totalRating:0, totalReviews:0, totalDownloads:0, thumbnails:[] };
+        const c = map[u];
+        c.assetIds.push(a.id); c.categories.add(a.category); c.allTags.push(...(a.tags||[]));
+        c.totalRating += a.rating; c.totalReviews += a.reviews; c.totalDownloads += a._downloads;
+        if (c.thumbnails.length < 3) c.thumbnails.push(a.thumbnailUrl);
+    });
+    return Object.values(map).map(c => {
+        const count = c.assetIds.length;
+        const avgRating = Math.round((c.totalRating / count) * 10) / 10;
+        const catTitles = [...c.categories].sort().map(cat => CATEGORY_TITLES[cat] || cat).slice(0, 2);
+        const title = catTitles.join(' & ');
+        const tagCount = {}; c.allTags.forEach(t => tagCount[t] = (tagCount[t]||0)+1);
+        const skills = Object.entries(tagCount).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([t])=>t);
+        const bios = {
+            'characters&environments':'Creating charming stylized characters and immersive environments for indie games. Specializing in cohesive art direction across '+count+' published assets.',
+            'characters':'Crafting detailed and versatile character models with expressive design and clean topology. '+count+' asset'+(count>1?'s':'')+' published on LootYard.',
+            'environments':'Building modular and immersive environment kits that snap together seamlessly. '+count+' asset'+(count>1?'s':'')+' published, covering '+c.categories.size+' categor'+(c.categories.size>1?'ies':'y')+'.',
+            'weapons':'Crafting hand-painted and PBR fantasy weapons for RPGs and adventure games. Every blade tells a story. '+count+' asset'+(count>1?'s':'')+' available.',
+            'vehicles':'Engineering detailed vehicle models with working animations and optimized meshes. '+count+' asset'+(count>1?'s':'')+' ready for open-world and racing game projects.',
+            'vfx':'Producing optimized particle effects and VFX for real-time game engines. '+count+' asset'+(count>1?'s':'')+' available with GPU-ready flipbooks.',
+            'ui':'Designing clean, functional game UI components from HUDs to inventory systems. '+count+' asset'+(count>1?'s':'')+' published with consistent visual language.',
+        };
+        const cats = [...c.categories];
+        const bio = bios[cats.sort().join('&')] || (['weapons','props'].includes(cats[0]) ? 'Specializing in high-quality game-ready '+(skills[0]||'3D')+' assets. '+count+' published asset'+(count>1?'s':'')+' on LootYard.' : (['characters','environments','props','vfx','ui'].includes(cats[0]) ? 'Specializing in high-quality game-ready '+(skills[0]||'3D')+' assets. '+count+' published asset'+(count>1?'s':'')+' on LootYard.' : 'Specializing in high-quality game-ready assets.'));
+        return { username:c.username, displayName:CREATOR_DISPLAY_NAMES[c.username]||c.username, title, bio, skills, assetCount:count, avgRating, totalReviews:c.totalReviews, totalDownloads:c.totalDownloads, categories:cats, assetIds:c.assetIds, thumbnails:c.thumbnails };
+    }).sort((a,b) => b.assetCount - a.assetCount);
+}
 
-  function renderAssets() {
-    var filtered = ASSETS.filter(function(a){ return currentCat === 'all' || a.category === currentCat; });
+/* ── Load data ──────────────────────────────────────────── */
+let creator = null;
+let creatorAssets = [];
+let creatorReviews = [];
 
-    if (currentSort === 'newest')    filtered.sort(function(a,b){ return b.date.localeCompare(a.date); });
-    if (currentSort === 'downloads') filtered.sort(function(a,b){ return b.downloads - a.downloads; });
-    if (currentSort === 'popular')   filtered.sort(function(a,b){ return b.downloads - a.downloads; });
-    if (currentSort === 'az')        filtered.sort(function(a,b){ return a.title.localeCompare(b.title); });
+function initData() {
+    // Prefer data passed from home page
+    let creators = (typeof window.GENERATED_CREATORS !== 'undefined') ? window.GENERATED_CREATORS : null;
 
-    var grid = document.getElementById('assetGrid');
-    var empty = document.getElementById('emptyState');
-    var badge = document.getElementById('assetCountBadge');
-    badge.textContent = filtered.length + ' asset' + (filtered.length !== 1 ? 's' : '');
-    document.getElementById('statAssets').textContent = filtered.length;
+    // Fallback: generate locally
+    if (!creators && typeof MOCK_ASSETS !== 'undefined') {
+        const merged = JSON.parse(JSON.stringify(MOCK_ASSETS));
+        merged.forEach(a => {
+            const m = CREATOR_MERGE_MAP[a.creator];
+            if (m) { a.creator = m; a.author = m; }
+            const revs = (typeof MOCK_REVIEWS !== 'undefined') ? (MOCK_REVIEWS[a.id]||[]) : [];
+            a.rating = revs.length > 0 ? Math.round((revs.reduce((s,r)=>s+r.rating,0)/revs.length)*10)/10 : Math.round((4.2+(merged.indexOf(a)%5)*0.15)*10)/10;
+            a.reviews = revs.length;
+            a._idx = merged.indexOf(a);
+            a._downloads = revs.length*120+Math.floor(Math.random()*800)+200;
+        });
+        creators = generateCreators(merged);
+    }
+
+    // Get creator from URL
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('creator');
+    if (!username || !creators) { showNotFound(); return; }
+
+    creator = creators.find(c => c.username === username);
+    if (!creator) { showNotFound(); return; }
+
+    creatorAssets = (typeof MOCK_ASSETS !== 'undefined')
+        ? JSON.parse(JSON.stringify(MOCK_ASSETS)).filter(a => a.status !== 'coming-soon' && a.creator === username)
+        : [];
+
+    creatorReviews = (typeof MOCK_REVIEWS !== 'undefined')
+        ? creator.assetIds.flatMap(id => (MOCK_REVIEWS[id] || []).map(r => ({...r, assetTitle: (MOCK_ASSETS.find(a=>a.id===id)||{}).title || ''})))
+        : [];
+
+    showProfile();
+}
+
+/* ── Render functions ──────────────────────────────────────── */
+function showProfile() {
+    document.getElementById('notFoundState').style.display = 'none';
+    document.getElementById('profileContent').style.display = 'block';
+
+    document.getElementById('profileAvatar').src = avatarUrl(creator.username);
+    document.getElementById('profileName').textContent = creator.displayName;
+    document.getElementById('profileTitle').textContent = creator.title;
+    document.getElementById('profileBio').textContent = creator.bio;
+    document.getElementById('statAssets').textContent = creator.assetCount;
+    document.getElementById('statDownloads').textContent = fmtDl(creator.totalDownloads);
+    document.getElementById('statRating').textContent = creator.avgRating;
+    document.getElementById('statReviews').textContent = creator.totalReviews;
+
+    // Skills
+    document.getElementById('skillsRow').innerHTML = creator.skills.map(s =>
+        `<span class="tag-chip-sm">${s}</span>`
+    ).join('');
+
+    // Commission area: show only in visitor mode
+    updateCommissionVisibility();
+
+    renderAssetGrid();
+    renderReviews();
+    renderTimeline();
+    renderSocialLinks();
+
+    // Set nav indicator opacity to 0 since portfolio is not a navbar tab
+    const ind = document.getElementById('navIndicator');
+    if (ind) ind.style.opacity = '0';
+
+    // POV default: owner
+    isOwner = true;
+    updatePOVUI();
+}
+
+function showNotFound() {
+    document.getElementById('notFoundState').style.display = 'flex';
+    document.getElementById('profileContent').style.display = 'none';
+}
+
+function fmtDl(n) { return n >= 1000 ? (n/1000).toFixed(n%1000===0?0:1)+'k' : n; }
+
+function renderAssetGrid() {
+    let filtered = [...creatorAssets];
+    
+    // Category filter from categorySelector dropdown
+    const cat = document.getElementById('categorySelector').value;
+    if (cat !== 'all') {
+        filtered = filtered.filter(a => a.category === cat);
+    }
+
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    if (q) filtered = filtered.filter(a => a.title.toLowerCase().includes(q) || (a.tags||[]).some(t => t.toLowerCase().includes(q)));
+
+    if (currentSort === 'newest') filtered.sort((a,b) => b._idx - a._idx);
+    else if (currentSort === 'popular') filtered.sort((a,b) => b.rating - a.rating);
+    else if (currentSort === 'downloads') filtered.sort((a,b) => b._downloads - a._downloads);
+    else if (currentSort === 'az') filtered.sort((a,b) => a.title.localeCompare(b.title));
+
+    const grid = document.getElementById('assetGrid');
+    const empty = document.getElementById('emptyState');
+    document.getElementById('assetCountBadge').textContent = filtered.length + ' asset' + (filtered.length !== 1 ? 's' : '');
 
     if (filtered.length === 0) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
     empty.classList.add('hidden');
 
-    if (currentView === 'grid') {
-      grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 grid-anim';
-      grid.innerHTML = filtered.map(function(a){
-        return '<div class="asset-card" onclick="showPopup(event,\'' + a.id + '\')">' +
-          '<div class="asset-thumb" style="background:' + a.bg + '">' +
-            '<span>' + a.emoji + '</span>' +
-            '<span class="asset-badge">' + catShort(a.category) + '</span>' +
-            (a.isNew ? '<span class="asset-new-badge">New</span>' : '') +
-          '</div>' +
-          '<div class="p-2.5">' +
-            '<p class="text-xs font-bold text-bark truncate">' + a.title + '</p>' +
-            '<div class="flex items-center justify-between mt-1">' +
-              '<span class="text-xs text-taupe">' + a.dateLabel + '</span>' +
-              '<span class="text-xs font-bold text-mango flex items-center gap-0.5"><i class="fad fa-download" style="font-size:0.6rem"></i>' + fmtDl(a.downloads) + '</span>' +
-            '</div>' +
-          '</div>' +
-        '</div>';
-      }).join('');
-    } else {
-      grid.className = 'flex flex-col gap-2 grid-anim';
-      grid.innerHTML = filtered.map(function(a){
-        return '<div class="asset-card flex items-center gap-3 p-3" onclick="showPopup(event,\'' + a.id + '\')">' +
-          '<div class="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-2xl" style="background:' + a.bg + '">' + a.emoji + '</div>' +
-          '<div class="flex-1 min-w-0">' +
-            '<div class="flex items-center gap-2">' +
-              '<p class="text-sm font-bold text-bark truncate">' + a.title + '</p>' +
-              (a.isNew ? '<span class="text-xs font-bold text-bark bg-mango rounded-full px-1.5 py-0.5">New</span>' : '') +
-            '</div>' +
-            '<p class="text-xs text-taupe mt-0.5">' + a.category + ' · ' + a.dateLabel + '</p>' +
-          '</div>' +
-          '<div class="flex items-center gap-1 text-xs font-bold text-mango flex-shrink-0">' +
-            '<i class="fad fa-download" style="font-size:0.65rem"></i>' + fmtDl(a.downloads) +
-          '</div>' +
-        '</div>';
-      }).join('');
+    grid.innerHTML = filtered.map(a => `
+        <div class="asset-card" onclick="showPopup(event,'${a.id}')">
+            ${a.rating >= 4.8 ? '<div class="card-badge">Hot</div>' : ''}
+            <div class="relative aspect-[4/3] overflow-hidden bg-[var(--mango-pale)]">
+                <div class="skeleton absolute inset-0"></div>
+                <img src="${thumbUrl(a)}" alt="${a.title}" loading="lazy" class="w-full h-full object-cover relative z-[1]" onload="this.previousElementSibling.style.display='none'">
+            </div>
+            <div class="p-3">
+                <h3 class="text-xs font-bold text-[var(--bark)] truncate">${a.title}</h3>
+                <div class="flex items-center justify-between mt-1">
+                    <div class="stars text-[11px]">${'★'.repeat(Math.floor(a.rating))}</div>
+                    <span class="text-[9px] text-[var(--taupe)]">${a.rating} (${a.reviews||0})</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderReviews() {
+    const grid = document.getElementById('reviewsGrid');
+    const noRev = document.getElementById('noReviews');
+    if (creatorReviews.length === 0) { grid.innerHTML = ''; noRev.classList.remove('hidden'); return; }
+    noRev.classList.add('hidden');
+
+    grid.innerHTML = creatorReviews.slice(0, 8).map(r => `
+        <div class="review-card">
+            <div class="flex items-center gap-2 mb-2">
+                <img src="${avatarUrl(r.username)}" width="28" height="28" class="w-7 h-7 rounded-full border border-[var(--border)] object-cover flex-shrink-0" alt="">
+                <div class="min-w-0">
+                    <p class="text-xs font-bold text-[var(--bark)]">${r.username}</p>
+                    <p class="text-[10px] text-[var(--taupe)]">${r.assetTitle}</p>
+                </div>
+                <div class="ml-auto flex gap-0.5">${'<span class="star-filled text-xs text-[var(--mango)]">★</span>'.repeat(r.rating)+'<span class="star-empty text-xs text-[var(--border)]">★</span>'.repeat(5-r.rating)}</div>
+            </div>
+            <p class="text-xs leading-relaxed text-bark/70">${r.comment}</p>
+        </div>
+    `).join('');
+}
+
+function renderTimeline() {
+    const sorted = [...creatorAssets].sort((a,b) => b._idx - a._idx);
+    const container = document.getElementById('timelineContainer');
+    
+    if (sorted.length === 0) {
+        container.innerHTML = `<p class="text-xs text-[var(--taupe)]">No work history yet.</p>`;
+        return;
     }
-  }
 
-  function catShort(cat) {
-    var m = {'3D Mesh':'3D','Sound Effect':'SFX','Animation':'ANIM','Material Texture':'TEX','Luau Script':'CODE'};
-    return m[cat] || cat;
-  }
-  function fmtDl(n) { return n >= 1000 ? (n/1000).toFixed(n % 1000 === 0 ? 0 : 1) + 'k' : n; }
-
-  /* ---- ASSET POPUP ---- */
-  function showPopup(e, id) {
-    e.stopPropagation();
-    var a = ASSETS.find(function(x){ return x.id === id; });
-    if (!a) return;
-    document.getElementById('ppIcon').textContent = a.emoji;
-    document.getElementById('ppIcon').style.background = a.bg;
-    document.getElementById('ppName').textContent = a.title;
-    document.getElementById('ppCat').textContent = a.category;
-    document.getElementById('ppDate').textContent = a.dateLabel;
-    document.getElementById('ppDl').textContent = fmtDl(a.downloads) + ' downloads';
-    document.getElementById('ppSize').textContent = a.size;
-    document.getElementById('ppEngine').textContent = a.engine;
-    document.getElementById('ppDesc').textContent = a.desc;
-    document.getElementById('ppTags').innerHTML = a.tags.map(function(t){
-      return '<span class="tag-chip-sm">' + t + '</span>';
+    const html = sorted.map((a, i) => {
+        const monthIndex = a._idx >= 12 ? 0 : (a._idx % 12);
+        const year = 2025 + Math.floor(a._idx / 12);
+        const monthName = MONTHS[monthIndex] || 'Jan';
+        const dateStr = `${monthName} ${year}`;
+        
+        return `
+        <div class="tl-item mb-5 last:mb-0 group" onclick="showPopup(event,'${a.id}')">
+            <div class="tl-dot"></div>
+            <div class="min-w-0">
+                <span class="text-[9px] font-black text-mango uppercase tracking-widest">${dateStr}</span>
+                <p class="text-xs font-extrabold text-[var(--bark)] truncate mt-0.5 group-hover:text-mango transition-colors">${a.title}</p>
+                <div class="flex items-center gap-2 mt-1 text-[10px] text-[var(--taupe)] font-semibold">
+                    <span>${(CATEGORY_TITLES[a.category]||a.category)}</span>
+                    <span>·</span>
+                    <span class="text-mango font-bold">📥 ${fmtDl(a._downloads)}</span>
+                </div>
+            </div>
+        </div>`;
     }).join('');
+    
+    container.innerHTML = `<div class="tl-line"></div>${html}`;
+}
 
-    var popup = document.getElementById('assetPopup');
-    popup.classList.add('open');
+function renderSocialLinks() {
+    const u = creator.username;
+    const links = [
+        { platform:'GitHub', icon:'<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/></svg>', handle:u },
+        { platform:'X / Twitter', icon:'<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>', handle:u },
+        { platform:'Discord', icon:'<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515A13 13 0 0 0 15 6a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25A19.736 19.736 0 0 0 3.677 4.37C.533 9.046-.32 13.58.099 18.057a19.9 19.9 0 0 0 5.993 3.03c.462-.63.874-1.295 1.226-1.994a13.094 13.094 0 0 1-1.873-.894.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .078.01c3.928 1.793 8.18 1.793 12.062 0a.075.075 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892c.36.698.772 1.362 1.225 1.993a19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66z"/></svg>', handle:u },
+        { platform:'ArtStation', icon:'<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3H1v18h22V3zM7 13h10v8H7z"/></svg>', handle:u },
+    ];
 
-    var card = e.currentTarget;
-    var rect = card.getBoundingClientRect();
-    var pw = 230;
-    var left = rect.left + rect.width / 2 - pw / 2;
-    if (left + pw > window.innerWidth - 12) left = window.innerWidth - pw - 12;
-    if (left < 8) left = 8;
-    var top = rect.bottom + 8;
-    if (top + 320 > window.innerHeight) top = rect.top - 320 - 8;
-    popup.style.left = left + 'px';
-    popup.style.top = top + 'px';
-  }
+    document.getElementById('socialLinksContainer').innerHTML = links.map(l => `
+        <a href="#" class="social-link" onclick="return false">
+            <div class="social-icon" style="background:#fff0df">${l.icon}</div>
+            <span class="text-[var(--brown)] truncate">${l.handle}</span>
+            <svg class="w-3 h-3 text-[var(--taupe)] ml-auto" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 17l10-10"/></svg>
+        </a>
+    `).join('');
+}
 
-  function closePopup() { document.getElementById('assetPopup').classList.remove('open'); }
-  document.addEventListener('click', function(e){
-    var pp = document.getElementById('assetPopup');
-    if (pp && !pp.contains(e.target)) pp.classList.remove('open');
-  });
+/* ── POV toggle ─────────────────────────────────────── */
+let isOwner = true;
 
-  /* ---- SORT ---- */
-  function toggleSort() { document.getElementById('sortDropdown').classList.toggle('open'); }
-  document.addEventListener('click', function(e){
-    if (!e.target.closest('#sortContainer')) document.getElementById('sortDropdown').classList.remove('open');
-  });
-  function setSort(el, key, label) {
-    document.querySelectorAll('.sort-opt').forEach(function(o){ o.classList.remove('active'); });
+function togglePOV() {
+    isOwner = !isOwner;
+    updatePOVUI();
+}
+
+function updatePOVUI() {
+    document.getElementById('povLabel').textContent = isOwner ? 'Owner view' : 'Visitor view';
+    const dot = document.getElementById('povDot');
+    dot.classList.toggle('visitor', !isOwner);
+    document.getElementById('editIntroBtn').style.display = isOwner ? '' : 'none';
+    updateCommissionVisibility();
+}
+
+function updateCommissionVisibility() {
+    document.getElementById('commissionArea').style.display = isOwner ? 'none' : '';
+}
+
+/* ── Sort ─────────────────────────────────────── */
+let currentSort = 'newest';
+
+function toggleSort() { document.getElementById('sortDropdown').classList.toggle('open'); }
+document.addEventListener('click', e => { if (!e.target.closest('#sortContainer')) document.getElementById('sortDropdown').classList.remove('open'); });
+
+function setSort(el, key, label) {
+    document.querySelectorAll('.sort-opt').forEach(o => o.classList.remove('active'));
     el.classList.add('active');
     currentSort = key;
     document.getElementById('sortLabel').textContent = label;
     document.getElementById('sortDropdown').classList.remove('open');
-    renderAssets();
-  }
+    renderAssetGrid();
+}
 
-  /* ---- VIEW TOGGLE ---- */
-  function setView(v) {
-    currentView = v;
-    document.getElementById('viewGrid').className = 'rounded-lg px-2.5 py-1.5 text-xs font-bold transition-colors ' + (v==='grid' ? 'bg-bark text-cream' : 'text-bark hover:bg-mango-pale');
-    document.getElementById('viewList').className = 'rounded-lg px-2.5 py-1.5 text-xs font-bold transition-colors ' + (v==='list' ? 'bg-bark text-cream' : 'text-bark hover:bg-mango-pale');
-    renderAssets();
-  }
+/* ── Asset popup ─────────────────────────────────────── */
+function showPopup(e, id) {
+    e.stopPropagation();
+    const a = creatorAssets.find(x => x.id === id);
+    if (!a) return;
+    document.getElementById('ppThumb').src = thumbUrl(a);
+    document.getElementById('ppName').textContent = a.title;
+    document.getElementById('ppCat').textContent = (CATEGORY_TITLES[a.category] || a.category);
+    document.getElementById('ppDl').textContent = fmtDl(a._downloads) + ' downloads';
+    document.getElementById('ppRating').textContent = a.rating + ' / 5';
+    document.getElementById('ppReviews').textContent = (a.reviews||0) + ' reviews';
+    document.getElementById('ppDesc').textContent = a.desc || a.description;
+    document.getElementById('ppTags').innerHTML = (a.tags||[]).map(t => `<span class="tag-chip-sm">${t}</span>`).join('');
 
-  /* ---- TIMELINE ---- */
-  function renderTimeline() {
-    var sorted = ASSETS.slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
-    var html = '';
-    sorted.forEach(function(a, i){
-      var isFirst = i === 0;
-      html += '<div class="tl-item flex gap-3 mb-4 last:mb-0" onclick="showPopup(event,\'' + a.id + '\')">' +
-        '<div class="flex flex-col items-center flex-shrink-0" style="margin-left:0">' +
-          '<div class="tl-dot ' + (isFirst ? 'active' : '') + '" style="margin-left:-7px;margin-top:3px"></div>' +
-        '</div>' +
-        '<div style="padding-left:0.25rem;flex:1;min-width:0">' +
-          '<p class="text-xs font-bold text-taupe uppercase tracking-wide">' + a.dateLabel + '</p>' +
-          '<p class="text-xs font-bold text-bark truncate">' + a.title + '</p>' +
-          '<p class="text-xs text-taupe flex items-center gap-1"><span>' + catShort(a.category) + '</span><span>·</span><span class="text-mango font-semibold">' + fmtDl(a.downloads) + '</span></p>' +
-        '</div>' +
-      '</div>';
+    const popup = document.getElementById('assetPopup');
+    popup.classList.add('open');
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pw = 260;
+    let left = rect.left + rect.width/2 - pw/2;
+    if (left + pw > window.innerWidth - 12) left = window.innerWidth - pw - 12;
+    if (left < 8) left = 8;
+    let top = rect.bottom + 8;
+    if (top + 300 > window.innerHeight) top = rect.top - 300 - 8;
+    popup.style.left = left + 'px';
+    popup.style.top = top + 'px';
+}
+
+function closePopup() { document.getElementById('assetPopup').classList.remove('open'); }
+document.addEventListener('click', e => { const p = document.getElementById('assetPopup'); if (p && !p.contains(e.target)) p.classList.remove('open'); });
+
+/* ── Commission modal ─────────────────────────────── */
+function openCommissionModal() {
+    document.getElementById('commTitle').textContent = 'Commission ' + creator.displayName;
+    document.getElementById('commSubtitle').textContent = 'Describe your project — ' + creator.displayName + ' typically responds within 24 hours.';
+    document.getElementById('commissionSuccess').classList.add('hidden');
+    document.getElementById('commActions').style.display = '';
+    ['cName','cEmail','cReqs','cBudget','cDeadline'].forEach(id => {
+        document.getElementById(id).value = '';
+        const err = document.getElementById(id+'Err');
+        if (err) err.classList.add('hidden');
     });
-    document.getElementById('timelineContainer').innerHTML = '<div class="tl-line"></div>' + html;
-  }
+    document.getElementById('commissionModal').classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModalOnOverlay(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
 
-  /* ---- POV TOGGLE ---- */
-  function togglePOV() {
-    isOwner = !isOwner;
-    document.getElementById('povLabel').textContent = isOwner ? 'Owner view' : 'Visitor view';
-    document.getElementById('povDot').style.background = isOwner ? 'var(--mango)' : 'var(--taupe)';
-
-    // Owner-only elements
-    ['editIntroBtn','editProfileBtn','addSocialBtn','avatarEditBtn'].forEach(function(id){
-      var el = document.getElementById(id);
-      if (el) { isOwner ? el.classList.remove('hidden') : el.classList.add('hidden'); }
-    });
-    // Visitor-only elements
-    ['commissionBtn','hireBtn'].forEach(function(id){
-      var el = document.getElementById(id);
-      if (el) { isOwner ? el.classList.add('hidden') : el.classList.remove('hidden'); }
-    });
-    document.getElementById('availabilityEditNote').style.display = isOwner ? '' : 'none';
-    // Avatar edit overlay
-    document.getElementById('avatarEditBtn').classList.toggle('hidden', !isOwner);
-  }
-
-  /* ---- MODALS ---- */
-  function openModal(type) {
-    currentModal = type;
-    var modal = document.getElementById('profileModal');
-    var title = document.getElementById('modalTitle');
-    document.getElementById('profileFields').classList.add('hidden');
-    document.getElementById('photoFields').classList.add('hidden');
-    document.getElementById('socialFields').classList.add('hidden');
-    if (type === 'profile') { title.textContent = 'Edit profile'; document.getElementById('profileFields').classList.remove('hidden'); }
-    if (type === 'photo')   { title.textContent = 'Change avatar'; document.getElementById('photoFields').classList.remove('hidden'); }
-    if (type === 'social')  { title.textContent = 'Add social link'; document.getElementById('socialFields').classList.remove('hidden'); }
-    modal.classList.add('open');
-  }
-  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-  function closeModalOnOverlay(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
-
-  function saveModal() {
-    if (currentModal === 'profile') {
-      var name  = document.getElementById('editName').value.trim();
-      var title = document.getElementById('editTitle').value.trim();
-      var bio   = document.getElementById('editBio').value.trim();
-      if (name)  document.getElementById('profileName').textContent  = name;
-      if (title) document.getElementById('profileTitle').textContent = title;
-      if (bio)   document.getElementById('profileBio').textContent   = bio;
-      if (name) { document.getElementById('headerAvatar').textContent = name.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase(); }
-    }
-    if (currentModal === 'photo') {
-      var initials = document.getElementById('editInitials').value.trim().toUpperCase().slice(0,2);
-      if (initials) { document.getElementById('avatarInitials').textContent = initials; document.getElementById('headerAvatar').textContent = initials; }
-    }
-    closeModal('profileModal');
-  }
-
-  function setAvatarColor(bg, text) {
-    var c = document.getElementById('avatarCircle');
-    c.style.background = bg;
-    c.style.color = text || '#15110d';
-  }
-
-  /* ---- COMMISSION FORM ---- */
-  function openCommissionModal() { document.getElementById('commissionModal').classList.add('open'); document.getElementById('commissionSuccess').classList.add('hidden'); document.getElementById('commissionActions').classList.remove('hidden'); }
-
-  function submitCommission() {
-    var valid = true;
-    var name  = document.getElementById('cName').value.trim();
-    var email = document.getElementById('cEmail').value.trim();
-    var reqs  = document.getElementById('cReqs').value.trim();
-    document.getElementById('cNameErr').classList.toggle('hidden', name.length > 0);
+function submitCommission() {
+    let valid = true;
+    const name = document.getElementById('cName').value.trim();
+    const email = document.getElementById('cEmail').value.trim();
+    const reqs = document.getElementById('cReqs').value.trim();
+    document.getElementById('cNameErr').classList.toggle('hidden', !!name);
     document.getElementById('cEmailErr').classList.toggle('hidden', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
-    document.getElementById('cReqsErr').classList.toggle('hidden', reqs.length > 0);
+    document.getElementById('cReqsErr').classList.toggle('hidden', !!reqs);
     if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !reqs) return;
     document.getElementById('commissionSuccess').classList.remove('hidden');
-    document.getElementById('commissionActions').classList.add('hidden');
-  }
+    document.getElementById('commActions').style.display = 'none';
+}
 
-  /* ---- INIT ---- */
-  renderAssets();
-  renderTimeline();
-  // Set initial owner state UI
-  togglePOV(); togglePOV(); // call twice = reset to owner = true
+/* ── Toast ─────────────────────────────────────────────── */
+function toast(msg) {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.style.transform = 'translateX(-50%) translateY(80px)', 2500);
+}
+
+/* ── Firebase Auth initialization ──────────── */
+const firebaseConfig = {
+  apiKey: "AIzaSyBxFuzLh-o7jqUr6LInMQbpkP3zny1h1kk",
+  authDomain: "lootyard-xyz.firebaseapp.com",
+  projectId: "lootyard-xyz",
+  storageBucket: "lootyard-xyz.firebasestorage.app",
+  messagingSenderId: "376623956358",
+  appId: "1:376623956358:web:79a5609ecc0888534a6c07",
+  measurementId: "G-V9FXDS2Q5Y"
+};
+if (typeof firebase !== 'undefined') {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById('guestButtons').classList.add('hidden');
+            document.getElementById('userArea').classList.remove('hidden');
+            updateAvatarUI(user);
+        } else {
+            document.getElementById('guestButtons').classList.remove('hidden');
+            document.getElementById('userArea').classList.add('hidden');
+        }
+    });
+}
+
+function updateAvatarUI(user) {
+    const avatar = user.photoURL || avatarUrl(user.displayName || user.email);
+    document.getElementById('avatarImg').src = avatar;
+    document.getElementById('dropdownAvatar').src = avatar;
+    document.getElementById('dropdownName').textContent = user.displayName || user.email.split('@')[0];
+    document.getElementById('dropdownEmail').textContent = user.email;
+}
+
+function toggleDropdown() {
+    const dd = document.getElementById('profileDropdown');
+    dd.classList.toggle('open');
+}
+
+document.addEventListener('click', e => {
+    const btn = document.getElementById('avatarBtn');
+    const dd = document.getElementById('profileDropdown');
+    if (btn && dd && !btn.contains(e.target) && !dd.contains(e.target)) {
+        dd.classList.remove('open');
+    }
+});
+
+function signOut() {
+    if (typeof firebase !== 'undefined') {
+        firebase.auth().signOut().then(() => {
+            window.location.reload();
+        }).catch(err => {
+            console.error('Error signing out', err);
+        });
+    }
+}
+
+function showPortfolio() {
+    if (typeof firebase !== 'undefined') {
+        const user = firebase.auth().currentUser;
+        if (user) {
+            window.location.href = 'portfolio.html?creator=anya_3d'; // fallback or dynamic lookup
+        } else {
+            openAuth('login');
+        }
+    }
+}
+
+function showNotifications() {
+    toast('No new notifications.');
+}
+
+function openAuth(mode) {
+    window.location.href = `home.html?auth=${mode}`;
+}
+
+/* ── Init ─────────────────────────────────────────────── */
+initData();
 </script>
 </body>
 </html>
