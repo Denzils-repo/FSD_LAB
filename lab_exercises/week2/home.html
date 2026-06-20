@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LootYard — Explore</title>
-    <link rel="icon" type="image/png" href="assets/chestnobg.png">
-    <link rel="shortcut icon" type="image/png" href="assets/icon.png">
+    <link rel="icon" type="image/png" href="lab_exercises/week2/assets/chestnobg.png">
+    <link rel="shortcut icon" type="image/png" href="lab_exercises/week2/assets/icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -34,7 +34,7 @@
 
         @font-face {
             font-family: "Magic Jasmine";
-            src: url("assets/fonts/child-hood/ChildHood.otf") format("truetype");
+            src: url("lab_exercises/week2/assets/fonts/child-hood/ChildHood.otf") format("truetype");
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -146,7 +146,7 @@
             border-radius: 16px;
             overflow: hidden;
             cursor: pointer;
-            transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s;
+            transition: all 500ms ease-in-out;
             position: relative;
         }
         .product-card:hover {
@@ -172,34 +172,19 @@
             text-transform: uppercase;
         }
 
-        /* ── Product detail panel (right-side modal) ── */
-        #productPanel {
-            position: fixed;
-            inset: 0;
-            z-index: 300;
-            display: none;
+        /* ── Yeezy-style Product detail view — contained within main ── */
+        #mainContent {
+            position: relative;
         }
-        #productPanel.open { display: flex; }
-
-        #panelBackdrop {
+        #productDetailView {
             position: absolute;
             inset: 0;
-            background: rgba(21,17,13,0.35);
-            backdrop-filter: blur(4px);
-        }
-
-        #panelContent {
-            position: relative;
-            margin-left: auto;
-            width: min(600px, 100vw);
-            height: 100%;
+            z-index: 10;
             background: var(--cream);
-            border-left: 1.5px solid var(--border);
             overflow-y: auto;
-            transform: translateX(100%);
-            transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+            transition: opacity 300ms ease-out, transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 12px;
         }
-        #productPanel.open #panelContent { transform: translateX(0); }
 
         /* ── Auth modal ── */
         #authModal {
@@ -358,7 +343,7 @@
             <div class="flex items-center gap-8">
                 <!-- Logo -->
                 <a href="index.html" class="flex items-center gap-2.5" aria-label="LootYard home">
-                    <img src="assets/chestnobg.png" alt="LootYard treasure chest logo" class="h-16 w-16 object-contain">
+                    <img src="lab_exercises/week2/assets/chestnobg.png" alt="LootYard treasure chest logo" class="h-16 w-16 object-contain">
                     <span class="text-3xl leading-none text-[#15110d]" style="font-family: 'Magic Jasmine', cursive;">LootYard</span>
                 </a>
 
@@ -421,7 +406,7 @@
 <!-- ================================================================
      MAIN CONTENT
 ================================================================ -->
-<main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+<main id="mainContent" class="max-w-7xl mx-auto px-4 sm:px-6 py-8" style="position:relative;">
 
     <!-- Category chips -->
     <div class="flex gap-2 overflow-x-auto pb-1 mb-8 scrollbar-hide">
@@ -457,6 +442,65 @@
         </div>
     </section>
 
+    <!-- ============================================================
+         YEEZY-STYLE DETAIL VIEW — contained inside main
+    ============================================================ -->
+    <div id="productDetailView" class="hidden opacity-0">
+        <!-- Top bar -->
+        <div class="sticky top-0 z-10 bg-[var(--cream)]/90 backdrop-blur px-6 py-4 flex items-center justify-between border-b border-[var(--border)]">
+            <button onclick="closePanel()" class="flex items-center gap-1.5 text-xs font-bold text-[var(--taupe)] hover:text-[var(--bark)] transition-colors uppercase tracking-wider">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Go back
+            </button>
+        </div>
+
+        <!-- Content -->
+        <div class="px-6 py-8 flex flex-col gap-8">
+            <div id="detailImageContainer" class="w-full aspect-video rounded-2xl overflow-hidden border border-[var(--border)] bg-[var(--mango-pale)] relative shadow-sm">
+                <img id="panelImage" src="" alt="" class="w-full h-full object-cover">
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="flex flex-wrap items-start justify-between gap-4">
+                    <h1 id="panelTitle" class="font-display text-3xl font-black text-[var(--bark)] leading-tight"></h1>
+                    <div class="flex items-center gap-2.5">
+                        <img id="panelAuthorAvatar" src="" alt="" class="w-8 h-8 rounded-full border border-[var(--border)]">
+                        <span id="panelAuthor" class="text-sm font-semibold text-[var(--taupe)]"></span>
+                    </div>
+                </div>
+
+                <p id="panelDesc" class="text-sm text-[var(--taupe)] leading-relaxed"></p>
+
+                <div class="flex items-center gap-3">
+                    <div id="panelStars" class="stars"></div>
+                    <span id="panelRating" class="text-xs font-bold text-[var(--bark)]"></span>
+                    <span id="panelReviewCount" class="text-xs text-[var(--taupe)]"></span>
+                </div>
+
+                <button id="downloadBtn" onclick="handleDownload()" class="mango-btn w-full py-3.5 text-sm font-bold shadow-md">
+                    Log in to Download
+                </button>
+            </div>
+
+            <div class="h-px bg-[var(--border)] my-2"></div>
+
+            <div>
+                <h3 class="text-xs font-bold text-[var(--taupe)] uppercase tracking-wider mb-4">Reviews</h3>
+                <div id="reviewList" class="flex flex-col gap-3 mb-6"></div>
+                <div id="commentForm" class="hidden flex items-center gap-3">
+                    <img id="commentAvatar" src="" alt="" class="w-8 h-8 rounded-full border border-[var(--border)] flex-shrink-0">
+                    <div class="flex-1 flex gap-2">
+                        <input id="commentInput" type="text" placeholder="Add a comment…"
+                            class="flex-1 text-xs px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-white outline-none focus:border-[var(--mango)] transition-colors font-inter">
+                        <button onclick="submitComment()" class="mango-btn text-xs px-4 py-2 font-bold">Post</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </main>
 
 
@@ -466,7 +510,7 @@
 <footer class="border-t border-[var(--border)] mt-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2">
-            <img src="assets/chestnobg.png" alt="LootYard" class="h-7 w-7 object-contain">
+            <img src="lab_exercises/week2/assets/chestnobg.png" alt="LootYard" class="h-7 w-7 object-contain">
             <span style="font-family:'Magic Jasmine',cursive;font-size:1.1rem;color:var(--bark);">LootYard</span>
             <span class="text-[10px] font-semibold text-[var(--taupe)]">· Free assets, real creators</span>
         </div>
@@ -483,73 +527,7 @@
 </footer>
 
 
-<!-- ================================================================
-     PRODUCT DETAIL PANEL (slides in from right)
-================================================================ -->
-<div id="productPanel">
-    <div id="panelBackdrop" onclick="closePanel()"></div>
-    <div id="panelContent" class="flex flex-col">
 
-        <!-- Panel header -->
-        <div class="sticky top-0 bg-[var(--cream)]/90 backdrop-blur border-b border-[var(--border)] px-6 py-3 flex items-center gap-3">
-            <button onclick="closePanel()" class="flex items-center gap-1.5 text-xs font-semibold text-[var(--taupe)] hover:text-[var(--bark)] transition-colors">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg>
-                Go back
-            </button>
-        </div>
-
-        <!-- Panel body -->
-        <div class="p-6 flex flex-col gap-6">
-
-            <!-- Cover image placeholder -->
-            <div class="rounded-2xl overflow-hidden border border-[var(--border)] aspect-video bg-[var(--mango-pale)]">
-                <img id="panelImage" src="" alt="" class="w-full h-full object-cover">
-            </div>
-
-            <!-- Info -->
-            <div class="flex flex-col gap-3">
-                <div class="flex items-start justify-between gap-4">
-                    <h1 id="panelTitle" class="font-display text-2xl font-bold text-[var(--bark)] leading-tight"></h1>
-                    <div class="flex items-center gap-2 flex-shrink-0">
-                        <!-- Author avatar (DiceBear) -->
-                        <img id="panelAuthorAvatar" src="" alt="" class="w-7 h-7 rounded-full border border-[var(--border)]">
-                        <span id="panelAuthor" class="text-xs font-semibold text-[var(--taupe)]"></span>
-                    </div>
-                </div>
-
-                <p id="panelDesc" class="text-sm text-[var(--taupe)] leading-relaxed"></p>
-
-                <div class="flex items-center gap-3">
-                    <div id="panelStars" class="stars"></div>
-                    <span id="panelRating" class="text-xs font-bold text-[var(--bark)]"></span>
-                    <span id="panelReviewCount" class="text-xs text-[var(--taupe)]"></span>
-                </div>
-
-                <!-- Download button — changes based on auth state -->
-                <button id="downloadBtn" onclick="handleDownload()" class="mango-btn w-full py-3 text-sm mt-1">
-                    Log in to Download
-                </button>
-            </div>
-
-            <!-- Reviews -->
-            <div>
-                <h3 class="text-xs font-bold text-[var(--taupe)] uppercase tracking-wider mb-3">Reviews</h3>
-                <div id="reviewList" class="flex flex-col gap-3 mb-4"></div>
-
-                <!-- Add comment (only shown when logged in) -->
-                <div id="commentForm" class="hidden flex items-center gap-3">
-                    <img id="commentAvatar" src="" alt="" class="w-7 h-7 rounded-full border border-[var(--border)] flex-shrink-0">
-                    <div class="flex-1 flex gap-2">
-                        <input id="commentInput" type="text" placeholder="Add a comment…"
-                            class="flex-1 text-xs px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-white outline-none focus:border-[var(--mango)] transition-colors font-inter">
-                        <button onclick="submitComment()" class="mango-btn text-xs px-4 py-2">Post</button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
 
 
 <!-- ================================================================
@@ -856,6 +834,7 @@ function showNotifications()  { toast('No new notifications.'); closeDropdown();
 function buildCard(product) {
     const card = document.createElement('div');
     card.className = 'product-card';
+    card.setAttribute('data-product-id', product.id);
     card.onclick = () => openPanel(product);
 
     const badge = product.rating >= 4.8
@@ -866,6 +845,7 @@ function buildCard(product) {
         <div class="relative w-full aspect-video overflow-hidden">
             <div class="skeleton absolute inset-0"></div>
             <img src="${unsplashUrl(product)}" alt="${product.title}"
+                 data-card-img="${product.id}"
                  class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500"
                  onload="this.classList.remove('opacity-0');this.previousElementSibling.remove();"
                  onerror="this.previousElementSibling.remove();this.src='https://placehold.co/400x300/fff0df/ff9f4a?text=${encodeURIComponent(product.title)}'">
@@ -898,33 +878,99 @@ function renderGrids(products) {
 }
 
 // ─── PRODUCT PANEL ────────────────────────────────────────────────
+
 async function openPanel(product) {
     currentProd = product;
-    const panel = document.getElementById('productPanel');
-
-    document.getElementById('panelImage').src       = unsplashUrl(product);
-    document.getElementById('panelTitle').textContent   = product.title;
-    document.getElementById('panelAuthor').textContent  = '@' + product.author;
-    document.getElementById('panelAuthorAvatar').src    = dicebearUrl(product.author); // API 3
-    document.getElementById('panelDesc').textContent    = product.desc;
-    document.getElementById('panelRating').textContent  = product.rating;
+    
+    const cardImg = document.querySelector(`[data-card-img="${product.id}"]`);
+    if (!cardImg) return;
+    
+    const firstRect = cardImg.getBoundingClientRect();
+    const mainEl = document.getElementById('mainContent');
+    const mainRect = mainEl.getBoundingClientRect();
+    
+    // Fill text data
+    document.getElementById('panelImage').src = unsplashUrl(product);
+    document.getElementById('panelTitle').textContent = product.title;
+    document.getElementById('panelAuthor').textContent = '@' + product.author;
+    document.getElementById('panelAuthorAvatar').src = dicebearUrl(product.author);
+    document.getElementById('panelDesc').textContent = product.desc;
+    document.getElementById('panelRating').textContent = product.rating;
     document.getElementById('panelReviewCount').textContent = `(${product.reviews} reviews)`;
-    document.getElementById('panelStars').textContent   = starsHtml(product.rating);
-
+    document.getElementById('panelStars').textContent = starsHtml(product.rating);
+    
     updateDownloadBtn(!!currentUser);
     updateCommentUI(!!currentUser);
+    
+    const panelImage = document.getElementById('panelImage');
+    panelImage.style.opacity = '0';
+    
+    const detailView = document.getElementById('productDetailView');
+    detailView.classList.remove('hidden');
+    detailView.style.opacity = '0';
+    detailView.style.transform = 'translateY(12px)';
+    detailView.scrollTop = 0;
+    
+    // Animate the detail view in
+    requestAnimationFrame(() => {
+        detailView.style.transition = 'opacity 300ms ease-out, transform 300ms cubic-bezier(0.16, 1, 0.3, 1)';
+        detailView.style.opacity = '1';
+        detailView.style.transform = 'translateY(0)';
+    });
 
-    panel.classList.add('open');
-    document.body.style.overflow = 'hidden';
+    // Scroll navbar into view so user sees the panel from the top
+    document.getElementById('navbar').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // Load reviews from Firestore (API 2)
-    await loadReviews(product.id);
+    const lastRect = document.getElementById('detailImageContainer').getBoundingClientRect();
+    
+    // Floating clone from card to panel image
+    const clone = cardImg.cloneNode(true);
+    clone.style.position = 'fixed';
+    clone.style.zIndex = '9999';
+    clone.style.top = `${firstRect.top}px`;
+    clone.style.left = `${firstRect.left}px`;
+    clone.style.width = `${firstRect.width}px`;
+    clone.style.height = `${firstRect.height}px`;
+    clone.style.margin = '0';
+    clone.style.borderRadius = '1rem';
+    clone.style.objectFit = 'cover';
+    clone.style.transform = 'none';
+    clone.style.transition = 'all 500ms cubic-bezier(0.16, 1, 0.3, 1)';
+    document.body.appendChild(clone);
+    
+    cardImg.style.opacity = '0';
+    
+    requestAnimationFrame(() => {
+        clone.style.top = `${lastRect.top}px`;
+        clone.style.left = `${lastRect.left}px`;
+        clone.style.width = `${lastRect.width}px`;
+        clone.style.height = `${lastRect.height}px`;
+    });
+    
+    setTimeout(async () => {
+        panelImage.style.opacity = '1';
+        clone.remove();
+        await loadReviews(product.id);
+    }, 500);
 }
 
-function closePanel() {
-    document.getElementById('productPanel').classList.remove('open');
-    document.body.style.overflow = '';
-    setTimeout(() => { currentProd = null; }, 400);
+async function closePanel() {
+    if (!currentProd) return;
+    const product = currentProd;
+    const cardImg = document.querySelector(`[data-card-img="${product.id}"]`);
+    
+    const detailView = document.getElementById('productDetailView');
+    detailView.style.transition = 'opacity 250ms ease-out, transform 250ms cubic-bezier(0.16, 1, 0.3, 1)';
+    detailView.style.opacity = '0';
+    detailView.style.transform = 'translateY(8px)';
+    
+    setTimeout(() => {
+        detailView.classList.add('hidden');
+        detailView.style.opacity = '';
+        detailView.style.transform = '';
+        if (cardImg) cardImg.style.opacity = '';
+        currentProd = null;
+    }, 250);
 }
 
 function starsHtml(rating) {

@@ -7,7 +7,29 @@
     <link rel="icon" type="image/png" href="lab_exercises/week2/assets/chestnobg.png">
     <link rel="shortcut icon" type="image/png" href="lab_exercises/week2/assets/icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#fff8f1',
+                        bark: '#15110d',
+                        mango: '#ff9f4a',
+                        'mango-soft': '#ffd2aa',
+                        'mango-pale': '#fff0df',
+                        taupe: '#8a7564',
+                        brown: '#5c4a3c',
+                    },
+                    fontFamily: {
+                        display: ['Bricolage Grotesque', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                        hand: ['Caveat', 'cursive'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
 
     <!-- ============================================================
          FIREBASE SDK  (v9 compat — works in plain HTML, no bundler)
@@ -17,6 +39,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <script src="mock_assets.js"></script>
 
     <style>
         /* ── Design tokens (same as landing page) ── */
@@ -146,7 +170,7 @@
             border-radius: 16px;
             overflow: hidden;
             cursor: pointer;
-            transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s;
+            transition: all 500ms ease-in-out;
             position: relative;
         }
         .product-card:hover {
@@ -172,34 +196,19 @@
             text-transform: uppercase;
         }
 
-        /* ── Product detail panel (right-side modal) ── */
-        #productPanel {
-            position: fixed;
-            inset: 0;
-            z-index: 300;
-            display: none;
+        /* ── Yeezy-style Product detail view — contained within main ── */
+        #mainContent {
+            position: relative;
         }
-        #productPanel.open { display: flex; }
-
-        #panelBackdrop {
+        #productDetailView {
             position: absolute;
             inset: 0;
-            background: rgba(21,17,13,0.35);
-            backdrop-filter: blur(4px);
-        }
-
-        #panelContent {
-            position: relative;
-            margin-left: auto;
-            width: min(600px, 100vw);
-            height: 100%;
+            z-index: 10;
             background: var(--cream);
-            border-left: 1.5px solid var(--border);
             overflow-y: auto;
-            transform: translateX(100%);
-            transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+            transition: opacity 300ms ease-out, transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 12px;
         }
-        #productPanel.open #panelContent { transform: translateX(0); }
 
         /* ── Auth modal ── */
         #authModal {
@@ -263,6 +272,45 @@
         }
         .mango-btn:hover { background: #f08a30; }
 
+        .outline-btn {
+            background: white;
+            color: var(--bark);
+            border: 1.5px solid var(--border);
+            padding: 0.65rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.18s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .outline-btn:hover {
+            background: var(--mango-pale);
+            border-color: var(--mango-light);
+        }
+
+        /* ── 3D Preview Overlay Modal ── */
+        #preview3dOverlay {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, backdrop-filter 0.3s ease;
+        }
+        #preview3dOverlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #preview3dOverlay .modal-container {
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        #preview3dOverlay.open .modal-container {
+            transform: scale(1) translateY(0);
+        }
+
         /* ── Section heading ── */
         .section-heading {
             font-family: 'Bricolage Grotesque', sans-serif;
@@ -313,6 +361,30 @@
         }
         #toast.show { transform: translateX(-50%) translateY(0); }
 
+        /* ── Loader ── */
+        .loader {
+            width: 48px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: 
+                radial-gradient(farthest-side,#ff9f4a 94%,#0000) top/8px 8px no-repeat,
+                conic-gradient(#0000 30%,#ff9f4a);
+            -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 8px),#000 0);
+            animation: l13 1s infinite linear;
+            display: inline-block;
+            box-sizing: border-box;
+        }
+        @keyframes l13 { 
+            100% { transform: rotate(1turn); }
+        }
+
+        /* ── Fade Out Grid ── */
+        .fade-out-grid {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transition: opacity 300ms ease-out !important;
+        }
+
         /* ── Category chips ── */
         .cat-chip {
             padding: 0.35rem 0.875rem;
@@ -352,68 +424,71 @@
 <!-- ================================================================
      NAVBAR
 ================================================================ -->
-<header id="navbar" class="sticky top-0 z-50 border-b border-[#f0e7dd] bg-[#fff8f1]/90 backdrop-blur-md">
-    <div class="flex w-full items-center justify-between px-6 py-2.5 lg:px-10">
-        <nav class="flex w-full items-center justify-between gap-6" aria-label="Primary navigation">
-            <div class="flex items-center gap-8">
-                <!-- Logo -->
-                <a href="index.html" class="flex items-center gap-2.5" aria-label="LootYard home">
-                    <img src="lab_exercises/week2/assets/chestnobg.png" alt="LootYard treasure chest logo" class="h-16 w-16 object-contain">
-                    <span class="text-3xl leading-none text-[#15110d]" style="font-family: 'Magic Jasmine', cursive;">LootYard</span>
-                </a>
+<header id="navbar" class="sticky top-0 z-50 border-b border-bark/5 bg-cream/85 backdrop-blur-md">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3 lg:px-10">
+        <a href="index.html" class="flex items-center gap-2.5 flex-1" aria-label="LootYard home">
+            <img src="lab_exercises/week2/assets/chestnobg.png" alt="LootYard treasure chest logo" class="h-12 w-12 object-contain">
+            <span class="font-hand text-3xl font-bold leading-none text-bark [text-shadow:0.5px_0_0_currentColor]">LootYard</span>
+        </a>
 
-                <!-- Pill navigation -->
-                <ul id="sectionNav" class="relative hidden items-center rounded-full bg-[#fff4e8] p-1 font-display text-sm font-bold text-[#15110d] md:flex">
-                    <span id="navIndicator" style="transform: translateX(0px); opacity: 1;"></span>
-                    <li class="relative z-10 w-28 text-center"><a data-nav-link data-index="0" href="#" class="block rounded-full px-4 py-2.5 text-[#15110d] font-black">Categories</a></li>
-                    <li class="relative z-10 w-28 text-center"><a data-nav-link data-index="1" href="#" class="block rounded-full px-4 py-2.5 text-[#8a7564] hover:text-[#15110d] transition-colors">Talent</a></li>
-                </ul>
-            </div>
-
-            <!-- Search and Auth Area -->
-            <div class="flex items-center gap-5 flex-1 justify-end">
-                <!-- Search -->
-                <div class="search-bar flex items-center gap-2 px-3.5 py-1.5 flex-1 max-w-xs">
-                    <svg class="w-3.5 h-3.5 text-[#8a7564] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
-                    <input id="searchInput" type="text" placeholder="Search assets…" class="text-xs flex-1 placeholder:text-[#bba898]">
-                </div>
-
-                <!-- Auth Area -->
-                <div class="relative flex-shrink-0" id="authArea">
-                    <!-- Guest state -->
-                    <div id="guestButtons" class="flex items-center gap-2">
-                        <button onclick="openAuth('login')" class="text-xs font-semibold text-[#8a7564] hover:text-[#15110d] transition-colors">Log in</button>
-                        <button onclick="openAuth('signup')" class="mango-btn text-xs py-1.5 px-4">Sign up</button>
-                    </div>
-
-                    <!-- Logged-in state (hidden until auth) -->
-                    <div id="userArea" class="hidden">
-                        <!-- Avatar button — API 3: DiceBear / API 4: Gravatar -->
-                        <button class="avatar-ring" id="avatarBtn" onclick="toggleDropdown()">
-                            <img id="avatarImg" src="" alt="avatar">
-                        </button>
-
-                        <!-- Profile dropdown -->
-                        <div id="profileDropdown">
-                            <div class="flex items-center gap-3 pb-2">
-                                <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border border-[var(--border)]">
-                                    <img id="dropdownAvatar" src="" alt="avatar" class="w-full h-full object-cover">
-                                </div>
-                                <div class="min-w-0">
-                                    <p class="text-sm font-bold text-[var(--bark)] truncate" id="dropdownName">—</p>
-                                    <p class="text-[10px] text-[var(--taupe)] truncate" id="dropdownEmail">—</p>
-                                </div>
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <button class="dropdown-item" onclick="showPortfolio()">View Portfolio</button>
-                            <button class="dropdown-item" onclick="showNotifications()">Notifications</button>
-                            <div class="dropdown-divider"></div>
-                            <button class="dropdown-item danger" onclick="signOut()">Log out</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <nav aria-label="Section navigation" class="relative flex justify-center">
+            <ul id="sectionNav" class="relative hidden items-center rounded-full bg-white/70 p-1 ring-1 ring-bark/5 font-body text-sm font-bold text-bark md:flex">
+                <span id="navIndicator" style="width: 7rem; transform: translateX(0px); opacity: 1;"></span>
+                <li class="relative z-10 text-center" style="width: 7rem;"><a data-section-link data-index="0" href="#" onclick="switchTab('assets'); return false;" class="block rounded-full px-4 py-2 text-bark hover:text-bark transition-colors duration-300 whitespace-nowrap">Assets</a></li>
+                <li class="relative z-10 text-center" style="width: 7rem;"><a data-section-link data-index="1" href="#" onclick="switchTab('talent'); return false;" class="block rounded-full px-4 py-2 text-bark/50 hover:text-bark transition-colors duration-300 whitespace-nowrap">Talent</a></li>
+            </ul>
         </nav>
+
+        <!-- Search and Auth Area -->
+        <div class="flex items-center gap-5 flex-1 justify-end">
+            <!-- Search -->
+            <div class="search-bar flex items-center gap-2 px-3.5 py-1.5 flex-1 max-w-xs">
+                <svg class="w-3.5 h-3.5 text-taupe flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+                <input id="searchInput" type="text" placeholder="Search assets…" class="text-xs flex-1 placeholder:text-[#bba898]">
+            </div>
+
+            <!-- Auth Area -->
+            <div class="relative flex-shrink-0" id="authArea">
+                <!-- Guest state -->
+                <div id="guestButtons" class="flex items-center gap-4">
+                    <button onclick="openAuth('login')" class="hidden text-sm font-bold text-bark/60 transition-colors hover:text-mango sm:inline">Log In</button>
+                    <button onclick="openAuth('signup')" class="flex items-center gap-2.5 rounded-full border border-bark/10 bg-white px-4 py-2 text-sm font-bold text-bark shadow-sm transition-all hover:-translate-y-0.5 hover:border-mango hover:shadow-md">
+                        <span class="grid h-7 w-7 place-items-center rounded-full bg-mango-soft">
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5 text-bark">
+                                <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" />
+                            </svg>
+                        </span>
+                        Sign Up
+                    </button>
+                </div>
+
+                <!-- Logged-in state (hidden until auth) -->
+                <div id="userArea" class="hidden">
+                    <!-- Avatar button — API 3: DiceBear / API 4: Gravatar -->
+                    <button class="avatar-ring" id="avatarBtn" onclick="toggleDropdown()">
+                        <img id="avatarImg" src="" alt="avatar">
+                    </button>
+
+                    <!-- Profile dropdown -->
+                    <div id="profileDropdown">
+                        <div class="flex items-center gap-3 pb-2">
+                            <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border border-[var(--border)]">
+                                <img id="dropdownAvatar" src="" alt="avatar" class="w-full h-full object-cover">
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-sm font-bold text-[var(--bark)] truncate" id="dropdownName">—</p>
+                                <p class="text-[10px] text-[var(--taupe)] truncate" id="dropdownEmail">—</p>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" onclick="showPortfolio()">View Portfolio</button>
+                        <button class="dropdown-item" onclick="showNotifications()">Notifications</button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item danger" onclick="signOut()">Log out</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </header>
 
@@ -421,22 +496,26 @@
 <!-- ================================================================
      MAIN CONTENT
 ================================================================ -->
-<main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+<main id="mainContent" class="max-w-7xl mx-auto px-4 sm:px-6 py-8" style="position:relative;">
 
     <!-- Category chips -->
-    <div class="flex gap-2 overflow-x-auto pb-1 mb-8 scrollbar-hide">
+    <div id="categoryChips" class="flex gap-2 overflow-x-auto pb-1 mb-8 scrollbar-hide">
         <button class="cat-chip active" data-cat="all">All</button>
         <button class="cat-chip" data-cat="characters">Characters</button>
-        <button class="cat-chip" data-cat="environments">Environments</button>
         <button class="cat-chip" data-cat="props">Props</button>
-        <button class="cat-chip" data-cat="vehicles">Vehicles</button>
         <button class="cat-chip" data-cat="weapons">Weapons</button>
+        <button class="cat-chip" data-cat="vehicles">Vehicles</button>
+        <button class="cat-chip" data-cat="environment">Environment</button>
         <button class="cat-chip" data-cat="vfx">VFX</button>
         <button class="cat-chip" data-cat="ui">UI Kits</button>
+        <button class="cat-chip" data-cat="music">Music</button>
+        <button class="cat-chip" data-cat="animations">Animations</button>
+        <button class="cat-chip" data-cat="shaders">Shaders</button>
+        <button class="cat-chip" data-cat="textures">Textures</button>
     </div>
 
     <!-- Most Popular -->
-    <section class="mb-10">
+    <section id="popularSection" class="mb-10">
         <div class="flex items-center justify-between mb-4">
             <h2 class="section-heading">Most Popular</h2>
             <a href="#" class="text-xs font-semibold text-[var(--taupe)] hover:text-[var(--mango)] transition-colors">See all</a>
@@ -447,7 +526,7 @@
     </section>
 
     <!-- Recents -->
-    <section class="mb-10">
+    <section id="recentsSection" class="mb-10">
         <div class="flex items-center justify-between mb-4">
             <h2 class="section-heading">Recents</h2>
             <a href="#" class="text-xs font-semibold text-[var(--taupe)] hover:text-[var(--mango)] transition-colors">See all</a>
@@ -457,97 +536,201 @@
         </div>
     </section>
 
+    <!-- Featured Creators / Talent Section -->
+    <section id="talentSection" class="mb-10 hidden">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="section-heading">Featured Creators</h2>
+        </div>
+        <div id="talentGrid" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            <!-- Populated by JS -->
+        </div>
+    </section>
+
+    <!-- Coming Soon Section -->
+    <section id="comingSoonSection" class="hidden mb-10">
+        <div class="flex flex-col items-center justify-center border border-[var(--border)] bg-white rounded-3xl p-16 text-center shadow-sm">
+            <span class="text-5xl mb-4 animate-bounce select-none">🚧</span>
+            <h2 class="font-display text-2xl font-black text-[var(--bark)] mb-2">Coming Soon</h2>
+            <p class="text-sm text-[var(--taupe)] max-w-sm leading-relaxed">
+                This category is currently under development. More LootYard assets are on the way.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================
+         YEEZY-STYLE DETAIL VIEW — contained inside main
+    ============================================================ -->
+    <div id="productDetailView" class="hidden opacity-0">
+        <!-- Top bar -->
+        <div class="sticky top-0 z-10 bg-[var(--cream)]/90 backdrop-blur px-6 py-4 flex items-center justify-between border-b border-[var(--border)]">
+            <button onclick="closePanel()" class="flex items-center gap-1.5 text-xs font-bold text-[var(--taupe)] hover:text-[var(--bark)] transition-colors uppercase tracking-wider">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Go back
+            </button>
+        </div>
+
+        <!-- Content -->
+        <div class="px-6 py-8">
+            <!-- Sticky Two-Column Inspection Layout -->
+            <div class="flex flex-col lg:flex-row gap-8 items-start">
+                
+                <!-- Left Side: Interactive Hero Image Thumbnail (62% width) -->
+                <div class="w-full lg:w-[62%] lg:sticky lg:top-20 shrink-0">
+                    <div id="detailImageContainer" onclick="open3dPreview()" class="w-full aspect-[16/10] rounded-[2rem] overflow-hidden border border-[var(--border)] bg-[var(--mango-pale)] relative shadow-sm cursor-pointer group">
+                        <!-- Image -->
+                        <img id="panelImage" src="" alt="" class="w-full h-full object-cover absolute inset-0 transition-transform duration-500 group-hover:scale-105">
+                        
+                        <!-- 3D Overlay Hover Effect -->
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-white gap-2">
+                            <span class="bg-white/20 p-4 rounded-full backdrop-blur-md border border-white/20 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                                <svg class="w-6 h-6 text-mango" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25" />
+                                </svg>
+                            </span>
+                            <span class="text-xs font-bold tracking-wider uppercase transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 delay-75">Click to view in 3D</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Scrollable Metadata & Repositioned Reviews -->
+                <div class="w-full lg:flex-1 flex flex-col gap-6">
+                    <!-- Simplified text-focused metadata area -->
+                    <div class="space-y-1">
+                        <h1 id="panelTitle" class="font-display text-3xl font-black text-[var(--bark)] leading-tight"></h1>
+                        <p class="text-sm font-semibold text-[var(--taupe)]">
+                            by <span id="panelAuthor"></span>
+                        </p>
+                        <!-- Hidden avatar to prevent existing JS errors -->
+                        <img id="panelAuthorAvatar" class="hidden" src="" alt="">
+                    </div>
+
+                    <!-- Rating stars & review count block -->
+                    <div class="flex items-center gap-3">
+                        <div id="panelStars" class="stars"></div>
+                        <span id="panelRating" class="text-xs font-bold text-[var(--bark)]"></span>
+                        <span id="panelReviewCount" class="text-xs text-[var(--taupe)] font-medium"></span>
+                    </div>
+
+                    <!-- Tags section -->
+                    <div class="space-y-2">
+                        <h4 class="text-[10px] font-black text-[var(--taupe)] uppercase tracking-wider">Tags</h4>
+                        <div id="panelTags" class="flex flex-wrap gap-1.5">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="space-y-2">
+                        <h4 class="text-[10px] font-black text-[var(--taupe)] uppercase tracking-wider">Description</h4>
+                        <p id="panelDesc" class="text-sm text-[var(--taupe)] leading-relaxed"></p>
+                    </div>
+
+                    <!-- View in 3D Button -->
+                    <button onclick="open3dPreview()" class="outline-btn w-full py-4 text-sm font-extrabold flex items-center justify-center gap-2 border border-[var(--border)] rounded-2xl hover:bg-white transition-all shadow-sm">
+                        <svg class="w-4 h-4 text-mango" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25" />
+                        </svg>
+                        View in 3D
+                    </button>
+
+                    <!-- Download CTA button -->
+                    <button id="downloadBtn" onclick="handleDownload()" class="mango-btn w-full py-4 text-sm font-extrabold shadow-md hover:-translate-y-0.5 transition-all">
+                        Log in to Download
+                    </button>
+
+                    <div class="h-px bg-[var(--border)] my-2"></div>
+
+                    <!-- Reviews list repositioned under metadata in right column for side-by-side scrolling -->
+                    <div>
+                        <h3 class="text-xs font-bold text-[var(--taupe)] uppercase tracking-wider mb-4">Reviews</h3>
+                        
+                        <div class="relative">
+                            <div id="reviewsScrollContainer" class="max-h-[320px] overflow-hidden transition-all duration-700 relative">
+                                <div id="reviewList" class="flex flex-col gap-4"></div>
+                                
+                                <div id="reviewsFadeOverlay" class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--cream)] via-[var(--cream)]/85 to-transparent flex flex-col justify-end items-center pb-4 transition-opacity duration-500 z-10 pointer-events-none hidden opacity-0">
+                                    <span class="bg-[var(--bark)] text-white text-[10px] font-bold px-4 py-2.5 rounded-full shadow-lg flex items-center gap-1.5 animate-bounce select-none">
+                                        <svg class="w-3 h-3 text-mango" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                                        </svg>
+                                        Scroll to explore reviews
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Existing comment form (hidden for guests) -->
+                        <div id="commentForm" class="hidden flex items-center gap-3 mt-4">
+                            <img id="commentAvatar" src="" alt="" class="w-8 h-8 rounded-full border border-[var(--border)] flex-shrink-0">
+                            <div class="flex-1 flex gap-2">
+                                <input id="commentInput" type="text" placeholder="Add a comment…"
+                                    class="flex-1 text-xs px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-white outline-none focus:border-[var(--mango)] transition-colors font-inter">
+                                <button onclick="submitComment()" class="mango-btn text-xs px-4 py-2 font-bold">Post</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
 </main>
 
 
 <!-- ================================================================
      FOOTER
 ================================================================ -->
-<footer class="border-t border-[var(--border)] mt-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-wrap items-center justify-between gap-4">
-        <div class="flex items-center gap-2">
-            <img src="lab_exercises/week2/assets/chestnobg.png" alt="LootYard" class="h-7 w-7 object-contain">
-            <span style="font-family:'Magic Jasmine',cursive;font-size:1.1rem;color:var(--bark);">LootYard</span>
-            <span class="text-[10px] font-semibold text-[var(--taupe)]">· Free assets, real creators</span>
+<footer class="border-t border-bark/5 bg-cream">
+    <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-6 py-10 sm:flex-row lg:px-10">
+        <div class="flex items-center gap-2.5">
+            <img src="lab_exercises/week2/assets/chestnobg.png" alt="LootYard logo" class="h-9 w-9 object-contain">
+            <span class="font-hand text-2xl font-bold text-bark [text-shadow:0.5px_0_0_currentColor]">LootYard</span>
+            <span class="ml-2 text-xs text-bark/40">· Free assets, real creators</span>
         </div>
-        <p class="text-[10px] font-bold text-[var(--taupe)]">© 2026 LootYard. All rights reserved.</p>
-        <div class="flex items-center gap-4">
-            <a href="#" class="text-[var(--taupe)] hover:text-[var(--mango)] transition-colors">
+        <p class="text-xs text-bark/40">
+            © 2026 LootYard. All rights reserved.
+        </p>
+        <div class="flex gap-4 text-bark/40">
+            <a href="#" class="hover:text-mango transition-colors" aria-label="X">
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             </a>
-            <a href="#" class="text-[var(--taupe)] hover:text-[var(--mango)] transition-colors">
+            <a href="#" class="hover:text-mango transition-colors" aria-label="GitHub">
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/></svg>
             </a>
         </div>
     </div>
-</footer>
-
-
 <!-- ================================================================
-     PRODUCT DETAIL PANEL (slides in from right)
+     3D PREVIEW OVERLAY MODAL
 ================================================================ -->
-<div id="productPanel">
-    <div id="panelBackdrop" onclick="closePanel()"></div>
-    <div id="panelContent" class="flex flex-col">
+<div id="preview3dOverlay" class="fixed inset-0 z-[10000] flex items-center justify-center bg-[var(--bark)]/85 backdrop-blur-md">
+    <!-- Click backdrop to close -->
+    <div class="absolute inset-0" onclick="close3dPreview()"></div>
 
-        <!-- Panel header -->
-        <div class="sticky top-0 bg-[var(--cream)]/90 backdrop-blur border-b border-[var(--border)] px-6 py-3 flex items-center gap-3">
-            <button onclick="closePanel()" class="flex items-center gap-1.5 text-xs font-semibold text-[var(--taupe)] hover:text-[var(--bark)] transition-colors">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg>
-                Go back
-            </button>
-        </div>
+    <!-- Modal Container -->
+    <div class="modal-container relative w-full max-w-4xl aspect-[16/10] bg-[var(--cream)] rounded-[2.5rem] border border-[var(--border)] overflow-hidden shadow-2xl m-4">
+        
+        <!-- Close button (top-right) -->
+        <button onclick="close3dPreview()" class="absolute top-6 right-6 z-50 bg-white/90 hover:bg-white border border-[var(--border)] p-2.5 rounded-full shadow-md text-[var(--bark)] transition-all hover:scale-105 active:scale-95" aria-label="Close 3D Preview">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
 
-        <!-- Panel body -->
-        <div class="p-6 flex flex-col gap-6">
-
-            <!-- Cover image placeholder -->
-            <div class="rounded-2xl overflow-hidden border border-[var(--border)] aspect-video bg-[var(--mango-pale)]">
-                <img id="panelImage" src="" alt="" class="w-full h-full object-cover">
+        <!-- model-viewer element -->
+        <model-viewer id="overlayModel" src="chest.glb"
+            alt="3D model viewer"
+            auto-rotate
+            camera-controls
+            interaction-prompt="none"
+            class="w-full h-full">
+            <!-- Custom conic gradient loader -->
+            <div slot="progress-bar" class="absolute inset-0 flex items-center justify-center bg-[var(--cream)]/10 z-20">
+                <span class="loader"></span>
             </div>
-
-            <!-- Info -->
-            <div class="flex flex-col gap-3">
-                <div class="flex items-start justify-between gap-4">
-                    <h1 id="panelTitle" class="font-display text-2xl font-bold text-[var(--bark)] leading-tight"></h1>
-                    <div class="flex items-center gap-2 flex-shrink-0">
-                        <!-- Author avatar (DiceBear) -->
-                        <img id="panelAuthorAvatar" src="" alt="" class="w-7 h-7 rounded-full border border-[var(--border)]">
-                        <span id="panelAuthor" class="text-xs font-semibold text-[var(--taupe)]"></span>
-                    </div>
-                </div>
-
-                <p id="panelDesc" class="text-sm text-[var(--taupe)] leading-relaxed"></p>
-
-                <div class="flex items-center gap-3">
-                    <div id="panelStars" class="stars"></div>
-                    <span id="panelRating" class="text-xs font-bold text-[var(--bark)]"></span>
-                    <span id="panelReviewCount" class="text-xs text-[var(--taupe)]"></span>
-                </div>
-
-                <!-- Download button — changes based on auth state -->
-                <button id="downloadBtn" onclick="handleDownload()" class="mango-btn w-full py-3 text-sm mt-1">
-                    Log in to Download
-                </button>
-            </div>
-
-            <!-- Reviews -->
-            <div>
-                <h3 class="text-xs font-bold text-[var(--taupe)] uppercase tracking-wider mb-3">Reviews</h3>
-                <div id="reviewList" class="flex flex-col gap-3 mb-4"></div>
-
-                <!-- Add comment (only shown when logged in) -->
-                <div id="commentForm" class="hidden flex items-center gap-3">
-                    <img id="commentAvatar" src="" alt="" class="w-7 h-7 rounded-full border border-[var(--border)] flex-shrink-0">
-                    <div class="flex-1 flex gap-2">
-                        <input id="commentInput" type="text" placeholder="Add a comment…"
-                            class="flex-1 text-xs px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-white outline-none focus:border-[var(--mango)] transition-colors font-inter">
-                        <button onclick="submitComment()" class="mango-btn text-xs px-4 py-2">Post</button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
+        </model-viewer>
     </div>
 </div>
 
@@ -640,22 +823,12 @@ const db   = firebase.firestore();
 
 
 // ─── MOCK DATA & FIRESTORE DATA SEED ─────────────────────────────────
-const MOCK_PRODUCTS = [
-    { id:'p1', title:'Crystal Cave Kit',        author:'anya_3d',   category:'environments', rating:4.8, reviews:42,  desc:'A full modular kit for building crystalline underground environments. 47 unique pieces, PBR textures included.', tags:['lowpoly','fantasy','cave'] },
-    { id:'p2', title:'Sci-Fi Drone Pack',       author:'rocketboy', category:'vehicles',     rating:4.6, reviews:31,  desc:'6 drone variants with LODs, emission maps, and hover animations. Game-ready FBX + Blender source.', tags:['scifi','drone','game-ready'] },
-    { id:'p3', title:'Stylized Tree Bundle',    author:'leafwork',  category:'environments', rating:4.9, reviews:87,  desc:'18 stylized tree assets. Supports SpeedTree wind shader. Summer, autumn, and dead variants.', tags:['nature','stylized','foliage'] },
-    { id:'p4', title:'Mech Soldier Rig',        author:'ironforge', category:'characters',   rating:4.7, reviews:56,  desc:'Fully rigged bipedal mech with 12 animations. Compatible with Mixamo retargeting pipeline.', tags:['mech','rigged','animated'] },
-    { id:'p5', title:'Ancient Ruins Props',     author:'stonearch', category:'props',        rating:4.5, reviews:24,  desc:'28 weathered stone props — columns, arches, broken walls. Substance textures, 2K maps.', tags:['ruins','props','historical'] },
-    { id:'p6', title:'Neon UI Kit',             author:'pixelpush', category:'ui',           rating:4.4, reviews:19,  desc:'Cyberpunk-style HUD elements: 60+ components, Figma source, sprite sheets, After Effects animations.', tags:['ui','hud','cyberpunk'] },
-    { id:'p7', title:'Low-Poly Village',        author:'cottagly',  category:'environments', rating:4.8, reviews:103, desc:'Complete low-poly village: 40+ buildings, roads, fences, foliage. Mobile-optimized.', tags:['lowpoly','village','mobile'] },
-    { id:'p8', title:'Fire & Smoke VFX',        author:'vfxlab',    category:'vfx',          rating:4.6, reviews:38,  desc:'10 fire and smoke particle systems for Unity and Unreal. HDR flipbooks included.', tags:['vfx','fire','particles'] },
-    { id:'p9', title:'Fantasy Sword Collection',author:'bladesmth', category:'weapons',      rating:4.7, reviews:61,  desc:'12 fantasy swords with hand-painted textures. Normal maps, emissive maps, and 3 LODs each.', tags:['weapons','fantasy','painted'] },
-    { id:'p10',title:'Pixel Art Tileset',       author:'dotmatrix', category:'ui',           rating:4.5, reviews:29,  desc:'16×16 RPG tileset — 200+ tiles, animated water/lava, day/night palette swaps.', tags:['pixel','tileset','rpg'] },
-];
+// Local mock data loaded from mock_assets.js
 
-let dbProducts = [...MOCK_PRODUCTS];
+let dbProducts = [];
 
 async function loadProducts() {
+    /* FIRESTORE TEMPORARILY DISABLED FOR MVP STABILITY
     try {
         const snapshot = await db.collection('products').get();
         const products = [];
@@ -671,25 +844,24 @@ async function loadProducts() {
         console.error("Error fetching products:", error);
         renderGrids(dbProducts);
     }
+    */
+
+    // Load from local MOCK_ASSETS (defined in mock_assets.js)
+    MOCK_ASSETS.forEach(asset => {
+        if (!asset.author) asset.author = asset.creator;
+        if (!asset.desc) asset.desc = asset.description;
+        if (!asset.rating) asset.rating = 4.8;
+        if (!asset.reviews) asset.reviews = MOCK_REVIEWS[asset.id] ? MOCK_REVIEWS[asset.id].length : 0;
+    });
+
+    dbProducts = [...MOCK_ASSETS];
+    renderGrids(dbProducts);
 }
 
 
-// Unsplash Source API — keyword-based free images (API 5)
-// No key needed! Using source.unsplash.com with relevant keywords
+// Reliance entirely on local AI-generated / placeholder thumbnails
 function unsplashUrl(product) {
-    const kwMap = {
-        environments: '3d,environment,cave,ruins',
-        vehicles:     '3d,drone,robot,technology',
-        characters:   '3d,character,figure,render',
-        props:        '3d,props,ancient,stone',
-        weapons:      '3d,sword,weapon,fantasy',
-        vfx:          'smoke,fire,particles,vfx',
-        ui:           'interface,neon,digital,hud',
-    };
-    const kw = kwMap[product.category] || '3d,game,asset,render';
-    // Deterministic seed per product so image stays consistent on reload
-    const seed = product.id;
-    return `https://source.unsplash.com/400x300/?${kw}&sig=${seed}`;
+    return product.thumbnailUrl || 'lab_exercises/week2/assets/chestnobg.png';
 }
 
 // DiceBear API — auto-generated avatar from username (API 3)
@@ -856,7 +1028,8 @@ function showNotifications()  { toast('No new notifications.'); closeDropdown();
 function buildCard(product) {
     const card = document.createElement('div');
     card.className = 'product-card';
-    card.onclick = () => openPanel(product);
+    card.setAttribute('data-product-id', product.id);
+    card.onclick = () => openPanel(product, card);
 
     const badge = product.rating >= 4.8
         ? `<div class="card-badge">Hot</div>` : '';
@@ -866,6 +1039,7 @@ function buildCard(product) {
         <div class="relative w-full aspect-video overflow-hidden">
             <div class="skeleton absolute inset-0"></div>
             <img src="${unsplashUrl(product)}" alt="${product.title}"
+                 data-card-img="${product.id}"
                  class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500"
                  onload="this.classList.remove('opacity-0');this.previousElementSibling.remove();"
                  onerror="this.previousElementSibling.remove();this.src='https://placehold.co/400x300/fff0df/ff9f4a?text=${encodeURIComponent(product.title)}'">
@@ -898,33 +1072,170 @@ function renderGrids(products) {
 }
 
 // ─── PRODUCT PANEL ────────────────────────────────────────────────
-async function openPanel(product) {
-    currentProd = product;
-    const panel = document.getElementById('productPanel');
 
-    document.getElementById('panelImage').src       = unsplashUrl(product);
-    document.getElementById('panelTitle').textContent   = product.title;
-    document.getElementById('panelAuthor').textContent  = '@' + product.author;
-    document.getElementById('panelAuthorAvatar').src    = dicebearUrl(product.author); // API 3
-    document.getElementById('panelDesc').textContent    = product.desc;
-    document.getElementById('panelRating').textContent  = product.rating;
-    document.getElementById('panelReviewCount').textContent = `(${product.reviews} reviews)`;
-    document.getElementById('panelStars').textContent   = starsHtml(product.rating);
-
-    updateDownloadBtn(!!currentUser);
-    updateCommentUI(!!currentUser);
-
-    panel.classList.add('open');
-    document.body.style.overflow = 'hidden';
-
-    // Load reviews from Firestore (API 2)
-    await loadReviews(product.id);
+function getProductModelUrl(product) {
+    if (product.modelUrl) return product.modelUrl;
+    const mapping = {
+        'p1': 'lab_exercises/week2/assets/mushroom_potion.glb',
+        'p2': 'lab_exercises/week2/assets/cartoon_plane.glb',
+        'p3': 'lab_exercises/week2/assets/cloud_tea.glb',
+        'p4': 'lab_exercises/week2/assets/panda.glb',
+        'p5': 'lab_exercises/week2/assets/mushroom_potion.glb',
+        'p7': 'lab_exercises/week2/assets/cartoon_plane.glb',
+        'p9': 'lab_exercises/week2/assets/cloud_tea.glb'
+    };
+    return mapping[product.id] || null;
 }
 
-function closePanel() {
-    document.getElementById('productPanel').classList.remove('open');
-    document.body.style.overflow = '';
-    setTimeout(() => { currentProd = null; }, 400);
+async function openPanel(product, cardElement) {
+    currentProd = product;
+    
+    // Find the specific cardImg from the clicked card element if provided, otherwise query globally
+    let cardImg = null;
+    if (cardElement) {
+        cardImg = cardElement.querySelector('[data-card-img]');
+    } else {
+        cardImg = document.querySelector(`[data-card-img="${product.id}"]`);
+    }
+    
+    // Fade out other grid sections behind the inspector panel
+    const categoryChips = document.getElementById('categoryChips');
+    const popularSection = document.getElementById('popularSection');
+    const recentsSection = document.getElementById('recentsSection');
+    const talentSection = document.getElementById('talentSection');
+    if (categoryChips) categoryChips.classList.add('fade-out-grid');
+    if (popularSection) popularSection.classList.add('fade-out-grid');
+    if (recentsSection) recentsSection.classList.add('fade-out-grid');
+    if (talentSection) talentSection.classList.add('fade-out-grid');
+
+    // Fill metadata text data
+    document.getElementById('panelImage').src = unsplashUrl(product);
+    document.getElementById('panelTitle').textContent = product.title;
+    document.getElementById('panelAuthor').textContent = product.author;
+    document.getElementById('panelAuthorAvatar').src = dicebearUrl(product.author);
+    document.getElementById('panelDesc').textContent = product.desc;
+    document.getElementById('panelRating').textContent = product.rating;
+    document.getElementById('panelReviewCount').textContent = `(${product.reviews} reviews)`;
+    document.getElementById('panelStars').textContent = starsHtml(product.rating);
+    
+    // Render tags
+    const tagsContainer = document.getElementById('panelTags');
+    tagsContainer.innerHTML = '';
+    if (product.tags && product.tags.length > 0) {
+        product.tags.forEach(tag => {
+            const span = document.createElement('span');
+            span.className = 'rounded-lg bg-white border border-[var(--border)] px-3 py-1 text-xs font-bold text-[var(--bark)] shadow-sm';
+            span.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
+            tagsContainer.appendChild(span);
+        });
+    } else {
+        tagsContainer.innerHTML = '<span class="text-xs text-[var(--taupe)] italic">No tags</span>';
+    }
+
+    // Static image only in detail panel. 3D viewer is moved to modal overlay.
+    const panelImage = document.getElementById('panelImage');
+    panelImage.classList.remove('hidden');
+    
+    updateDownloadBtn(!!currentUser);
+    updateCommentUI(!!currentUser);
+    
+    const detailView = document.getElementById('productDetailView');
+    detailView.classList.remove('hidden');
+    detailView.style.opacity = '0';
+    detailView.style.transform = 'translateY(12px)';
+    detailView.scrollTop = 0;
+    
+    // Animate the detail view in
+    requestAnimationFrame(() => {
+        detailView.style.transition = 'opacity 300ms ease-out, transform 300ms cubic-bezier(0.16, 1, 0.3, 1)';
+        detailView.style.opacity = '1';
+        detailView.style.transform = 'translateY(0)';
+    });
+
+    // Scroll navbar into view so user sees the panel from the top
+    document.getElementById('navbar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    if (cardImg) {
+        const firstRect = cardImg.getBoundingClientRect();
+        panelImage.style.opacity = '0';
+        
+        const lastRect = document.getElementById('detailImageContainer').getBoundingClientRect();
+        
+        // Floating clone from card to panel image
+        const clone = cardImg.cloneNode(true);
+        clone.style.position = 'fixed';
+        clone.style.zIndex = '9999';
+        clone.style.top = `${firstRect.top}px`;
+        clone.style.left = `${firstRect.left}px`;
+        clone.style.width = `${firstRect.width}px`;
+        clone.style.height = `${firstRect.height}px`;
+        clone.style.margin = '0';
+        clone.style.borderRadius = '1.5rem';
+        clone.style.objectFit = 'cover';
+        clone.style.transform = 'none';
+        clone.style.transition = 'all 500ms cubic-bezier(0.16, 1, 0.3, 1)';
+        document.body.appendChild(clone);
+        
+        cardImg.style.opacity = '0';
+        
+        requestAnimationFrame(() => {
+            clone.style.top = `${lastRect.top}px`;
+            clone.style.left = `${lastRect.left}px`;
+            clone.style.width = `${lastRect.width}px`;
+            clone.style.height = `${lastRect.height}px`;
+        });
+        
+        setTimeout(async () => {
+            panelImage.style.opacity = '1';
+            clone.remove();
+            await loadReviews(product.id);
+        }, 500);
+    } else {
+        panelImage.style.opacity = '1';
+        loadReviews(product.id);
+    }
+}
+
+async function closePanel() {
+    if (!currentProd) return;
+    const product = currentProd;
+    
+    // Fade back in the background grids/sections
+    const categoryChips = document.getElementById('categoryChips');
+    const popularSection = document.getElementById('popularSection');
+    const recentsSection = document.getElementById('recentsSection');
+    const talentSection = document.getElementById('talentSection');
+    if (categoryChips) categoryChips.classList.remove('fade-out-grid');
+    if (popularSection) popularSection.classList.remove('fade-out-grid');
+    if (recentsSection) recentsSection.classList.remove('fade-out-grid');
+    if (talentSection) talentSection.classList.remove('fade-out-grid');
+    
+    const detailView = document.getElementById('productDetailView');
+    detailView.style.transition = 'opacity 250ms ease-out, transform 250ms cubic-bezier(0.16, 1, 0.3, 1)';
+    detailView.style.opacity = '0';
+    detailView.style.transform = 'translateY(8px)';
+    
+    // Clear scroll listener
+    detailView.onscroll = null;
+    
+    setTimeout(() => {
+        detailView.classList.add('hidden');
+        detailView.style.opacity = '';
+        detailView.style.transform = '';
+        
+        // Restore opacity on all matching card images
+        document.querySelectorAll(`[data-card-img="${product.id}"]`).forEach(img => {
+            img.style.opacity = '';
+        });
+        
+        // Reset overlay model-viewer when detail panel is closed
+        const modelViewer = document.getElementById('overlayModel');
+        if (modelViewer) {
+            modelViewer.removeAttribute('auto-rotate');
+        }
+        
+        currentProd = null;
+    }, 250);
 }
 
 function starsHtml(rating) {
@@ -932,6 +1243,11 @@ function starsHtml(rating) {
     const half  = rating % 1 >= 0.5 ? 1 : 0;
     const empty = 5 - full - half;
     return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+}
+
+// DiceBear API — auto-generated avatar from username (API 3)
+function dicebearUrl(username) {
+    return `https://api.dicebear.com/8.x/thumbs/svg?seed=${encodeURIComponent(username)}&backgroundColor=ffd2aa,fff0df,ffe4c4&shapeColor=ff9f4a,c0714a`;
 }
 
 function updateDownloadBtn(loggedIn) {
@@ -943,13 +1259,14 @@ function updateDownloadBtn(loggedIn) {
 function handleDownload() {
     if (!currentUser) { openAuth('login'); return; }
     toast(`Downloading "${currentProd.title}"…`);
-    // Record download in Firestore
+    /* FIRESTORE TEMPORARILY DISABLED FOR MVP STABILITY
     db.collection('downloads').add({
         uid:       currentUser.uid,
         productId: currentProd.id,
         title:     currentProd.title,
         at:        firebase.firestore.FieldValue.serverTimestamp(),
     });
+    */
 }
 
 function updateCommentUI(loggedIn) {
@@ -959,41 +1276,135 @@ function updateCommentUI(loggedIn) {
 // ─── REVIEWS (Firestore — API 2) ─────────────────────────────────
 async function loadReviews(productId) {
     const list = document.getElementById('reviewList');
-    list.innerHTML = '<div class="skeleton h-10 w-full rounded-xl"></div>';
+    list.innerHTML = `
+        <div class="skeleton h-20 w-full rounded-[1.5rem] mb-4"></div>
+        <div class="skeleton h-20 w-full rounded-[1.5rem]"></div>
+    `;
     try {
+        /* FIRESTORE TEMPORARILY DISABLED FOR MVP STABILITY
         const snap = await db.collection('reviews')
             .where('productId', '==', productId)
             .orderBy('createdAt', 'desc')
             .limit(10)
             .get();
-
+            
         list.innerHTML = '';
         if (snap.empty) {
-            list.innerHTML = '<p class="text-xs text-[var(--taupe)] italic">No reviews yet — be the first!</p>';
+            list.innerHTML = '<p class="text-xs text-[var(--taupe)] italic pl-1">No reviews yet — be the first!</p>';
             return;
         }
+        
+        const reviews = [];
         snap.forEach(doc => {
-            const d = doc.data();
-            list.appendChild(buildReviewEl(d));
+            reviews.push(doc.data());
         });
+        */
+
+        // Load reviews from local mock database
+        const localReviews = MOCK_REVIEWS[productId] || [];
+        list.innerHTML = '';
+        if (localReviews.length === 0) {
+            list.innerHTML = '<p class="text-xs text-[var(--taupe)] italic pl-1">No reviews yet — be the first!</p>';
+            return;
+        }
+        
+        const reviews = localReviews.map(r => ({
+            authorName: r.username,
+            text: r.comment,
+            createdAt: r.createdAt
+        }));
+
+        // First review container
+        const firstContainer = document.createElement('div');
+        firstContainer.id = 'reviewFirst';
+        firstContainer.appendChild(buildReviewEl(reviews[0]));
+        list.appendChild(firstContainer);
+
+        if (reviews.length > 1) {
+            // Container for rest
+            const restWrapper = document.createElement('div');
+            restWrapper.className = 'relative mt-4';
+            
+            const restGrid = document.createElement('div');
+            restGrid.id = 'reviewsRest';
+            restGrid.className = 'flex flex-col gap-4';
+            for (let i = 1; i < reviews.length; i++) {
+                restGrid.appendChild(buildReviewEl(reviews[i]));
+            }
+            
+            const fadeOverlay = document.createElement('div');
+            fadeOverlay.id = 'reviewsFadeOverlay';
+            fadeOverlay.className = 'absolute inset-0 bg-gradient-to-t from-[var(--cream)] via-[var(--cream)]/90 to-transparent flex flex-col justify-end items-center pb-8 transition-opacity duration-500 z-10 pointer-events-none';
+            fadeOverlay.innerHTML = `
+                <span class="bg-[var(--bark)] text-white text-[10px] font-bold px-4 py-2.5 rounded-full shadow-lg flex items-center gap-1.5 animate-bounce select-none">
+                    <svg class="w-3 h-3 text-mango" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                    </svg>
+                    Scroll to explore reviews
+                </span>
+            `;
+            
+            restWrapper.appendChild(restGrid);
+            restWrapper.appendChild(fadeOverlay);
+            list.appendChild(restWrapper);
+            
+            // Listen to scroll on productDetailView to fade out and remove overlay
+            const detailView = document.getElementById('productDetailView');
+            detailView.onscroll = () => {
+                if (detailView.scrollTop > 50) {
+                    const overlay = document.getElementById('reviewsFadeOverlay');
+                    if (overlay) {
+                        overlay.classList.add('opacity-0');
+                        setTimeout(() => {
+                            if (overlay.parentNode) overlay.remove();
+                        }, 500);
+                        detailView.onscroll = null;
+                    }
+                }
+            };
+        }
     } catch (e) {
-        list.innerHTML = '<p class="text-xs text-[var(--taupe)] italic">Reviews unavailable right now.</p>';
+        console.error(e);
+        list.innerHTML = '<p class="text-xs text-[var(--taupe)] italic pl-1">Reviews unavailable right now.</p>';
     }
 }
 
 function buildReviewEl(d) {
     const el = document.createElement('div');
-    el.className = 'flex items-start gap-3';
-    const avatarSrc = dicebearUrl(d.authorName || 'user'); // API 3
+    el.className = 'bg-white border border-[var(--border)] rounded-[1.5rem] p-5 shadow-sm transition-all hover:shadow-md';
+    
+    const avatarSrc = dicebearUrl(d.authorName || 'user');
+    
+    const isCreator = currentProd && d.authorName && (d.authorName.toLowerCase() === currentProd.author.toLowerCase());
+    const creatorBadge = isCreator 
+        ? `<span class="inline-flex items-center gap-1 rounded bg-[var(--mango-pale)] text-[9px] font-extrabold text-[var(--mango)] px-1.5 py-0.5 ring-1 ring-[var(--mango-light)]/30 uppercase tracking-wider ml-1.5">Creator</span>` 
+        : '';
+        
+    let dateStr = '';
+    if (d.createdAt) {
+        if (d.createdAt.toDate) {
+            dateStr = d.createdAt.toDate().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        } else if (d.createdAt instanceof Date) {
+            dateStr = d.createdAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        } else {
+            dateStr = new Date(d.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+    } else {
+        dateStr = 'Just now';
+    }
+
     el.innerHTML = `
-        <img src="${avatarSrc}" alt="" class="w-7 h-7 rounded-full border border-[var(--border)] flex-shrink-0">
-        <div class="flex-1 bg-white border border-[var(--border)] rounded-xl px-3.5 py-2.5">
-            <div class="flex items-center justify-between mb-0.5">
-                <p class="text-[11px] font-bold text-[var(--bark)]">${d.authorName || 'Anonymous'}</p>
-                <p class="text-[10px] text-[var(--taupe)]">${d.createdAt?.toDate().toLocaleDateString() || ''}</p>
+        <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+                <img src="${avatarSrc}" alt="" class="w-8 h-8 rounded-full border border-[var(--border)] flex-shrink-0">
+                <div class="flex items-center">
+                    <p class="text-xs font-extrabold text-[var(--bark)]">@${d.authorName || 'Anonymous'}</p>
+                    ${creatorBadge}
+                </div>
             </div>
-            <p class="text-xs text-[var(--taupe)] leading-relaxed">${d.text}</p>
+            <p class="text-[10px] font-semibold text-[var(--taupe)]">${dateStr}</p>
         </div>
+        <p class="text-xs text-[var(--taupe)] leading-relaxed pl-11">${d.text}</p>
     `;
     return el;
 }
@@ -1004,6 +1415,7 @@ async function submitComment() {
     const text  = input.value.trim();
     if (!text) return;
 
+    /* FIRESTORE TEMPORARILY DISABLED FOR MVP STABILITY
     await db.collection('reviews').add({
         productId:  currentProd.id,
         authorUid:  currentUser.uid,
@@ -1011,10 +1423,67 @@ async function submitComment() {
         text,
         createdAt:  firebase.firestore.FieldValue.serverTimestamp(),
     });
+    */
+
+    // Create local mock review and add to array
+    if (!MOCK_REVIEWS[currentProd.id]) {
+        MOCK_REVIEWS[currentProd.id] = [];
+    }
+    const username = currentUser.displayName || currentUser.email.split('@')[0];
+    MOCK_REVIEWS[currentProd.id].unshift({
+        username: username,
+        rating: 5,
+        comment: text,
+        createdAt: new Date().toISOString()
+    });
+
     input.value = '';
     await loadReviews(currentProd.id);
     toast('Review posted!');
 }
+
+// ─── 3D PREVIEW OVERLAY FUNCTIONS ──────────────────────────────────
+function open3dPreview() {
+    const overlay = document.getElementById('preview3dOverlay');
+    if (overlay) {
+        overlay.classList.add('open');
+        
+        const model = document.getElementById('overlayModel');
+        if (model) {
+            model.src = 'chest.glb';
+            model.setAttribute('auto-rotate', '');
+            
+            const progressBar = model.querySelector('[slot="progress-bar"]');
+            if (progressBar) {
+                progressBar.classList.remove('hidden');
+            }
+            
+            model.addEventListener('load', () => {
+                if (progressBar) {
+                    progressBar.classList.add('hidden');
+                }
+            });
+        }
+    }
+}
+
+function close3dPreview() {
+    const overlay = document.getElementById('preview3dOverlay');
+    if (overlay) {
+        overlay.classList.remove('open');
+        const model = document.getElementById('overlayModel');
+        if (model) {
+            model.src = '';
+        }
+    }
+}
+
+// Listen to Escape key globally to dismiss the 3D preview
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        close3dPreview();
+    }
+});
 
 // ─── CATEGORY FILTER ─────────────────────────────────────────────
 document.querySelectorAll('.cat-chip').forEach(chip => {
@@ -1022,8 +1491,20 @@ document.querySelectorAll('.cat-chip').forEach(chip => {
         document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         const cat = chip.dataset.cat;
-        const filtered = cat === 'all' ? dbProducts : dbProducts.filter(p => p.category === cat);
-        renderGrids(filtered);
+        
+        const comingSoonCats = ['music', 'animations', 'shaders', 'textures'];
+        if (comingSoonCats.includes(cat)) {
+            document.getElementById('comingSoonSection').classList.remove('hidden');
+            document.getElementById('popularSection').classList.add('hidden');
+            document.getElementById('recentsSection').classList.add('hidden');
+        } else {
+            document.getElementById('comingSoonSection').classList.add('hidden');
+            document.getElementById('popularSection').classList.remove('hidden');
+            document.getElementById('recentsSection').classList.remove('hidden');
+            
+            const filtered = cat === 'all' ? dbProducts : dbProducts.filter(p => p.category === cat);
+            renderGrids(filtered);
+        }
     });
 });
 
@@ -1033,13 +1514,25 @@ document.getElementById('searchInput').addEventListener('input', e => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         const q = e.target.value.toLowerCase();
-        const filtered = q
-            ? dbProducts.filter(p =>
-                p.title.toLowerCase().includes(q) ||
-                p.author.toLowerCase().includes(q) ||
-                p.tags.some(t => t.includes(q)))
-            : dbProducts;
-        renderGrids(filtered);
+        const isTalentActive = !document.getElementById('talentSection').classList.contains('hidden');
+        
+        if (isTalentActive) {
+            const filtered = q
+                ? MOCK_CREATORS.filter(c =>
+                    c.displayName.toLowerCase().includes(q) ||
+                    c.title.toLowerCase().includes(q) ||
+                    c.bio.toLowerCase().includes(q))
+                : MOCK_CREATORS;
+            renderFilteredTalents(filtered);
+        } else {
+            const filtered = q
+                ? dbProducts.filter(p =>
+                    p.title.toLowerCase().includes(q) ||
+                    p.author.toLowerCase().includes(q) ||
+                    p.tags.some(t => t.includes(q)))
+                : dbProducts;
+            renderGrids(filtered);
+        }
     }, 300);
 });
 
@@ -1054,19 +1547,153 @@ function toast(msg) {
 }
 
 // ─── NAV TABS ────────────────────────────────────────────────────
-document.querySelectorAll('[data-nav-link]').forEach(link => {
-    link.addEventListener('click', e => {
-        e.preventDefault();
-        const index = Number(link.dataset.index);
-        document.getElementById('navIndicator').style.transform = `translateX(${index * 7}rem)`;
-        document.querySelectorAll('[data-nav-link]').forEach(l => {
-            const active = l === link;
-            l.className = active 
-                ? "block rounded-full px-4 py-2.5 text-[#15110d] font-black" 
-                : "block rounded-full px-4 py-2.5 text-[#8a7564] hover:text-[#15110d] transition-colors";
-        });
-    });
-});
+const MOCK_CREATORS = [
+    {
+        uid: 'c1',
+        displayName: 'Aryan Dev',
+        title: '3D Artist · Game Asset Creator',
+        bio: 'Indie 3D artist obsessed with stylised environments and game-ready props. Free assets for all.',
+        avatarInitials: 'AD',
+        avatarBg: '#ffd2aa',
+        assetsCount: 8,
+        downloads: '11.2k',
+        rating: 4.8,
+        status: 'Open',
+        portfolioUrl: 'portfolio.html'
+    },
+    {
+        uid: 'c2',
+        displayName: 'Arjun Kapoor',
+        title: '3D Modeller & Animator',
+        bio: 'Specialized in low-poly weapon design and custom humanoid animations for fast-paced shooters.',
+        avatarInitials: 'AK',
+        avatarBg: '#ff9f4a',
+        assetsCount: 34,
+        downloads: '24.5k',
+        rating: 4.9,
+        status: 'Open',
+        portfolioUrl: '#'
+    },
+    {
+        uid: 'c3',
+        displayName: 'Sofia Larsen',
+        title: 'Sound Designer',
+        bio: 'Creating immersive game audio, ambient loops, and procedural sound systems for game developers.',
+        avatarInitials: 'SL',
+        avatarBg: '#15110d',
+        assetsCount: 21,
+        downloads: '9.8k',
+        rating: 4.7,
+        status: 'Busy',
+        portfolioUrl: '#'
+    },
+    {
+        uid: 'c4',
+        displayName: 'Anya Petrov',
+        title: 'VFX Artist',
+        bio: 'Stylized particle effects, fire systems, and shader graphs for Unity and Unreal Engine projects.',
+        avatarInitials: 'AP',
+        avatarBg: '#378ADD',
+        assetsCount: 15,
+        downloads: '14.1k',
+        rating: 4.8,
+        status: 'Open',
+        portfolioUrl: '#'
+    }
+];
+
+function renderFilteredTalents(creators) {
+    const grid = document.getElementById('talentGrid');
+    if (creators.length === 0) {
+        grid.innerHTML = '<div class="col-span-full py-12 text-center text-sm text-[var(--taupe)] font-bold">No creators found matching your search.</div>';
+        return;
+    }
+    grid.innerHTML = creators.map(c => {
+        const isSelf = c.portfolioUrl !== '#';
+        const link = isSelf ? `href="${c.portfolioUrl}"` : 'href="#" onclick="toast(\'Portfolio coming soon!\'); return false;"';
+        const statusColor = c.status === 'Open' ? 'text-emerald-600' : 'text-mango';
+        return `
+            <a ${link} class="group block rounded-[2rem] border border-bark/5 bg-white p-6 shadow-sm hover:shadow-md hover:border-mango transition-all duration-300">
+                <div class="flex items-start gap-4">
+                    <div class="w-14 h-14 rounded-full flex items-center justify-center font-display text-xl font-extrabold border-2 border-bark/10 shrink-0" style="background: ${c.avatarBg}; color: ${c.avatarBg === '#15110d' ? '#fff8f1' : '#15110d'}">
+                        ${c.avatarInitials}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                            <h3 class="truncate font-display font-bold text-bark text-base group-hover:text-mango transition-colors">${c.displayName}</h3>
+                            <span class="text-[10px] font-black uppercase ${statusColor}">
+                                ${c.status}
+                            </span>
+                        </div>
+                        <p class="truncate text-xs text-bark/50 font-semibold mt-0.5">${c.title}</p>
+                        <p class="text-xs text-taupe mt-2 line-clamp-2 leading-relaxed">${c.bio}</p>
+                        
+                        <div class="flex gap-4 mt-4 pt-3 border-t border-bark/5 text-[11px] text-bark/60 font-semibold">
+                            <div><span class="font-extrabold text-bark">${c.assetsCount}</span> assets</div>
+                            <div><span class="font-extrabold text-bark">${c.downloads}</span> dls</div>
+                            <div><span class="font-extrabold text-mango">${c.rating} ★</span> rating</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        `;
+    }).join('');
+}
+
+function renderTalents() {
+    renderFilteredTalents(MOCK_CREATORS);
+}
+
+function switchTab(tab) {
+    const indicator = document.getElementById('navIndicator');
+    const assetsLink = document.querySelector('[data-section-link][data-index="0"]');
+    const talentLink = document.querySelector('[data-section-link][data-index="1"]');
+    const searchInput = document.getElementById('searchInput');
+    
+    // Close detail panel if open
+    closePanel();
+    
+    // Reset search
+    searchInput.value = '';
+    
+    if (tab === 'assets') {
+        indicator.style.transform = 'translateX(0px)';
+        assetsLink.classList.remove('text-bark/50');
+        assetsLink.classList.add('text-bark');
+        talentLink.classList.remove('text-bark');
+        talentLink.classList.add('text-bark/50');
+        
+        searchInput.placeholder = 'Search assets…';
+        
+        // Show assets containers
+        document.getElementById('categoryChips').classList.remove('hidden');
+        document.getElementById('popularSection').classList.remove('hidden');
+        document.getElementById('recentsSection').classList.remove('hidden');
+        
+        // Hide talent container
+        document.getElementById('talentSection').classList.add('hidden');
+        
+        renderGrids(dbProducts);
+    } else if (tab === 'talent') {
+        indicator.style.transform = 'translateX(7rem)';
+        talentLink.classList.remove('text-bark/50');
+        talentLink.classList.add('text-bark');
+        assetsLink.classList.remove('text-bark');
+        assetsLink.classList.add('text-bark/50');
+        
+        searchInput.placeholder = 'Search creators…';
+        
+        // Hide assets containers
+        document.getElementById('categoryChips').classList.add('hidden');
+        document.getElementById('popularSection').classList.add('hidden');
+        document.getElementById('recentsSection').classList.add('hidden');
+        
+        // Show talent container
+        document.getElementById('talentSection').classList.remove('hidden');
+        
+        renderTalents();
+    }
+}
 
 // ─── INIT ─────────────────────────────────────────────────────────
 loadProducts();
