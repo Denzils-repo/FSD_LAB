@@ -293,7 +293,7 @@ const MOCK_ASSETS = [
         status: "available"
     },
 
-    // Coming Soon Categories
+    // Coming Soon Placeholders (originally a29-a32)
     {
         id: "a29",
         title: "Music Pack Collection",
@@ -332,6 +332,828 @@ const MOCK_ASSETS = [
         description: "High-resolution tiling textures: stone walls, gravel pathing, and metal floor grids.",
         tags: ["textures", "tiling", "pbr", "materials"],
         thumbnailUrl: "ai_gen_img/32-texture-collection.jpg",
+        status: "coming-soon"
+    },
+
+    // Characters (additional)
+    {
+        id: "a33",
+        title: "Desert Nomad Explorer",
+        creator: "sandstorm",
+        category: "characters",
+        description: "Hooded desert nomad with goggles, scarf and travel gear. Rigged and game-ready.",
+        tags: ["character", "desert", "nomad", "explorer"],
+        thumbnailUrl: "ai_gen_img/33-desert-nomad-explorer.jpg",
+        status: "available"
+    },
+    {
+        id: "a34",
+        title: "Space Marine Commander",
+        creator: "ironforge",
+        category: "characters",
+        description: "Heavy-armored space marine with rifle. Modular plates and decals.",
+        tags: ["character", "scifi", "marine", "soldier"],
+        thumbnailUrl: "ai_gen_img/34-space-marine-commander.jpg",
+        status: "available"
+    },
+    {
+        id: "a35",
+        title: "Medieval Knight Champion",
+        creator: "armoury",
+        category: "characters",
+        description: "Champion knight in full plate with crested helm and longsword.",
+        tags: ["character", "medieval", "knight", "warrior"],
+        thumbnailUrl: "ai_gen_img/35-medieval-knight-champion.jpg",
+        status: "available"
+    },
+    {
+        id: "a36",
+        title: "Steampunk Engineer",
+        creator: "ironforge",
+        category: "characters",
+        description: "Friendly engineer with brass goggles, leather apron and a wrench.",
+        tags: ["character", "steampunk", "engineer", "mechanic"],
+        thumbnailUrl: "ai_gen_img/36-steampunk-engineer.jpg",
+        status: "available"
+    },
+    {
+        id: "a37",
+        title: "Cyber Ninja Operative",
+        creator: "neonpulse",
+        category: "characters",
+        description: "Stealth ninja with neon visor and dual katanas. Modular armor pieces.",
+        tags: ["character", "cyberpunk", "ninja", "stealth"],
+        thumbnailUrl: "ai_gen_img/37-cyber-ninja-operative.jpg",
+        status: "available"
+    },
+    {
+        id: "a38",
+        title: "Arctic Survival Scout",
+        creator: "mossyman",
+        category: "characters",
+        description: "Fur-trimmed parka scout with backpack and snow gear.",
+        tags: ["character", "arctic", "scout", "survival"],
+        thumbnailUrl: "ai_gen_img/38-arctic-survival-scout.jpg",
+        status: "available"
+    },
+    {
+        id: "a39",
+        title: "Robot Maintenance Droid",
+        creator: "ironforge",
+        category: "characters",
+        description: "Cute wheeled droid with antenna and toolkit arms. Rigged.",
+        tags: ["character", "robot", "droid", "companion"],
+        thumbnailUrl: "ai_gen_img/39-robot-maintenance-droid.jpg",
+        status: "available"
+    },
+    {
+        id: "a40",
+        title: "Fantasy Mage Apprentice",
+        creator: "wizardry",
+        category: "characters",
+        description: "Young apprentice with star-patterned robe and glowing spellbook.",
+        tags: ["character", "mage", "apprentice", "fantasy"],
+        thumbnailUrl: "ai_gen_img/40-fantasy-mage-apprentice.jpg",
+        status: "available"
+    },
+
+    // Props (additional)
+    {
+        id: "a41",
+        title: "Alchemist Laboratory Set",
+        creator: "glimmerbottle",
+        category: "props",
+        description: "Bubbling flasks, burner, mortar and pestle on a wooden bench.",
+        tags: ["props", "alchemy", "lab", "fantasy"],
+        thumbnailUrl: "ai_gen_img/41-alchemist-laboratory-set.jpg",
+        status: "available"
+    },
+    {
+        id: "a42",
+        title: "Camping Equipment Bundle",
+        creator: "pinewardstudio",
+        category: "props",
+        description: "Tent, lantern, sleeping bag, backpack and campfire kit.",
+        tags: ["props", "camping", "outdoor", "survival"],
+        thumbnailUrl: "ai_gen_img/42-camping-equipment-bundle.jpg",
+        status: "available"
+    },
+    {
+        id: "a43",
+        title: "Fantasy Market Props",
+        creator: "oakironcraft",
+        category: "props",
+        description: "Striped awning stall with crates of fruit and hanging lanterns.",
+        tags: ["props", "market", "stall", "medieval"],
+        thumbnailUrl: "ai_gen_img/43-fantasy-market-props.jpg",
+        status: "available"
+    },
+    {
+        id: "a44",
+        title: "Pirate Treasure Collection",
+        creator: "oakironcraft",
+        category: "props",
+        description: "Gem-studded chest, gold coins, compass, skull and parchment map.",
+        tags: ["props", "pirate", "treasure", "gold"],
+        thumbnailUrl: "ai_gen_img/44-pirate-treasure-collection.jpg",
+        status: "available"
+    },
+    {
+        id: "a45",
+        title: "Blacksmith Workshop Tools",
+        creator: "gildedanvil",
+        category: "props",
+        description: "Anvil, hammer, tongs, bellows and a glowing forge.",
+        tags: ["props", "blacksmith", "tools", "forge"],
+        thumbnailUrl: "ai_gen_img/45-blacksmith-workshop-tools.jpg",
+        status: "available"
+    },
+    {
+        id: "a46",
+        title: "Ancient Scroll Collection",
+        creator: "duststone",
+        category: "props",
+        description: "Rolled parchments with wax seals and runic engravings.",
+        tags: ["props", "scroll", "ancient", "parchment"],
+        thumbnailUrl: "ai_gen_img/46-ancient-scroll-collection.jpg",
+        status: "available"
+    },
+    {
+        id: "a47",
+        title: "Crystal Artifact Set",
+        creator: "geodelab",
+        category: "props",
+        description: "Glowing geometric crystals on stone pedestals.",
+        tags: ["props", "crystal", "artifact", "magic"],
+        thumbnailUrl: "ai_gen_img/47-crystal-artifact-set.jpg",
+        status: "available"
+    },
+    {
+        id: "a48",
+        title: "Tavern Furniture Pack",
+        creator: "oakironcraft",
+        category: "props",
+        description: "Wooden tables, benches, barrels and candle holders.",
+        tags: ["props", "tavern", "furniture", "medieval"],
+        thumbnailUrl: "ai_gen_img/48-tavern-furniture-pack.jpg",
+        status: "available"
+    },
+
+    // Weapons (additional)
+    {
+        id: "a49",
+        title: "Viking Weapon Collection",
+        creator: "castlesmith",
+        category: "weapons",
+        description: "Battle axe, round shield, sword and spear with knotwork details.",
+        tags: ["weapon", "viking", "axe", "shield"],
+        thumbnailUrl: "ai_gen_img/49-viking-weapon-collection.jpg",
+        status: "available"
+    },
+    {
+        id: "a50",
+        title: "Samurai Blade Pack",
+        creator: "edgewright",
+        category: "weapons",
+        description: "Katana, wakizashi and tanto with ornate scabbards.",
+        tags: ["weapon", "samurai", "katana", "sword"],
+        thumbnailUrl: "ai_gen_img/50-samurai-blade-pack.jpg",
+        status: "available"
+    },
+    {
+        id: "a51",
+        title: "Sci-Fi Plasma Arsenal",
+        creator: "plasmacraft",
+        category: "weapons",
+        description: "Plasma rifle, pistol and shotgun with glowing energy cells.",
+        tags: ["weapon", "scifi", "plasma", "energy"],
+        thumbnailUrl: "ai_gen_img/51-scifi-plasma-arsenal.jpg",
+        status: "available"
+    },
+    {
+        id: "a52",
+        title: "Hunter Weapon Bundle",
+        creator: "pinewardstudio",
+        category: "weapons",
+        description: "Crossbow, bow with quiver, hunting knife and traps.",
+        tags: ["weapon", "hunter", "crossbow", "bow"],
+        thumbnailUrl: "ai_gen_img/52-hunter-weapon-bundle.jpg",
+        status: "available"
+    },
+    {
+        id: "a53",
+        title: "Arcane Magic Weapons",
+        creator: "runebearer",
+        category: "weapons",
+        description: "Rune sword, orb-tipped wand and enchanted dagger with VFX.",
+        tags: ["weapon", "arcane", "magic", "rune"],
+        thumbnailUrl: "ai_gen_img/53-arcane-magic-weapons.jpg",
+        status: "available"
+    },
+    {
+        id: "a54",
+        title: "Assassin Equipment Set",
+        creator: "shadowstep",
+        category: "weapons",
+        description: "Throwing knives, smoke bombs, grappling hook and dark mask.",
+        tags: ["weapon", "assassin", "stealth", "knife"],
+        thumbnailUrl: "ai_gen_img/54-assassin-equipment-set.jpg",
+        status: "available"
+    },
+    {
+        id: "a55",
+        title: "Futuristic Combat Kit",
+        creator: "orbitalforge",
+        category: "weapons",
+        description: "Sci-fi helmet, armored vest, energy grenades and blaster.",
+        tags: ["weapon", "scifi", "combat", "armor"],
+        thumbnailUrl: "ai_gen_img/55-futuristic-combat-kit.jpg",
+        status: "available"
+    },
+    {
+        id: "a56",
+        title: "Royal Knight Armory",
+        creator: "castlesmith",
+        category: "weapons",
+        description: "Ornate sword, kite shield with crest, polished helm and lance.",
+        tags: ["weapon", "royal", "knight", "armory"],
+        thumbnailUrl: "ai_gen_img/56-royal-knight-armory.jpg",
+        status: "available"
+    },
+
+    // Vehicles (additional)
+    {
+        id: "a57",
+        title: "Space Fighter Craft",
+        creator: "orbitalforge",
+        category: "vehicles",
+        description: "Sleek swept-wing fighter craft with glowing engines.",
+        tags: ["vehicle", "scifi", "spaceship", "fighter"],
+        thumbnailUrl: "ai_gen_img/57-space-fighter-craft.jpg",
+        status: "available"
+    },
+    {
+        id: "a58",
+        title: "Rescue Helicopter",
+        creator: "liftgrid",
+        category: "vehicles",
+        description: "Red and white rescue helicopter with rotor blur and decals.",
+        tags: ["vehicle", "helicopter", "rescue", "rotor"],
+        thumbnailUrl: "ai_gen_img/58-rescue-helicopter.jpg",
+        status: "available"
+    },
+    {
+        id: "a59",
+        title: "Fantasy Airship",
+        creator: "skystone",
+        category: "vehicles",
+        description: "Wooden-hulled airship with sails, brass propellers and balloon.",
+        tags: ["vehicle", "airship", "fantasy", "steampunk"],
+        thumbnailUrl: "ai_gen_img/59-fantasy-airship.jpg",
+        status: "available"
+    },
+    {
+        id: "a60",
+        title: "Racing Hovercraft",
+        creator: "voidrider",
+        category: "vehicles",
+        description: "Aerodynamic racing hovercraft with decals and glowing thrusters.",
+        tags: ["vehicle", "racing", "hovercraft", "speed"],
+        thumbnailUrl: "ai_gen_img/60-racing-hovercraft.jpg",
+        status: "available"
+    },
+    {
+        id: "a61",
+        title: "Military Transport Vehicle",
+        creator: "ironwheel",
+        category: "vehicles",
+        description: "Armored 6-wheel transport truck in olive drab.",
+        tags: ["vehicle", "military", "transport", "truck"],
+        thumbnailUrl: "ai_gen_img/61-military-transport-vehicle.jpg",
+        status: "available"
+    },
+    {
+        id: "a62",
+        title: "Mining Exploration Rover",
+        creator: "duneline",
+        category: "vehicles",
+        description: "Chunky wheeled rover with drills, headlights and antennas.",
+        tags: ["vehicle", "rover", "mining", "exploration"],
+        thumbnailUrl: "ai_gen_img/62-mining-exploration-rover.jpg",
+        status: "available"
+    },
+    {
+        id: "a63",
+        title: "Futuristic Taxi Drone",
+        creator: "liftgrid",
+        category: "vehicles",
+        description: "Yellow and black hovering passenger taxi drone.",
+        tags: ["vehicle", "taxi", "drone", "futuristic"],
+        thumbnailUrl: "ai_gen_img/63-futuristic-taxi-drone.jpg",
+        status: "available"
+    },
+    {
+        id: "a64",
+        title: "Armored Desert Truck",
+        creator: "duneline",
+        category: "vehicles",
+        description: "Sand-worn armored truck with roof rack and oversized tires.",
+        tags: ["vehicle", "desert", "armored", "truck"],
+        thumbnailUrl: "ai_gen_img/64-armored-desert-truck.jpg",
+        status: "available"
+    },
+
+    // Environment (additional)
+    {
+        id: "a65",
+        title: "Desert Canyon Environment",
+        creator: "duststone",
+        category: "environments",
+        description: "Red rock cliffs and dry riverbed diorama.",
+        tags: ["environment", "desert", "canyon", "diorama"],
+        thumbnailUrl: "ai_gen_img/65-desert-canyon-environment.jpg",
+        status: "available"
+    },
+    {
+        id: "a66",
+        title: "Snowy Mountain Village",
+        creator: "frostline",
+        category: "environments",
+        description: "Timber cottages with snow-capped roofs nestled in pines.",
+        tags: ["environment", "village", "snow", "mountain"],
+        thumbnailUrl: "ai_gen_img/66-snowy-mountain-village.jpg",
+        status: "available"
+    },
+    {
+        id: "a67",
+        title: "Ancient Temple Ruins",
+        creator: "mosswright",
+        category: "environments",
+        description: "Stone pillars, overgrown vines and broken statues.",
+        tags: ["environment", "temple", "ruins", "overgrown"],
+        thumbnailUrl: "ai_gen_img/67-ancient-temple-ruins.jpg",
+        status: "available"
+    },
+    {
+        id: "a68",
+        title: "Fantasy Forest Clearing",
+        creator: "leafrender",
+        category: "environments",
+        description: "Mossy stones, glowing mushrooms and soft sunbeams.",
+        tags: ["environment", "forest", "clearing", "fantasy"],
+        thumbnailUrl: "ai_gen_img/68-fantasy-forest-clearing.jpg",
+        status: "available"
+    },
+    {
+        id: "a69",
+        title: "Cyberpunk City Block",
+        creator: "neonalleyworks",
+        category: "environments",
+        description: "Neon signs, towering buildings and rain-slick streets.",
+        tags: ["environment", "cyberpunk", "city", "neon"],
+        thumbnailUrl: "ai_gen_img/69-cyberpunk-city-block.jpg",
+        status: "available"
+    },
+    {
+        id: "a70",
+        title: "Volcanic Island Scene",
+        creator: "emberforge",
+        category: "environments",
+        description: "Lava flows, black rock and a smoking volcano diorama.",
+        tags: ["environment", "volcano", "lava", "island"],
+        thumbnailUrl: "ai_gen_img/70-volcanic-island-scene.jpg",
+        status: "available"
+    },
+    {
+        id: "a71",
+        title: "Medieval Castle Grounds",
+        creator: "castlesmith",
+        category: "environments",
+        description: "Stone keep, gatehouse, drawbridge and banners diorama.",
+        tags: ["environment", "castle", "medieval", "grounds"],
+        thumbnailUrl: "ai_gen_img/71-medieval-castle-grounds.jpg",
+        status: "available"
+    },
+    {
+        id: "a72",
+        title: "Underground Crystal Cavern",
+        creator: "geodelab",
+        category: "environments",
+        description: "Glowing pink and blue crystal clusters in rocky walls.",
+        tags: ["environment", "cave", "crystal", "underground"],
+        thumbnailUrl: "ai_gen_img/72-underground-crystal-cavern.jpg",
+        status: "available"
+    },
+
+    // VFX (additional)
+    {
+        id: "a73",
+        title: "Fire Magic Collection",
+        creator: "emberforge",
+        category: "vfx",
+        description: "Flame orbs, fire trails and ember bursts.",
+        tags: ["vfx", "fire", "magic", "particles"],
+        thumbnailUrl: "ai_gen_img/73-fire-magic-collection.jpg",
+        status: "available"
+    },
+    {
+        id: "a74",
+        title: "Ice Magic Collection",
+        creator: "frostline",
+        category: "vfx",
+        description: "Frost crystals, frozen mist and icicle shards.",
+        tags: ["vfx", "ice", "magic", "particles"],
+        thumbnailUrl: "ai_gen_img/74-ice-magic-collection.jpg",
+        status: "available"
+    },
+    {
+        id: "a75",
+        title: "Poison Effects Pack",
+        creator: "glimmerbottle",
+        category: "vfx",
+        description: "Toxic clouds, bubbling acid drops and slime particles.",
+        tags: ["vfx", "poison", "toxic", "particles"],
+        thumbnailUrl: "ai_gen_img/75-poison-effects-pack.jpg",
+        status: "available"
+    },
+    {
+        id: "a76",
+        title: "Portal Transition Effects",
+        creator: "glyphwell",
+        category: "vfx",
+        description: "Swirling magic portal with energy ribbons.",
+        tags: ["vfx", "portal", "transition", "magic"],
+        thumbnailUrl: "ai_gen_img/76-portal-transition-effects.jpg",
+        status: "available"
+    },
+    {
+        id: "a77",
+        title: "Explosion FX Bundle",
+        creator: "emberforge",
+        category: "vfx",
+        description: "Bright fireball with shockwave, debris and smoke.",
+        tags: ["vfx", "explosion", "fire", "debris"],
+        thumbnailUrl: "ai_gen_img/77-explosion-fx-bundle.jpg",
+        status: "available"
+    },
+    {
+        id: "a78",
+        title: "Weather Effects Collection",
+        creator: "voltarc",
+        category: "vfx",
+        description: "Rain, lightning, wind streams and snowflakes.",
+        tags: ["vfx", "weather", "rain", "lightning"],
+        thumbnailUrl: "ai_gen_img/78-weather-effects-collection.jpg",
+        status: "available"
+    },
+    {
+        id: "a79",
+        title: "Energy Shield Effects",
+        creator: "pulsewave",
+        category: "vfx",
+        description: "Hexagonal translucent dome shield with ripples.",
+        tags: ["vfx", "shield", "energy", "hex"],
+        thumbnailUrl: "ai_gen_img/79-energy-shield-effects.jpg",
+        status: "available"
+    },
+    {
+        id: "a80",
+        title: "Healing Magic Effects",
+        creator: "glyphwell",
+        category: "vfx",
+        description: "Soft green and gold light with floating leaves and runic circle.",
+        tags: ["vfx", "healing", "magic", "runes"],
+        thumbnailUrl: "ai_gen_img/80-healing-magic-effects.jpg",
+        status: "available"
+    },
+
+    // UI Kits (additional)
+    {
+        id: "a81",
+        title: "Inventory System UI",
+        creator: "questframe",
+        category: "ui",
+        description: "Glowing holo-panel inventory with item slot icons.",
+        tags: ["ui", "inventory", "system", "panel"],
+        thumbnailUrl: "ai_gen_img/81-inventory-system-ui.jpg",
+        status: "available"
+    },
+    {
+        id: "a82",
+        title: "Skill Tree Interface",
+        creator: "glowpanel",
+        category: "ui",
+        description: "3D holo-panel skill tree with connected nodes and icons.",
+        tags: ["ui", "skill", "tree", "rpg"],
+        thumbnailUrl: "ai_gen_img/82-skill-tree-interface.jpg",
+        status: "available"
+    },
+    {
+        id: "a83",
+        title: "Quest Tracker UI",
+        creator: "parchmentui",
+        category: "ui",
+        description: "Parchment-style 3D scroll panel with markers and icons.",
+        tags: ["ui", "quest", "tracker", "scroll"],
+        thumbnailUrl: "ai_gen_img/83-quest-tracker-ui.jpg",
+        status: "available"
+    },
+    {
+        id: "a84",
+        title: "Sci-Fi Dashboard Kit",
+        creator: "glassdeck",
+        category: "ui",
+        description: "Floating neon glass panels with gauges and icons.",
+        tags: ["ui", "dashboard", "scifi", "glass"],
+        thumbnailUrl: "ai_gen_img/84-scifi-dashboard-kit.jpg",
+        status: "available"
+    },
+    {
+        id: "a85",
+        title: "Mobile Game HUD",
+        creator: "questframe",
+        category: "ui",
+        description: "Glossy 3D buttons, joystick, mini-map and health bar.",
+        tags: ["ui", "mobile", "hud", "game"],
+        thumbnailUrl: "ai_gen_img/85-mobile-game-hud.jpg",
+        status: "available"
+    },
+    {
+        id: "a86",
+        title: "Strategy Game Interface",
+        creator: "glowpanel",
+        category: "ui",
+        description: "Holographic map panel with unit and resource icons.",
+        tags: ["ui", "strategy", "map", "rts"],
+        thumbnailUrl: "ai_gen_img/86-strategy-game-interface.jpg",
+        status: "available"
+    },
+    {
+        id: "a87",
+        title: "Dialogue System UI",
+        creator: "parchmentui",
+        category: "ui",
+        description: "Floating speech bubble panel with portrait and choice buttons.",
+        tags: ["ui", "dialogue", "speech", "rpg"],
+        thumbnailUrl: "ai_gen_img/87-dialogue-system-ui.jpg",
+        status: "available"
+    },
+    {
+        id: "a88",
+        title: "Health & Mana UI Pack",
+        creator: "glowpanel",
+        category: "ui",
+        description: "Glowing red and blue orb bars with ornate frames.",
+        tags: ["ui", "health", "mana", "rpg"],
+        thumbnailUrl: "ai_gen_img/88-health-mana-ui-pack.jpg",
+        status: "available"
+    },
+
+    // Music (On hold, coming-soon)
+    {
+        id: "a89",
+        title: "Fantasy Tavern Music Pack",
+        creator: "lootyard",
+        category: "music",
+        description: "Warm lute, flute and drum tracks for tavern scenes.",
+        tags: ["music", "fantasy", "tavern", "folk"],
+        thumbnailUrl: "ai_gen_img/89-fantasy-tavern-music.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a90",
+        title: "Sci-Fi Ambient Collection",
+        creator: "lootyard",
+        category: "music",
+        description: "Ambient synth pads and waveforms for futuristic scenes.",
+        tags: ["music", "scifi", "ambient", "synth"],
+        thumbnailUrl: "ai_gen_img/90-scifi-ambient-music.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a91",
+        title: "Dungeon Exploration Tracks",
+        creator: "lootyard",
+        category: "music",
+        description: "Dark exploratory tracks with low brass and percussion.",
+        tags: ["music", "dungeon", "exploration", "dark"],
+        thumbnailUrl: "ai_gen_img/91-dungeon-exploration-music.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a92",
+        title: "Battle Music Bundle",
+        creator: "lootyard",
+        category: "music",
+        description: "Epic orchestral battle tracks with war drums and brass.",
+        tags: ["music", "battle", "orchestral", "epic"],
+        thumbnailUrl: "ai_gen_img/92-battle-music-bundle.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a93",
+        title: "Relaxing Village Themes",
+        creator: "lootyard",
+        category: "music",
+        description: "Gentle folk themes for peaceful village scenes.",
+        tags: ["music", "village", "relaxing", "folk"],
+        thumbnailUrl: "ai_gen_img/93-relaxing-village-music.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a94",
+        title: "Boss Fight Soundtrack Pack",
+        creator: "lootyard",
+        category: "music",
+        description: "Heavy, dramatic boss-fight tracks with cinematic builds.",
+        tags: ["music", "boss", "soundtrack", "epic"],
+        thumbnailUrl: "ai_gen_img/94-boss-fight-music.jpg",
+        status: "coming-soon"
+    },
+
+    // Animations (On hold, coming-soon)
+    {
+        id: "a95",
+        title: "Sword Combat Animations",
+        creator: "motionrig",
+        category: "animations",
+        description: "Slashes, parries and combos for one-handed swords.",
+        tags: ["animation", "sword", "combat", "rigged"],
+        thumbnailUrl: "ai_gen_img/95-sword-combat-animations.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a96",
+        title: "Character Locomotion Pack",
+        creator: "motionrig",
+        category: "animations",
+        description: "Walk, jog, run and idle cycles for humanoid rigs.",
+        tags: ["animation", "locomotion", "walk", "run"],
+        thumbnailUrl: "ai_gen_img/96-character-locomotion-pack.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a97",
+        title: "Magic Casting Animations",
+        creator: "motionrig",
+        category: "animations",
+        description: "Cast, channel and release poses for spellcasters.",
+        tags: ["animation", "magic", "casting", "spell"],
+        thumbnailUrl: "ai_gen_img/97-magic-casting-animations.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a98",
+        title: "Parkour Movement Set",
+        creator: "motionrig",
+        category: "animations",
+        description: "Vault, climb, slide and roll movement animations.",
+        tags: ["animation", "parkour", "vault", "climb"],
+        thumbnailUrl: "ai_gen_img/98-parkour-movement-set.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a99",
+        title: "NPC Interaction Animations",
+        creator: "motionrig",
+        category: "animations",
+        description: "Greetings, conversations and friendly gestures.",
+        tags: ["animation", "npc", "interaction", "dialogue"],
+        thumbnailUrl: "ai_gen_img/99-npc-interaction-animations.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a100",
+        title: "Creature Animation Bundle",
+        creator: "motionrig",
+        category: "animations",
+        description: "Idle, walk, attack and leap cycles for creatures.",
+        tags: ["animation", "creature", "beast", "rigged"],
+        thumbnailUrl: "ai_gen_img/100-creature-animation-bundle.jpg",
+        status: "coming-soon"
+    },
+
+    // Shaders (On hold, coming-soon)
+    {
+        id: "a101",
+        title: "Stylized Water Shader",
+        creator: "shadercraft",
+        category: "shaders",
+        description: "Rippling glossy water surface with stylized foam edges.",
+        tags: ["shader", "water", "stylized", "foam"],
+        thumbnailUrl: "ai_gen_img/101-stylized-water-shader.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a102",
+        title: "Toon Lighting Shader",
+        creator: "shadercraft",
+        category: "shaders",
+        description: "Cel-shaded lighting with clear shadow banding.",
+        tags: ["shader", "toon", "cel", "lighting"],
+        thumbnailUrl: "ai_gen_img/102-toon-lighting-shader.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a103",
+        title: "Crystal Refraction Shader",
+        creator: "shadercraft",
+        category: "shaders",
+        description: "Faceted translucent crystals with colorful refractions.",
+        tags: ["shader", "crystal", "refraction", "glass"],
+        thumbnailUrl: "ai_gen_img/103-crystal-refraction-shader.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a104",
+        title: "Hologram Shader Pack",
+        creator: "shadercraft",
+        category: "shaders",
+        description: "Translucent cyan hologram with scanlines and glow.",
+        tags: ["shader", "hologram", "scifi", "glow"],
+        thumbnailUrl: "ai_gen_img/104-hologram-shader-pack.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a105",
+        title: "Fire Material Shader",
+        creator: "shadercraft",
+        category: "shaders",
+        description: "Flowing lava-fire texture with glowing cracks.",
+        tags: ["shader", "fire", "lava", "emissive"],
+        thumbnailUrl: "ai_gen_img/105-fire-material-shader.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a106",
+        title: "Magical Energy Shader",
+        creator: "shadercraft",
+        category: "shaders",
+        description: "Flowing arcane runes wrapped around an energy aura.",
+        tags: ["shader", "magic", "energy", "runes"],
+        thumbnailUrl: "ai_gen_img/106-magical-energy-shader.jpg",
+        status: "coming-soon"
+    },
+
+    // Textures (On hold, coming-soon)
+    {
+        id: "a107",
+        title: "Medieval Texture Collection",
+        creator: "pixelquarry",
+        category: "textures",
+        description: "Stone, wood, cobble and brick tileable textures.",
+        tags: ["texture", "medieval", "stone", "wood"],
+        thumbnailUrl: "ai_gen_img/107-medieval-texture-collection.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a108",
+        title: "Sci-Fi Surface Materials",
+        creator: "pixelquarry",
+        category: "textures",
+        description: "Glossy metal panel samples with neon trim.",
+        tags: ["texture", "scifi", "metal", "panel"],
+        thumbnailUrl: "ai_gen_img/108-scifi-surface-materials.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a109",
+        title: "Nature Ground Textures",
+        creator: "pixelquarry",
+        category: "textures",
+        description: "Grass, dirt, moss, sand and pebble ground textures.",
+        tags: ["texture", "nature", "grass", "dirt"],
+        thumbnailUrl: "ai_gen_img/109-nature-ground-textures.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a110",
+        title: "Dungeon Wall Textures",
+        creator: "pixelquarry",
+        category: "textures",
+        description: "Mossy stone bricks, cracked plaster and dark masonry.",
+        tags: ["texture", "dungeon", "wall", "stone"],
+        thumbnailUrl: "ai_gen_img/110-dungeon-wall-textures.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a111",
+        title: "Fabric Material Collection",
+        creator: "pixelquarry",
+        category: "textures",
+        description: "Linen, leather, silk and wool draped fabric samples.",
+        tags: ["texture", "fabric", "linen", "silk"],
+        thumbnailUrl: "ai_gen_img/111-fabric-material-collection.jpg",
+        status: "coming-soon"
+    },
+    {
+        id: "a112",
+        title: "Weapon Material Pack",
+        creator: "pixelquarry",
+        category: "textures",
+        description: "Polished steel, rust, gold inlay and gem facet samples.",
+        tags: ["texture", "weapon", "metal", "gem"],
+        thumbnailUrl: "ai_gen_img/112-weapon-material-pack.jpg",
         status: "coming-soon"
     }
 ];
@@ -458,3 +1280,6 @@ const MOCK_REVIEWS = {
         { username: "journal_master", rating: 5, comment: "Exactly what our RPG project needed.", createdAt: "2026-06-16T13:15:00Z" }
     ]
 };
+
+window.MOCK_ASSETS = MOCK_ASSETS;
+window.MOCK_REVIEWS = MOCK_REVIEWS;
