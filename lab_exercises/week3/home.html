@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LootYard — Explore</title>
+    <link rel="icon" type="image/png" href="assets/chestnobg.png">
+    <link rel="shortcut icon" type="image/png" href="assets/icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#fff8f1',
+                        bark: '#15110d',
+                        mango: '#ff9f4a',
+                        'mango-soft': '#ffd2aa',
+                        'mango-pale': '#fff0df',
+                        taupe: '#8a7564',
+                        brown: '#5c4a3c',
+                    },
+                    fontFamily: {
+                        display: ['Bricolage Grotesque', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                        hand: ['Caveat', 'cursive'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <script src="mock_assets.js"></script>
+
+    <style>
+        :root {
+            --cream: #fff8f1; --bark: #15110d; --mango: #ff9f4a;
+            --mango-light: #ffd2aa; --mango-pale: #fff0df;
+            --taupe: #8a7564; --brown: #5c4a3c;
+            --card-bg: #fffcf8; --border: #f0e7dd;
+            --header-h: 68px; --footer-h: 48px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--bark); }
+        .font-display { font-family: 'Bricolage Grotesque', sans-serif; }
+
+        body::before {
+            content: ''; position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 9999;
+        }
+
+        #navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            height: var(--header-h);
+            background: rgba(255,248,241,0.92);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+        #navIndicator {
+            position: absolute; left: 4px; top: 4px;
+            height: calc(100% - 8px); width: 7rem;
+            border-radius: 9999px; background: var(--mango-light);
+            transition: transform 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.3s;
+        }
+        .search-bar {
+            background: white; border: 1.5px solid var(--border);
+            border-radius: 9999px; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .search-bar:focus-within { border-color: var(--mango); box-shadow: 0 0 0 3px rgba(255,159,74,0.15); }
+        .search-bar input { background: transparent; outline: none; font-family: 'Inter', sans-serif; }
+
+        #profileDropdown {
+            position: absolute; top: calc(100% + 10px); right: 0; width: 220px;
+            background: white; border: 1.5px solid var(--border); border-radius: 16px;
+            box-shadow: 0 20px 50px -10px rgba(21,17,13,0.18); padding: 1rem;
+            display: none; z-index: 200;
+        }
+        #profileDropdown.open { display: block; }
+        .dropdown-divider { height: 1px; background: var(--border); margin: 0.625rem 0; }
+        .dropdown-item {
+            display: block; width: 100%; text-align: left; padding: 0.45rem 0.5rem;
+            border-radius: 8px; font-size: 0.8125rem; font-weight: 500; color: var(--brown);
+            cursor: pointer; transition: background 0.15s; background: none;
+            border: none; font-family: 'Inter', sans-serif;
+        }
+        .dropdown-item:hover { background: var(--mango-pale); color: var(--bark); }
+        .dropdown-item.danger:hover { background: #fff1f1; color: #c0392b; }
+
+        #siteFooter {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+            height: var(--footer-h);
+            background: rgba(255,248,241,0.92);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border);
+        }
+
+        #mainContent {
+            margin-top: var(--header-h);
+            height: calc(100vh - var(--header-h) - var(--footer-h));
+            overflow: hidden; position: relative;
+        }
+
+        .view-layer {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .view-layer.out { opacity: 0; pointer-events: none; transform: translateY(8px); }
+
+        #assetsView { padding: 0.75rem 1.5rem 0; gap: 0.6rem; }
+        .toolbar-row { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 0.75rem; }
+        #categoryChips { display: flex; gap: 0.375rem; overflow-x: auto; flex: 1; scrollbar-width: none; }
+        #categoryChips::-webkit-scrollbar { display: none; }
+        .cat-chip {
+            padding: 0.3rem 0.75rem; border-radius: 9999px;
+            font-size: 0.7rem; font-weight: 600;
+            border: 1.5px solid var(--border); background: white;
+            color: var(--taupe); cursor: pointer; transition: all 0.15s; white-space: nowrap;
+        }
+        .cat-chip:hover, .cat-chip.active { background: var(--mango-pale); border-color: var(--mango-light); color: var(--bark); }
+
+        .sort-wrap { position: relative; flex-shrink: 0; }
+        .sort-btn {
+            display: flex; align-items: center; gap: 0.4rem;
+            padding: 0.35rem 0.85rem 0.35rem 0.65rem;
+            border-radius: 9999px; border: 1.5px solid var(--border);
+            background: white; cursor: pointer; transition: all 0.15s;
+            font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 600;
+            color: var(--brown); white-space: nowrap;
+        }
+        .sort-btn:hover { border-color: var(--mango-light); background: var(--mango-pale); }
+        .sort-btn svg { transition: transform 0.2s; }
+        .sort-btn.open svg { transform: rotate(180deg); }
+        .sort-menu {
+            position: absolute; top: calc(100% + 6px); right: 0;
+            min-width: 170px; background: white;
+            border: 1.5px solid var(--border); border-radius: 14px;
+            box-shadow: 0 16px 40px -10px rgba(21,17,13,0.16);
+            padding: 0.4rem; z-index: 50;
+            opacity: 0; pointer-events: none; transform: translateY(-6px);
+            transition: all 0.2s ease;
+        }
+        .sort-menu.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        .sort-option {
+            display: flex; align-items: center; gap: 0.5rem;
+            width: 100%; padding: 0.45rem 0.65rem; border-radius: 10px;
+            font-size: 0.75rem; font-weight: 500; color: var(--brown);
+            cursor: pointer; border: none; background: none;
+            font-family: 'Inter', sans-serif; transition: background 0.12s; text-align: left;
+        }
+        .sort-option:hover { background: var(--mango-pale); }
+        .sort-option.active { color: var(--bark); font-weight: 700; }
+        .sort-option.active .sort-check { opacity: 1; }
+        .sort-check {
+            width: 16px; height: 16px; border-radius: 50%;
+            background: var(--mango); display: flex;
+            align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.15s; flex-shrink: 0;
+        }
+
+        .showing-label {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 0.85rem; font-weight: 700; color: var(--bark);
+            display: flex; align-items: center; gap: 0.35rem; flex-shrink: 0;
+        }
+        .showing-label::after { content: '›'; font-size: 0.95rem; color: var(--mango); }
+
+        .card-scroll { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 1rem; }
+        .card-scroll::-webkit-scrollbar { width: 5px; }
+        .card-scroll::-webkit-scrollbar-track { background: transparent; }
+        .card-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .card-scroll::-webkit-scrollbar-thumb:hover { background: var(--taupe); }
+        .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+        @media (min-width: 640px) { .card-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 1024px) { .card-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (min-width: 1280px) { .card-grid { grid-template-columns: repeat(5, 1fr); } }
+
+        .card-grid .card-img-wrap { aspect-ratio: 4/3; overflow: hidden; position: relative; }
+        .card-grid .card-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .card-grid .card-info { padding: 0.5rem 0.6rem 0.65rem; }
+
+        .product-card {
+            background: var(--card-bg); border: 1.5px solid var(--border);
+            border-radius: 14px; cursor: pointer;
+            transition: all 400ms ease-in-out; position: relative; z-index: 1;
+        }
+        .product-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px -10px rgba(21,17,13,0.14); z-index: 2; }
+        .card-badge {
+            position: absolute; top: 6px; left: 6px;
+            background: var(--mango); color: white;
+            font-size: 0.6rem; font-weight: 800;
+            padding: 1px 7px; border-radius: 9999px;
+            letter-spacing: 0.04em; text-transform: uppercase; z-index: 3;
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #f0e7dd 25%, #faf4ef 50%, #f0e7dd 75%);
+            background-size: 200% 100%; animation: shimmer 1.4s infinite;
+            border-radius: 6px; pointer-events: none !important;
+        }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+        .stars { color: var(--mango); letter-spacing: 0.04em; }
+        .empty-state {
+            grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 0.5rem; color: var(--taupe); padding: 3rem 0;
+        }
+        .empty-state span:first-child { font-size: 2rem; }
+        .empty-state span:last-child { font-size: 0.8rem; font-weight: 500; }
+
+        .avatar-ring {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 2px solid var(--border); background: var(--mango-pale);
+            overflow: hidden; cursor: pointer; transition: border-color 0.18s; flex-shrink: 0;
+        }
+        .avatar-ring:hover, .avatar-ring.open-state { border-color: var(--mango); }
+        .avatar-ring img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        #comingSoonView { align-items: center; justify-content: center; padding: 2rem; }
+        .coming-soon-box {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border: 1.5px solid var(--border); background: white;
+            border-radius: 24px; padding: 3rem; text-align: center;
+            box-shadow: 0 4px 20px -6px rgba(21,17,13,0.06);
+        }
+
+        /* ── Talent view ── */
+        #talentView { padding: 0.75rem 1.5rem 1rem; gap: 0.6rem; }
+        .talent-scroll { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 0.5rem; }
+        .talent-scroll::-webkit-scrollbar { width: 5px; }
+        .talent-scroll::-webkit-scrollbar-track { background: transparent; }
+        .talent-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .talent-grid {
+            display: grid; grid-template-columns: 1fr; gap: 0.75rem;
+        }
+        @media (min-width: 640px) { .talent-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1024px) { .talent-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .creator-card {
+            background: var(--card-bg); border: 1.5px solid var(--border);
+            border-radius: 16px; padding: 1rem 1.1rem;
+            transition: all 400ms ease-in-out; cursor: pointer;
+            display: flex; flex-direction: column; gap: 0.6rem;
+        }
+        .creator-card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px -8px rgba(21,17,13,0.12); border-color: var(--mango-light); }
+        .creator-top { display: flex; align-items: center; gap: 0.75rem; }
+        .creator-avatar {
+            width: 44px; height: 44px; border-radius: 14px;
+            border: 1.5px solid var(--border); object-cover; flex-shrink: 0;
+            background: var(--mango-pale);
+        }
+        .creator-name { font-family: 'Bricolage Grotesque', sans-serif; font-size: 0.875rem; font-weight: 700; color: var(--bark); line-height: 1.2; }
+        .creator-title { font-size: 0.7rem; color: var(--taupe); margin-top: 1px; }
+        .creator-bio { font-size: 0.7rem; color: var(--taupe); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .creator-skills { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+        .creator-skill {
+            display: inline-flex; align-items: center;
+            background: var(--mango-pale); border: 1px solid #f0d8b8;
+            border-radius: 9999px; padding: 0.15rem 0.55rem;
+            font-size: 0.6rem; font-weight: 700; color: var(--brown); white-space: nowrap;
+        }
+        .creator-stats {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding-top: 0.5rem; border-top: 1px solid var(--border);
+            font-size: 0.7rem; color: var(--taupe); margin-top: auto;
+        }
+        .creator-stats strong { color: var(--bark); }
+        .creator-stats .stars { font-size: 0.65rem; }
+        .creator-preview {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.35rem;
+            border-radius: 10px; overflow: hidden;
+        }
+        .creator-preview img {
+            width: 100%; aspect-ratio: 1; object-fit: cover; display: block;
+            border-radius: 6px; border: 1px solid var(--border);
+        }
+
+        #productDetailView {
+            position: absolute; inset: 0; z-index: 10;
+            background: var(--cream); overflow-y: auto;
+            transition: opacity 300ms ease-out, transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #productDetailView::-webkit-scrollbar { width: 5px; }
+        #productDetailView::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .creator-link {
+            color: var(--taupe); text-decoration: none; text-underline-offset: 3px;
+            text-decoration-color: transparent; transition: color 0.15s, text-decoration-color 0.15s;
+        }
+        .creator-link:hover { color: var(--mango); text-decoration-color: var(--mango-light); text-decoration: underline; text-decoration-style: dotted; }
+        .detail-action-btn { position: relative; z-index: 5; }
+        .reviews-container { position: relative; z-index: 0; overflow: hidden; }
+
+        #authModal { position: fixed; inset: 0; z-index: 500; display: none; align-items: center; justify-content: center; }
+        #authModal.open { display: flex; }
+        .auth-card {
+            background: white; border: 1.5px solid var(--border); border-radius: 24px;
+            padding: 2.5rem; width: min(420px, 90vw);
+            box-shadow: 0 32px 80px -20px rgba(21,17,13,0.25); position: relative; z-index: 10;
+        }
+        .oauth-btn {
+            width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.625rem;
+            padding: 0.7rem 1.25rem; border-radius: 12px; font-size: 0.875rem; font-weight: 600;
+            cursor: pointer; transition: all 0.18s; font-family: 'Inter', sans-serif;
+            border: 1.5px solid var(--border); background: white; color: var(--bark);
+        }
+        .oauth-btn:hover { background: var(--mango-pale); border-color: var(--mango-light); }
+        .primary-btn { background: var(--bark); color: white; border: none; }
+        .primary-btn:hover { background: var(--brown); }
+        .mango-btn {
+            background: var(--mango); color: white; border: none;
+            padding: 0.65rem 1.5rem; border-radius: 12px; font-weight: 700;
+            font-size: 0.875rem; cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.18s;
+        }
+        .mango-btn:hover { background: #f08a30; }
+        .outline-btn {
+            background: white; color: var(--bark); border: 1.5px solid var(--border);
+            padding: 0.65rem 1.5rem; border-radius: 12px; font-weight: 700;
+            font-size: 0.875rem; cursor: pointer; font-family: 'Inter', sans-serif;
+            transition: all 0.18s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .outline-btn:hover { background: var(--mango-pale); border-color: var(--mango-light); }
+
+        #preview3dOverlay { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        #preview3dOverlay.open { opacity: 1; pointer-events: auto; }
+        #preview3dOverlay .modal-container { transform: scale(0.9) translateY(20px); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        #preview3dOverlay.open .modal-container { transform: scale(1) translateY(0); }
+        #modelLoaderOverlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--cream); z-index: 20; transition: opacity 0.3s ease; }
+        #modelLoaderOverlay.hidden-loader { opacity: 0; pointer-events: none; }
+        .loader {
+            width: 48px; aspect-ratio: 1; border-radius: 50%;
+            background: radial-gradient(farthest-side,#ff9f4a 94%,#0000) top/8px 8px no-repeat, conic-gradient(#0000 30%,#ff9f4a);
+            -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 8px),#000 0);
+            animation: l13 1s infinite linear; display: inline-block;
+        }
+        @keyframes l13 { 100% { transform: rotate(1turn); } }
+
+        #toast {
+            position: fixed; bottom: calc(var(--footer-h) + 0.75rem); left: 50%;
+            transform: translateX(-50%) translateY(80px); background: var(--bark); color: white;
+            padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;
+            z-index: 9998; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+            pointer-events: none; white-space: nowrap;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+<header id="navbar">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 h-full lg:px-10">
+        <a href="index.html" class="flex items-center gap-2 flex-1" aria-label="LootYard home">
+            <img src="assets/chestnobg.png" alt="LootYard" class="h-10 w-10 object-contain">
+            <span class="font-hand text-2xl font-bold leading-none text-bark [text-shadow:0.5px_0_0_currentColor]">LootYard</span>
+        </a>
+        <nav aria-label="Section navigation" class="relative flex justify-center">
+            <ul id="sectionNav" class="relative hidden items-center rounded-full bg-white/70 p-1 ring-1 ring-bark/5 font-body text-sm font-bold text-bark md:flex">
+                <span id="navIndicator" style="width:7rem;transform:translateX(0px);opacity:1;"></span>
+                <li class="relative z-10 text-center" style="width:7rem;"><a data-section-link data-index="0" href="#" onclick="switchTab('assets');return false;" class="block rounded-full px-4 py-2 text-bark transition-colors duration-300 whitespace-nowrap">Assets</a></li>
+                <li class="relative z-10 text-center" style="width:7rem;"><a data-section-link data-index="1" href="#" onclick="switchTab('talent');return false;" class="block rounded-full px-4 py-2 text-bark/50 hover:text-bark transition-colors duration-300 whitespace-nowrap">Talent</a></li>
+            </ul>
+        </nav>
+        <div class="flex items-center gap-4 flex-1 justify-end">
+            <div class="search-bar flex items-center gap-2 px-3 py-1.5 flex-1 max-w-xs">
+                <svg class="w-3.5 h-3.5 text-taupe flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+                <input id="searchInput" type="text" placeholder="Search assets…" class="text-xs flex-1 placeholder:text-[#bba898]">
+            </div>
+            <div class="relative flex-shrink-0" id="authArea">
+                <div id="guestButtons" class="flex items-center gap-3">
+                    <button onclick="openAuth('login')" class="hidden text-xs font-bold text-bark/60 transition-colors hover:text-mango sm:inline">Log In</button>
+                    <button onclick="openAuth('signup')" class="flex items-center gap-2 rounded-full border border-bark/10 bg-white px-3 py-1.5 text-xs font-bold text-bark shadow-sm transition-all hover:-translate-y-0.5 hover:border-mango hover:shadow-md">
+                        <span class="grid h-6 w-6 place-items-center rounded-full bg-mango-soft">
+                            <svg viewBox="0 0 24 24" fill="currentColor" class="h-3 w-3 text-bark"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/></svg>
+                        </span>
+                        Sign Up
+                    </button>
+                </div>
+                <div id="userArea" class="hidden">
+                    <button class="avatar-ring" id="avatarBtn" onclick="toggleDropdown()">
+                        <img id="avatarImg" src="" alt="avatar">
+                    </button>
+                    <div id="profileDropdown">
+                        <div class="flex items-center gap-3 pb-2">
+                            <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border border-[var(--border)]">
+                                <img id="dropdownAvatar" src="" alt="avatar" class="w-full h-full object-cover">
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-sm font-bold text-[var(--bark)] truncate" id="dropdownName">—</p>
+                                <p class="text-[10px] text-[var(--taupe)] truncate" id="dropdownEmail">—</p>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" onclick="showPortfolio()">View Portfolio</button>
+                        <button class="dropdown-item" onclick="showNotifications()">Notifications</button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item danger" onclick="signOut()">Log out</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main id="mainContent" class="max-w-7xl mx-auto">
+
+    <!-- ASSETS VIEW -->
+    <div id="assetsView" class="view-layer">
+        <div class="toolbar-row">
+            <div id="categoryChips">
+                <button class="cat-chip active" data-cat="all">All</button>
+                <button class="cat-chip" data-cat="characters">Characters</button>
+                <button class="cat-chip" data-cat="props">Props</button>
+                <button class="cat-chip" data-cat="weapons">Weapons</button>
+                <button class="cat-chip" data-cat="vehicles">Vehicles</button>
+                <button class="cat-chip" data-cat="environments">Environment</button>
+                <button class="cat-chip" data-cat="vfx">VFX</button>
+                <button class="cat-chip" data-cat="ui">UI Kits</button>
+                <button class="cat-chip" data-cat="music">Music</button>
+                <button class="cat-chip" data-cat="animations">Animations</button>
+                <button class="cat-chip" data-cat="shaders">Shaders</button>
+                <button class="cat-chip" data-cat="textures">Textures</button>
+            </div>
+            <div class="sort-wrap" id="sortWrap">
+                <button class="sort-btn" id="sortBtn" onclick="toggleSortMenu()">
+                    <span id="sortLabel">Most Popular</span>
+                    <svg class="w-3.5 h-3.5 text-[var(--taupe)]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="sort-menu" id="sortMenu">
+                    <button class="sort-option active" data-sort="popular" onclick="setSort('popular')">
+                        <span class="sort-check"><svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>Most Popular
+                    </button>
+                    <button class="sort-option" data-sort="downloaded" onclick="setSort('downloaded')">
+                        <span class="sort-check"><svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>Most Downloaded
+                    </button>
+                    <button class="sort-option" data-sort="newest" onclick="setSort('newest')">
+                        <span class="sort-check"><svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>Newest
+                    </button>
+                    <button class="sort-option" data-sort="oldest" onclick="setSort('oldest')">
+                        <span class="sort-check"><svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>Oldest
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="showing-label" id="showingLabel">Showing Most Popular</div>
+        <div class="card-scroll" id="assetsScrollArea">
+            <div id="cardGrid" class="card-grid"></div>
+        </div>
+        <!-- COMING SOON BOX -->
+        <div id="comingSoonBox" class="hidden flex-1 flex flex-col items-center justify-center p-8 text-center">
+            <div class="coming-soon-box">
+                <span class="text-5xl mb-3 animate-bounce select-none">🚧</span>
+                <h2 class="font-display text-xl font-black text-[var(--bark)] mb-1">Coming Soon</h2>
+                <p class="text-sm text-[var(--taupe)] max-w-xs leading-relaxed">This category is under development. More LootYard assets are on the way.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TALENT VIEW -->
+    <div id="talentView" class="view-layer out" style="display:none;">
+        <div class="showing-label" style="flex-shrink:0;">Featured Creators</div>
+        <div class="talent-scroll">
+            <div id="talentGrid" class="talent-grid"></div>
+        </div>
+    </div>
+
+    <!-- PRODUCT DETAIL -->
+    <div id="productDetailView" style="display:none; opacity:0; pointer-events:none;">
+        <div class="sticky top-0 z-10 bg-[var(--cream)]/95 backdrop-blur px-6 py-3 flex items-center border-b border-[var(--border)]">
+            <button onclick="closePanel()" class="flex items-center gap-1.5 text-xs font-bold text-[var(--taupe)] hover:text-[var(--bark)] transition-colors uppercase tracking-wider">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                Go back
+            </button>
+        </div>
+        <div class="px-6 py-6">
+            <div class="flex flex-col lg:flex-row gap-6 items-start">
+                <div class="w-full lg:w-[60%] lg:sticky lg:top-14 shrink-0">
+                    <div onclick="open3dPreview()" class="w-full aspect-[16/10] rounded-[2rem] overflow-hidden border border-[var(--border)] bg-[var(--mango-pale)] relative shadow-sm cursor-pointer group">
+                        <img id="panelImage" src="" alt="" class="w-full h-full object-cover absolute inset-0 transition-transform duration-500 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-white gap-2 z-[2]">
+                            <span class="bg-white/20 p-3.5 rounded-full backdrop-blur-md border border-white/20 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                                <svg class="w-5 h-5 text-mango" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25"/></svg>
+                            </span>
+                            <span class="text-xs font-bold tracking-wider uppercase transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 delay-75">View in 3D</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full lg:flex-1 flex flex-col gap-4">
+                    <div class="space-y-0.5">
+                        <h1 id="panelTitle" class="font-display text-2xl font-black text-[var(--bark)] leading-tight"></h1>
+                        <p class="text-sm font-semibold text-[var(--taupe)]">by <a id="panelAuthor" href="#" class="creator-link"></a></p>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                        <div id="panelStars" class="stars text-sm"></div>
+                        <span id="panelRating" class="text-xs font-bold text-[var(--bark)]"></span>
+                        <span id="panelReviewCount" class="text-xs text-[var(--taupe)] font-medium"></span>
+                    </div>
+                    <div class="space-y-1.5">
+                        <h4 class="text-[10px] font-black text-[var(--taupe)] uppercase tracking-wider">Tags</h4>
+                        <div id="panelTags" class="flex flex-wrap gap-1.5"></div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <h4 class="text-[10px] font-black text-[var(--taupe)] uppercase tracking-wider">Description</h4>
+                        <p id="panelDesc" class="text-sm text-[var(--taupe)] leading-relaxed"></p>
+                    </div>
+                    <button onclick="open3dPreview()" class="outline-btn detail-action-btn w-full py-3 text-sm font-extrabold">
+                        <svg class="w-4 h-4 text-mango" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25"/></svg>
+                        View in 3D
+                    </button>
+                    <button id="downloadBtn" onclick="handleDownload()" class="mango-btn detail-action-btn w-full py-3 text-sm font-extrabold shadow-md hover:-translate-y-0.5 transition-all">Log in to Download</button>
+                    <div class="h-px bg-[var(--border)]"></div>
+                    <div>
+                        <h3 class="text-xs font-bold text-[var(--taupe)] uppercase tracking-wider mb-3">Reviews</h3>
+                        <div class="reviews-container">
+                            <div id="reviewsScrollContainer" class="max-h-[240px] overflow-hidden transition-all duration-700 relative cursor-pointer">
+                                <div id="reviewList" class="flex flex-col gap-3"></div>
+                            </div>
+                            <div id="reviewsFadeOverlay" class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[var(--cream)] via-[var(--cream)]/85 to-transparent flex flex-col justify-end items-center pb-2 transition-opacity duration-500 z-10 pointer-events-none" style="opacity:0;display:none;">
+                                <span class="bg-[var(--bark)] text-white text-[10px] font-bold px-3 py-2 rounded-full shadow-lg flex items-center gap-1.5 animate-bounce select-none">
+                                    <svg class="w-3 h-3 text-mango" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                    Scroll to explore
+                                </span>
+                            </div>
+                        </div>
+                        <div id="commentForm" class="hidden flex items-center gap-3 mt-3">
+                            <img id="commentAvatar" src="" alt="" class="w-8 h-8 rounded-full border border-[var(--border)] flex-shrink-0 object-cover">
+                            <div class="flex-1 flex gap-2">
+                                <input id="commentInput" type="text" placeholder="Add a comment…" class="flex-1 text-xs px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-white outline-none focus:border-[var(--mango)] transition-colors font-inter">
+                                <button onclick="submitComment()" class="mango-btn text-xs px-4 py-2 font-bold">Post</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer id="siteFooter">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 h-full lg:px-10">
+        <div class="flex items-center gap-2">
+            <img src="assets/chestnobg.png" alt="" class="h-6 w-6 object-contain">
+            <span class="font-hand text-base font-bold text-bark [text-shadow:0.5px_0_0_currentColor]">LootYard</span>
+            <span class="hidden sm:inline ml-1.5 text-[10px] text-bark/40">Free assets, real creators</span>
+        </div>
+        <p class="text-[10px] text-bark/40 hidden sm:block">© 2026 LootYard</p>
+        <div class="flex gap-3 text-bark/40">
+            <a href="#" class="hover:text-mango transition-colors" aria-label="X"><svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+            <a href="#" class="hover:text-mango transition-colors" aria-label="GitHub"><svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/></svg></a>
+        </div>
+    </div>
+</footer>
+
+<!-- 3D MODAL -->
+<div id="preview3dOverlay" class="fixed inset-0 z-[10000] flex items-center justify-center bg-[var(--bark)]/85 backdrop-blur-md">
+    <div class="absolute inset-0" onclick="close3dPreview()"></div>
+    <div class="modal-container relative w-full max-w-4xl aspect-[16/10] bg-[var(--cream)] rounded-[2.5rem] border border-[var(--border)] overflow-hidden shadow-2xl m-4">
+        <button onclick="close3dPreview()" class="absolute top-5 right-5 z-50 bg-white/90 hover:bg-white border border-[var(--border)] p-2.5 rounded-full shadow-md text-[var(--bark)] transition-all hover:scale-105" aria-label="Close">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <model-viewer id="overlayModel" src="chest.glb" alt="3D model viewer" auto-rotate camera-controls interaction-prompt="none" class="w-full h-full"></model-viewer>
+        <div id="modelLoaderOverlay" class="absolute inset-0 flex items-center justify-center bg-[var(--cream)] z-20"><span class="loader"></span></div>
+    </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div id="authModal">
+    <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" onclick="closeAuth()"></div>
+    <div class="auth-card">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="font-display text-xl font-bold text-[var(--bark)]" id="authTitle">Welcome back</h2>
+                <p class="text-xs text-[var(--taupe)] mt-0.5" id="authSubtitle">Log in to download and review assets</p>
+            </div>
+            <button onclick="closeAuth()" class="w-8 h-8 flex items-center justify-center rounded-full border border-[var(--border)] hover:bg-[var(--mango-pale)] transition-colors text-[var(--taupe)]">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <button class="oauth-btn mb-3" onclick="loginWithGoogle()">
+            <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Continue with Google
+        </button>
+        <button class="oauth-btn mb-5" onclick="loginWithGitHub()">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/></svg>
+            Continue with GitHub
+        </button>
+        <div class="flex items-center gap-3 mb-5">
+            <div class="flex-1 h-px bg-[var(--border)]"></div>
+            <span class="text-[10px] font-bold text-[var(--taupe)] uppercase tracking-wider">or</span>
+            <div class="flex-1 h-px bg-[var(--border)]"></div>
+        </div>
+        <div class="flex flex-col gap-3 mb-5">
+            <input id="authEmail" type="email" placeholder="Email address" class="text-sm px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--mango-pale)] outline-none focus:border-[var(--mango)] transition-colors font-inter w-full">
+            <input id="authPassword" type="password" placeholder="Password" class="text-sm px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--mango-pale)] outline-none focus:border-[var(--mango)] transition-colors font-inter w-full">
+            <div id="authNameRow" class="hidden">
+                <input id="authName" type="text" placeholder="Display name" class="text-sm px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--mango-pale)] outline-none focus:border-[var(--mango)] transition-colors font-inter w-full">
+            </div>
+        </div>
+        <button id="authSubmitBtn" class="oauth-btn primary-btn mb-4" onclick="handleEmailAuth()">Log in</button>
+        <p class="text-center text-xs text-[var(--taupe)]" id="authToggleText">Don't have an account? <button onclick="toggleAuthMode()" class="font-bold text-[var(--mango)] hover:underline">Sign up</button></p>
+        <p id="authError" class="text-center text-xs text-red-500 mt-2 hidden"></p>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBxFuzLh-o7jqUr6LInMQbpkP3zny1h1kk",
+  authDomain: "lootyard-xyz.firebaseapp.com",
+  projectId: "lootyard-xyz",
+  storageBucket: "lootyard-xyz.firebasestorage.app",
+  messagingSenderId: "376623956358",
+  appId: "1:376623956358:web:79a5609ecc0888534a6c07",
+  measurementId: "G-V9FXDS2Q5Y"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ────────────────────────────────────────────────────────────────
+// CREATOR CONSOLIDATION MAP
+// Merges single-asset creators into existing ones for richer profiles
+// ────────────────────────────────────────────────────────────────
+const CREATOR_MERGE_MAP = {
+    'ironforge':   'neonpulse',
+    'mossyman':    'leafwork',
+    'lootmaster':  'stonearch',
+    'relic_hunter':'stonearch',
+    'wizardry':    'wizardry',
+    'wizard_vfx':  'wizardry',
+    'plasmacut':   'plasmacut',
+    'volt_vfx':    'plasmacut',
+    'quantum_vfx': 'plasmacut',
+    'bladesmth':   'bladesmth',
+    'armoury':     'bladesmth',
+    'rocketboy':   'hovercraft',
+    'hovercraft':  'hovercraft',
+    'dronetech':   'hovercraft',
+    'sandstorm':   'hovercraft',
+    'cyberui':     'cyberui',
+    'pixelpush':   'cyberui',
+    'menumaster':  'cyberui',
+    'rpg_ui':      'cyberui',
+};
+
+const CREATOR_DISPLAY_NAMES = {
+    'leafwork':   'LeafWork Studios',
+    'neonpulse':  'NeonPulse',
+    'stonearch':  'StoneArch',
+    'anya_3d':    'Anya 3D',
+    'bladesmth': 'BladeSmith',
+    'wizardry':   'Wizardry FX',
+    'plasmacut':  'PlasmaCut',
+    'hovercraft': 'HoverCraft',
+    'skybound':   'SkyBound',
+    'vfxlab':     'VFX Lab',
+    'cyberui':    'CyberUI',
+};
+
+const CATEGORY_TITLES = {
+    'characters':   'Character Artist',
+    'props':        'Props Artist',
+    'weapons':      'Weapon Artist',
+    'vehicles':     'Vehicle Artist',
+    'environments': 'Environment Artist',
+    'vfx':          'VFX Artist',
+    'ui':           'UI Designer',
+};
+
+// ────────────────────────────────────────────────────────────────
+// DATA LOADING
+// ────────────────────────────────────────────────────────────────
+let dbProducts = [];
+let generatedCreators = [];
+
+function loadProducts() {
+    // Step 1: Consolidate creators in asset data
+    MOCK_ASSETS.forEach((a, i) => {
+        if (!a.author) a.author = a.creator;
+        if (!a.desc) a.desc = a.description;
+
+        // Apply creator merge
+        const merged = CREATOR_MERGE_MAP[a.creator];
+        if (merged) {
+            a.creator = merged;
+            a.author = merged;
+        }
+
+        // Real rating from reviews
+        const revs = MOCK_REVIEWS[a.id] || [];
+        if (revs.length > 0) {
+            a.rating = Math.round((revs.reduce((s, r) => s + r.rating, 0) / revs.length) * 10) / 10;
+        } else {
+            a.rating = Math.round((4.2 + (i % 5) * 0.15) * 10) / 10;
+        }
+        a.reviews = revs.length;
+        a._idx = i;
+        a._downloads = revs.length * 120 + Math.floor(Math.random() * 800) + 200;
+    });
+
+    dbProducts = [...MOCK_ASSETS];
+
+    // Step 2: Generate creator profiles from assets
+    generatedCreators = generateCreators(dbProducts);
+    // Expose globally for portfolio page
+    window.GENERATED_CREATORS = generatedCreators;
+
+    renderGrid();
+    renderTalent();
+}
+
+// ────────────────────────────────────────────────────────────────
+// GENERATE CREATORS FROM ASSET DATA
+// ────────────────────────────────────────────────────────────────
+function generateCreators(assets) {
+    const activeAssets = assets.filter(a => a.status !== 'coming-soon');
+    const map = {};
+
+    activeAssets.forEach(a => {
+        const u = a.creator;
+        if (!map[u]) {
+            map[u] = {
+                username: u,
+                displayName: CREATOR_DISPLAY_NAMES[u] || u,
+                assetIds: [],
+                categories: new Set(),
+                allTags: [],
+                totalRating: 0,
+                totalReviews: 0,
+                totalDownloads: 0,
+                thumbnails: [],
+            };
+        }
+        const c = map[u];
+        c.assetIds.push(a.id);
+        c.categories.add(a.category);
+        c.allTags.push(...(a.tags || []));
+        c.totalRating += a.rating;
+        c.totalReviews += a.reviews;
+        c.totalDownloads += a._downloads;
+        if (c.thumbnails.length < 3) {
+            c.thumbnails.push(a.thumbnailUrl);
+        }
+    });
+
+    return Object.values(map).map(c => {
+        const count = c.assetIds.length;
+        const avgRating = Math.round((c.totalRating / count) * 10) / 10;
+
+        // Derive title from categories
+        const catTitles = [...c.categories]
+            .sort()
+            .map(cat => CATEGORY_TITLES[cat] || cat)
+            .slice(0, 2);
+        const title = catTitles.join(' & ');
+
+        // Pick top skills from tags (most frequent, cap at 4)
+        const tagCount = {};
+        c.allTags.forEach(t => { tagCount[t] = (tagCount[t] || 0) + 1; });
+        const topTags = Object.entries(tagCount)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 4)
+            .map(([t]) => t);
+
+        // Generate bio from data
+        const bio = generateBio(c.categories, count, topTags);
+
+        return {
+            username: c.username,
+            displayName: c.displayName,
+            title: title,
+            bio: bio,
+            skills: topTags,
+            assetCount: count,
+            avgRating: avgRating,
+            totalReviews: c.totalReviews,
+            totalDownloads: c.totalDownloads,
+            categories: [...c.categories],
+            assetIds: c.assetIds,
+            thumbnails: c.thumbnails,
+        };
+    }).sort((a, b) => b.assetCount - a.assetCount);
+}
+
+function generateBio(categories, count, tags) {
+    const cats = [...categories];
+    const hasChar = cats.includes('characters');
+    const hasEnv = cats.includes('environments');
+    const hasVFX = cats.includes('vfx');
+    const hasUI = cats.includes('ui');
+    const hasVeh = cats.includes('vehicles');
+
+    if (hasChar && hasEnv) return `Creating charming stylized characters and immersive environments for indie games. Specializing in cohesive art direction across ${count} published assets.`;
+    if (hasChar) return `Crafting detailed ${count > 2 ? 'and versatile' : ''} character models with a focus on expressive design and clean topology. ${count} asset${count > 1 ? 's' : ''} published on LootYard.`;
+    if (hasEnv) return `Building modular and immersive environment kits that snap together seamlessly. ${count} asset${count > 1 ? 's' : ''} published, covering ${cats.length} category${cats.length > 1 ? 'ies' : 'y'}.`;
+    if (hasVFX) return `Producing optimized particle effects and VFX for real-time game engines. ${count} asset${count > 1 ? 's' : ''} available with GPU-ready flipbooks and Niagara/VFX Graph support.`;
+    if (hasUI) return `Designing clean, functional game UI components — from HUDs to inventory systems. ${count} asset${count > 1 ? 's' : ''} published with consistent visual language.`;
+    if (hasVeh) return `Engineering detailed vehicle models with working animations and optimized meshes. ${count} asset${count > 1 ? 's' : ''} ready for open-world and racing game projects.`;
+    return `Specializing in high-quality game-ready ${tags[0] || '3D'} assets. ${count} published asset${count > 1 ? 's' : ''} on LootYard with a focus on performance and visual fidelity.`;
+}
+
+// ────────────────────────────────────────────────────────────────
+// UTILITIES
+// ────────────────────────────────────────────────────────────────
+function thumbUrl(p) { return p.thumbnailUrl || 'assets/chestnobg.png'; }
+function avatarUrl(u) { return `https://api.dicebear.com/8.x/thumbs/svg?seed=${encodeURIComponent(u)}&backgroundColor=ffd2aa,fff0df,ffe4c4&shapeColor=ff9f4a,c0714a`; }
+async function gravatarUrl(email) {
+    const d = new TextEncoder().encode(email.trim().toLowerCase());
+    const h = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', d))).map(b => b.toString(16).padStart(2, '0')).join('');
+    return `https://www.gravatar.com/avatar/${h}?s=80&d=404`;
+}
+
+// ─── STATE ──────────────────────────────────────────────────
+let currentUser = null, currentProd = null, authMode = 'login';
+let activeTab = 'assets', activeCat = 'all', activeSort = 'popular';
+
+const SORT_LABELS = { popular: 'Most Popular', downloaded: 'Most Downloaded', newest: 'Newest', oldest: 'Oldest' };
+
+// ─── SORT DROPDOWN ──────────────────────────────────────────
+function toggleSortMenu() {
+    const menu = document.getElementById('sortMenu');
+    const btn = document.getElementById('sortBtn');
+    const isOpen = menu.classList.contains('open');
+    menu.classList.toggle('open', !isOpen);
+    btn.classList.toggle('open', !isOpen);
+}
+
+function setSort(sort) {
+    activeSort = sort;
+    document.getElementById('sortLabel').textContent = SORT_LABELS[sort];
+    document.getElementById('showingLabel').textContent = 'Showing ' + SORT_LABELS[sort];
+    document.querySelectorAll('.sort-option').forEach(opt => opt.classList.toggle('active', opt.dataset.sort === sort));
+    toggleSortMenu();
+    renderGrid();
+}
+
+document.addEventListener('click', e => {
+    if (!document.getElementById('sortWrap').contains(e.target)) {
+        document.getElementById('sortMenu').classList.remove('open');
+        document.getElementById('sortBtn').classList.remove('open');
+    }
+});
+
+// ─── VIEW MANAGEMENT ───────────────────────────────────────
+const VIEWS = ['assetsView', 'talentView'];
+
+function showView(targetId) {
+    VIEWS.forEach(id => {
+        const el = document.getElementById(id);
+        if (id === targetId) {
+            if (el.style.display === 'none') { el.style.display = 'flex'; void el.offsetHeight; }
+            el.classList.remove('out');
+        } else {
+            el.classList.add('out');
+            setTimeout(() => { if (el.classList.contains('out')) el.style.display = 'none'; }, 320);
+        }
+    });
+}
+
+// ─── GET + SORT PRODUCTS ───────────────────────────────────
+function getSortedProducts() {
+    let list = dbProducts.filter(p => p.status !== 'coming-soon');
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    if (q) list = list.filter(p => p.title.toLowerCase().includes(q) || p.creator.toLowerCase().includes(q) || (p.tags || []).some(t => t.toLowerCase().includes(q)));
+    if (activeCat !== 'all' && !['music', 'animations', 'shaders', 'textures'].includes(activeCat)) list = list.filter(p => p.category === activeCat);
+    switch (activeSort) {
+        case 'popular': list.sort((a, b) => b.rating - a.rating); break;
+        case 'downloaded': list.sort((a, b) => b._downloads - a._downloads); break;
+        case 'newest': list.sort((a, b) => b._idx - a._idx); break;
+        case 'oldest': list.sort((a, b) => a._idx - b._idx); break;
+    }
+    return list;
+}
+
+// ─── RENDER ASSET GRID ─────────────────────────────────────
+function renderGrid() {
+    const grid = document.getElementById('cardGrid');
+    const items = getSortedProducts();
+    grid.innerHTML = '';
+    if (items.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><span>🔍</span><span>No assets found</span></div>';
+        return;
+    }
+    items.forEach(p => grid.appendChild(buildCard(p)));
+}
+
+function buildCard(product) {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.setAttribute('data-product-id', product.id);
+    const badge = product.rating >= 4.8 ? '<div class="card-badge">Hot</div>' : '';
+    card.innerHTML = `
+        ${badge}
+        <div class="card-img-wrap">
+            <div class="skeleton absolute inset-0"></div>
+            <img src="${thumbUrl(product)}" alt="${product.title}" loading="lazy" onload="this.previousElementSibling.style.display='none'">
+        </div>
+        <div class="card-info">
+            <h3 class="text-xs font-bold text-[var(--bark)] truncate">${product.title}</h3>
+            <p class="text-[11px] text-[var(--taupe)] mt-0.5 flex items-center gap-1">
+                <img src="${avatarUrl(product.creator)}" width="14" height="14" class="w-3.5 h-3.5 rounded-full flex-shrink-0 border border-[var(--border)] object-cover" alt="">
+                <span class="truncate">${product.creator}</span>
+            </p>
+            <div class="flex items-center justify-between mt-1">
+                <div class="stars text-[11px]">${'★'.repeat(Math.floor(product.rating))}</div>
+                <span class="text-[9px] text-[var(--taupe)]">${product.rating} (${product.reviews || 0})</span>
+            </div>
+        </div>
+    `;
+    return card;
+}
+
+document.addEventListener('click', function(e) {
+    const card = e.target.closest('.product-card');
+    if (!card) return;
+    const product = dbProducts.find(p => p.id === card.getAttribute('data-product-id'));
+    if (product) openPanel(product);
+});
+
+// ────────────────────────────────────────────────────────────────
+// RENDER TALENT — fully data-driven from generated creators
+// ────────────────────────────────────────────────────────────────
+function renderTalent() {
+    const grid = document.getElementById('talentGrid');
+    grid.innerHTML = '';
+
+    if (generatedCreators.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><span>👥</span><span>No creators yet</span></div>';
+        return;
+    }
+
+    generatedCreators.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'creator-card';
+        card.onclick = function() { window.location.href = 'portfolio.html?creator=' + c.username; };
+
+        // Build thumbnail preview (up to 3)
+        const previewHTML = c.thumbnails.length > 0
+            ? `<div class="creator-preview">${c.thumbnails.map(t => `<img src="${t}" alt="" loading="lazy">`).join('')}</div>`
+            : '';
+
+        // Download count as readable string
+        const dlStr = c.totalDownloads >= 1000 ? (c.totalDownloads / 1000).toFixed(1) + 'k' : c.totalDownloads;
+
+        card.innerHTML = `
+            <div class="creator-top">
+                <img src="${avatarUrl(c.username)}" width="44" height="44" class="creator-avatar" alt="${c.displayName}">
+                <div class="min-w-0">
+                    <div class="creator-name">${c.displayName}</div>
+                    <div class="creator-title">${c.title}</div>
+                </div>
+            </div>
+            <div class="creator-bio">${c.bio}</div>
+            <div class="creator-skills">${c.skills.map(s => `<span class="creator-skill">${s}</span>`).join('')}</div>
+            ${previewHTML}
+            <div class="creator-stats">
+                <span><strong>${c.assetCount}</strong> asset${c.assetCount > 1 ? 's' : ''}</span>
+                <span class="stars">${'★'.repeat(Math.floor(c.avgRating))} <strong>${c.avgRating}</strong></span>
+                <span>💬 ${c.totalReviews}</span>
+                <span>⬇ ${dlStr}</span>
+            </div>
+        `;
+
+        grid.appendChild(card);
+    });
+}
+
+// ────────────────────────────────────────────────────────────────
+// PRODUCT DETAIL
+// ────────────────────────────────────────────────────────────────
+function openPanel(product) {
+    currentProd = product;
+    const detail = document.getElementById('productDetailView');
+    document.getElementById('panelImage').src = thumbUrl(product);
+    document.getElementById('panelImage').alt = product.title;
+    document.getElementById('panelTitle').textContent = product.title;
+    document.getElementById('panelAuthor').textContent = product.creator;
+    document.getElementById('panelAuthor').href = 'portfolio.html?creator=' + product.creator;
+    document.getElementById('panelDesc').textContent = product.desc || product.description;
+    document.getElementById('panelStars').textContent = '★'.repeat(Math.floor(product.rating));
+    document.getElementById('panelRating').textContent = product.rating.toFixed(1);
+    document.getElementById('panelReviewCount').textContent = `(${product.reviews || 0} reviews)`;
+    document.getElementById('panelTags').innerHTML = (product.tags || []).map(t => `<span class="cat-chip text-[10px] py-1 px-2.5" style="cursor:default">${t}</span>`).join('');
+    renderReviews(product.id);
+    updateDownloadBtn(!!currentUser);
+    detail.style.display = 'block';
+    detail.style.pointerEvents = 'auto';
+    void detail.offsetHeight;
+    detail.style.opacity = '1';
+    detail.scrollTop = 0;
+}
+
+function closePanel() {
+    const detail = document.getElementById('productDetailView');
+    detail.style.opacity = '0';
+    detail.style.pointerEvents = 'none';
+    setTimeout(() => { detail.style.display = 'none'; currentProd = null; }, 310);
+}
+
+// ─── 3D PREVIEW ────────────────────────────────────────────
+let modelTimeout = null;
+function open3dPreview() {
+    if (!currentProd) return;
+    const mv = document.getElementById('overlayModel');
+    const ld = document.getElementById('modelLoaderOverlay');
+    ld.classList.remove('hidden-loader'); ld.style.display = 'flex'; ld.style.opacity = '1';
+    mv.src = ''; void mv.offsetHeight; mv.src = 'chest.glb';
+    document.getElementById('preview3dOverlay').classList.add('open');
+    clearTimeout(modelTimeout);
+    modelTimeout = setTimeout(hideLoader, 5000);
+}
+function hideLoader() {
+    const ld = document.getElementById('modelLoaderOverlay');
+    ld.style.opacity = '0';
+    setTimeout(() => { ld.style.display = 'none'; ld.classList.add('hidden-loader'); }, 300);
+    clearTimeout(modelTimeout);
+}
+function close3dPreview() { document.getElementById('preview3dOverlay').classList.remove('open'); clearTimeout(modelTimeout); }
+document.addEventListener('DOMContentLoaded', () => {
+    const mv = document.getElementById('overlayModel');
+    mv.addEventListener('load', hideLoader);
+    mv.addEventListener('error', hideLoader);
+});
+
+// ─── REVIEWS ───────────────────────────────────────────────
+function renderReviews(id) {
+    const list = document.getElementById('reviewList');
+    const reviews = MOCK_REVIEWS[id] || [];
+    list.innerHTML = '';
+    if (!reviews.length) { list.innerHTML = '<p class="text-xs text-[var(--taupe)]">No reviews yet.</p>'; hideFade(); return; }
+    reviews.forEach(r => {
+        const d = document.createElement('div'); d.className = 'flex gap-2.5';
+        d.innerHTML = `<img src="${avatarUrl(r.username)}" width="28" height="28" class="w-7 h-7 rounded-full border border-[var(--border)] object-cover flex-shrink-0" alt="">
+            <div class="flex-1 min-w-0"><div class="flex items-center gap-2"><span class="text-xs font-bold text-[var(--bark)]">${r.username}</span><span class="stars text-[10px]">${'★'.repeat(r.rating)}</span></div><p class="text-xs text-[var(--taupe)] mt-0.5 leading-relaxed">${r.comment}</p><p class="text-[10px] text-[var(--taupe)]/50 mt-0.5">${timeAgo(r.createdAt)}</p></div>`;
+        list.appendChild(d);
+    });
+    const fade = document.getElementById('reviewsFadeOverlay');
+    if (reviews.length > 3) { fade.style.display = 'flex'; requestAnimationFrame(() => fade.style.opacity = '1'); } else hideFade();
+    const c = document.getElementById('reviewsScrollContainer');
+    c.style.maxHeight = '240px'; c.style.overflow = 'hidden'; c._expanded = false;
+}
+function hideFade() { const f = document.getElementById('reviewsFadeOverlay'); f.style.opacity = '0'; setTimeout(() => f.style.display = 'none', 500); }
+document.getElementById('reviewsScrollContainer').addEventListener('click', function() {
+    if (!this._expanded) { this.style.maxHeight = 'none'; this.style.overflow = 'visible'; this._expanded = true; hideFade(); }
+});
+function timeAgo(d) { const s = Math.floor((Date.now() - new Date(d)) / 1000); if (s < 60) return 'just now'; if (s < 3600) return `${Math.floor(s / 60)}m ago`; if (s < 86400) return `${Math.floor(s / 3600)}h ago`; return `${Math.floor(s / 86400)}d ago`; }
+
+// ─── DOWNLOAD / COMMENTS ───────────────────────────────────
+function handleDownload() { if (!currentUser) { openAuth('login'); return; } toast('Download started!'); }
+function updateDownloadBtn(l) { document.getElementById('downloadBtn').textContent = l ? 'Download Free' : 'Log in to Download'; }
+function updateCommentUI(l) { document.getElementById('commentForm').classList.toggle('hidden', !l); }
+function submitComment() {
+    if (!currentUser || !currentProd) return;
+    const t = document.getElementById('commentInput').value.trim(); if (!t) return;
+    if (!MOCK_REVIEWS[currentProd.id]) MOCK_REVIEWS[currentProd.id] = [];
+    MOCK_REVIEWS[currentProd.id].unshift({ username: currentUser.displayName || currentUser.email.split('@')[0], rating: 5, comment: t, createdAt: new Date().toISOString() });
+    document.getElementById('commentInput').value = '';
+    renderReviews(currentProd.id); toast('Comment posted!');
+}
+
+// ─── TAB SWITCHING ─────────────────────────────────────────
+function switchTab(tab) {
+    // Close detail panel if open
+    const detail = document.getElementById('productDetailView');
+    if (detail && detail.style.display !== 'none') {
+        closePanel();
+    }
+
+    activeTab = tab;
+    const idx = tab === 'assets' ? 0 : 1;
+    document.querySelectorAll('[data-section-link]').forEach(l => {
+        const i = parseInt(l.dataset.index);
+        l.classList.toggle('text-bark', i === idx);
+        l.classList.toggle('text-bark/50', i !== idx);
+    });
+    document.getElementById('navIndicator').style.transform = `translateX(${idx * 112}px)`;
+    if (tab === 'assets') {
+        showView('assetsView');
+        updateCategoryView();
+    } else {
+        showView('talentView');
+    }
+}
+
+// ─── CATEGORY CHIPS ────────────────────────────────────────
+document.querySelectorAll('.cat-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+        activeCat = chip.dataset.cat;
+        document.querySelectorAll('.cat-chip').forEach(c => c.classList.toggle('active', c.dataset.cat === activeCat));
+        updateCategoryView();
+    });
+});
+
+function updateCategoryView() {
+    const isComingSoon = ['music', 'animations', 'shaders', 'textures'].includes(activeCat);
+    document.getElementById('showingLabel').style.display = isComingSoon ? 'none' : 'block';
+    document.getElementById('assetsScrollArea').style.display = isComingSoon ? 'none' : 'block';
+    document.getElementById('comingSoonBox').classList.toggle('hidden', !isComingSoon);
+    
+    const sortWrap = document.getElementById('sortWrap');
+    if (sortWrap) {
+        sortWrap.style.visibility = isComingSoon ? 'hidden' : 'visible';
+    }
+
+    if (!isComingSoon) {
+        renderGrid();
+    }
+}
+
+// ─── SEARCH ────────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', function() {
+    if (activeTab !== 'assets') { activeTab = 'assets'; switchTab('assets'); }
+    if (['music', 'animations', 'shaders', 'textures'].includes(activeCat)) return;
+    renderGrid();
+});
+
+// ─── AUTH ──────────────────────────────────────────────────
+auth.onAuthStateChanged(async user => {
+    currentUser = user;
+    if (user) {
+        document.getElementById('guestButtons').classList.add('hidden');
+        document.getElementById('userArea').classList.remove('hidden');
+        updateAvatarUI(user);
+        try { await db.collection('users').doc(user.uid).set({ uid: user.uid, displayName: user.displayName || user.email.split('@')[0], email: user.email, photoURL: user.photoURL || '', lastSeen: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }); } catch (e) {}
+        if (currentProd) updateDownloadBtn(true);
+        updateCommentUI(true); closeAuth();
+    } else {
+        document.getElementById('guestButtons').classList.remove('hidden');
+        document.getElementById('userArea').classList.add('hidden');
+        if (currentProd) updateDownloadBtn(false);
+        updateCommentUI(false);
+    }
+});
+
+async function updateAvatarUI(user) {
+    const name = user.displayName || user.email.split('@')[0];
+    let src = avatarUrl(name);
+    if (user.photoURL) src = user.photoURL;
+    else { try { const g = await gravatarUrl(user.email); if ((await fetch(g, { method: 'HEAD' })).ok) src = g; } catch (_) {} }
+    document.getElementById('avatarImg').src = src;
+    document.getElementById('dropdownAvatar').src = src;
+    document.getElementById('dropdownName').textContent = name;
+    document.getElementById('dropdownEmail').textContent = user.email;
+    document.getElementById('commentAvatar').src = src;
+}
+
+async function loginWithGoogle() { try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); } catch (e) { showAuthError(e.message); } }
+async function loginWithGitHub() { try { await auth.signInWithPopup(new firebase.auth.GithubAuthProvider()); } catch (e) { showAuthError(e.message); } }
+async function handleEmailAuth() {
+    const email = document.getElementById('authEmail').value.trim(), pass = document.getElementById('authPassword').value, name = document.getElementById('authName').value.trim();
+    if (!email || !pass) { showAuthError('Please fill in all fields.'); return; }
+    try { if (authMode === 'signup') { const c = await auth.createUserWithEmailAndPassword(email, pass); await c.user.updateProfile({ displayName: name || email.split('@')[0] }); } else await auth.signInWithEmailAndPassword(email, pass); }
+    catch (e) { showAuthError(e.code === 'auth/wrong-password' ? 'Incorrect password.' : e.code === 'auth/user-not-found' ? 'No account with that email.' : e.code === 'auth/email-already-in-use' ? 'Email already in use.' : e.message); }
+}
+function toggleAuthMode() {
+    authMode = authMode === 'login' ? 'signup' : 'login'; const s = authMode === 'signup';
+    document.getElementById('authTitle').textContent = s ? 'Create account' : 'Welcome back';
+    document.getElementById('authSubtitle').textContent = s ? 'Join the LootYard community' : 'Log in to download and review assets';
+    document.getElementById('authSubmitBtn').textContent = s ? 'Sign up' : 'Log in';
+    document.getElementById('authToggleText').innerHTML = s ? 'Already have an account? <button onclick="toggleAuthMode()" class="font-bold text-[var(--mango)] hover:underline">Log in</button>' : 'Don\'t have an account? <button onclick="toggleAuthMode()" class="font-bold text-[var(--mango)] hover:underline">Sign up</button>';
+    document.getElementById('authNameRow').classList.toggle('hidden', !s); hideAuthError();
+}
+async function signOut() { await auth.signOut(); closeDropdown(); toast('Logged out.'); }
+function openAuth(m = 'login') { authMode = 'login'; if (m === 'signup') toggleAuthMode(); document.getElementById('authModal').classList.add('open'); }
+function closeAuth() { document.getElementById('authModal').classList.remove('open'); }
+function showAuthError(m) { const e = document.getElementById('authError'); e.textContent = m; e.classList.remove('hidden'); }
+function hideAuthError() { document.getElementById('authError').classList.add('hidden'); }
+
+function toggleDropdown() { document.getElementById('profileDropdown').classList.toggle('open'); document.getElementById('avatarBtn').classList.toggle('open-state'); }
+function closeDropdown() { document.getElementById('profileDropdown').classList.remove('open'); document.getElementById('avatarBtn').classList.remove('open-state'); }
+document.addEventListener('click', e => { if (!document.getElementById('userArea').contains(e.target)) closeDropdown(); });
+function showPortfolio() { closeDropdown(); window.location.href = 'portfolio.html'; }
+function showNotifications() { toast('No new notifications.'); closeDropdown(); }
+
+function toast(m) { const e = document.getElementById('toast'); e.textContent = m; e.classList.add('show'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('show'), 2500); }
+
+// ─── INIT ──────────────────────────────────────────────────
+loadProducts();
+const urlParams = new URLSearchParams(window.location.search);
+const tabParam = urlParams.get('tab');
+if (tabParam === 'talent' || tabParam === 'assets') {
+    switchTab(tabParam);
+}
+const authParam = urlParams.get('auth');
+if (authParam === 'login' || authParam === 'signup') {
+    openAuth(authParam);
+}
+</script>
+</body>
+</html>

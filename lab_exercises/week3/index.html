@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LootYard — Free game assets, always</title>
+    <meta name="description" content="Engine-ready 3D models, SFX, animations and code — completely free, no account needed. Or hire a creator for custom work.">
+    <link rel="icon" type="image/png" href="assets/chestnobg.png">
+    <link rel="shortcut icon" type="image/png" href="assets/icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#fff8f1',
+                        bark: '#15110d',
+                        mango: '#ff9f4a',
+                        'mango-soft': '#ffd2aa',
+                        'mango-pale': '#fff0df',
+                        taupe: '#8a7564',
+                        brown: '#5c4a3c',
+                    },
+                    fontFamily: {
+                        display: ['Bricolage Grotesque', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                        hand: ['Caveat', 'cursive'],
+                    }
+                }
+            }
+        }
+    </script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/hung1001/font-awesome-pro@4cac1a6/css/all.css">
+
+    <style>
+        :root {
+            --cream: #fff8f1;
+            --bark: #15110d;
+            --mango: #ff9f4a;
+            --mango-light: #ffd2aa;
+            --mango-pale: #fff0df;
+            --taupe: #8a7564;
+            --brown: #5c4a3c;
+            --card-bg: #fffcf8;
+            --border: #f0e7dd;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            background-color: var(--cream);
+            color: var(--bark);
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom scrollbar */
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: var(--mango) var(--cream);
+        }
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--cream);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--mango);
+            border: 3px solid var(--cream);
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--bark);
+        }
+
+        /* Noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Typography */
+        .font-display { font-family: 'Bricolage Grotesque', sans-serif; }
+
+        @font-face {
+            font-family: "Magic Jasmine";
+            src: url("assets/fonts/child-hood/ChildHood.otf") format("truetype");
+        }
+
+        /* Keyframes */
+        @keyframes shine {
+            0% { background-position: -120% 0; }
+            100% { background-position: 220% 0; }
+        }
+
+        @keyframes wordSwap7 {
+            0% { opacity: 0; transform: translateY(110%); }
+            1.5% { opacity: 1; transform: translateY(0); }
+            12.5% { opacity: 1; transform: translateY(0); }
+            14.28%, 100% { opacity: 0; transform: translateY(-110%); }
+        }
+
+        @keyframes floatModel {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes floatModelSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-14px) rotate(1.5deg); }
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes orb1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(40px, -30px) scale(1.08); }
+        }
+
+        @keyframes orb2 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-30px, 25px) scale(0.94); }
+        }
+
+        /* Hero section background orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            width: 420px; height: 420px;
+            background: radial-gradient(circle, rgba(255,210,170,0.45) 0%, transparent 70%);
+            top: -80px; right: -60px;
+            animation: orb1 8s ease-in-out infinite;
+        }
+
+        .orb-2 {
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(255,159,74,0.22) 0%, transparent 70%);
+            bottom: 40px; left: -40px;
+            animation: orb2 10s ease-in-out infinite;
+        }
+
+        /* Tag chips */
+        .tag-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: var(--mango-pale);
+            border: 1px solid #f0d8b8;
+            border-radius: 9999px;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--brown);
+            white-space: nowrap;
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            height: 4px;
+            background: #eadfd4;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, var(--mango-light), var(--mango));
+        }
+
+        /* Nav indicator */
+        #navIndicator {
+            position: absolute;
+            left: 4px;
+            top: 4px;
+            height: calc(100% - 8px);
+            width: 7rem;
+            border-radius: 9999px;
+            background: var(--mango-light);
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.3s;
+        }
+
+        /* Loading spinner */
+        .loader {
+            width: 50px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: 
+                radial-gradient(farthest-side,#ffa516 94%,#0000) top/8px 8px no-repeat,
+                conic-gradient(#0000 30%,#ffa516);
+            -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 8px),#000 0);
+            animation: l13 1s infinite linear;
+            transition: transform 0.3s ease;
+        }
+        .loader:hover {
+            transform: scale(1.15);
+        }
+        @keyframes l13 { 
+            100% { transform: rotate(1turn); }
+        }
+        model-viewer::part(default-progress-bar) {
+            display: none !important;
+        }
+        .hide {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        
+        /* Font Awesome Duotone theme mapping */
+        .fa-duotone, .fad, svg[data-prefix="fad"] {
+            --fa-primary-color: var(--bark) !important;
+            --fa-secondary-color: var(--mango) !important;
+            --fa-secondary-opacity: 0.85 !important;
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+        .tag-chip:hover .fa-duotone,
+        .tag-chip:hover .fad,
+        .tag-chip:hover svg[data-prefix="fad"] {
+            transform: scale(1.15);
+        }
+
+        /* Chat bubbles */
+        .chat-bubble-user {
+            background: var(--bark);
+            color: white;
+            border-radius: 18px 18px 4px 18px;
+        }
+        .chat-bubble-reply {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--bark);
+            border-radius: 18px 18px 18px 4px;
+        }
+
+        /* Corner Badge */
+        .corner-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bark);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 0.35rem 0.8rem;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-cream text-bark font-body min-h-screen relative">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 border-b border-bark/5 bg-cream/85 backdrop-blur-md">
+        <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3 lg:px-10">
+            <a href="#" class="flex items-center gap-2.5">
+                <img src="assets/chestnobg.png" alt="LootYard treasure chest logo" class="h-12 w-12 object-contain">
+                <span class="font-hand text-3xl font-bold leading-none text-bark [text-shadow:0.5px_0_0_currentColor]">LootYard</span>
+            </a>
+
+            <nav aria-label="Section navigation" class="relative">
+                <ul id="sectionNav" class="relative hidden items-center rounded-full bg-white/70 p-1 ring-1 ring-bark/5 font-body text-sm font-bold text-bark md:flex">
+                    <span id="navIndicator" style="width: 7rem;"></span>
+                    <li class="relative z-10 text-center" style="width: 7rem;"><a data-section-link data-index="0" href="#about" class="block rounded-full px-4 py-2 text-bark/50 hover:text-bark transition-colors duration-300 whitespace-nowrap">About</a></li>
+                    <li class="relative z-10 text-center" style="width: 7rem;"><a data-section-link data-index="1" href="#how-it-works" class="block rounded-full px-2 py-2 text-bark/50 hover:text-bark transition-colors duration-300 text-xs md:text-sm whitespace-nowrap">How it works</a></li>
+                    <li class="relative z-10 text-center" style="width: 7rem;"><a data-section-link data-index="2" href="#assets" class="block rounded-full px-4 py-2 text-bark/50 hover:text-bark transition-colors duration-300 whitespace-nowrap">Assets</a></li>
+                    <li class="relative z-10 text-center" style="width: 7rem;"><a data-section-link data-index="3" href="#talent" class="block rounded-full px-4 py-2 text-bark/50 hover:text-bark transition-colors duration-300 whitespace-nowrap">Talent</a></li>
+                    <li class="relative z-10 text-center" style="width: 7rem;"><a data-section-link data-index="4" href="#faq" class="block rounded-full px-4 py-2 text-bark/50 hover:text-bark transition-colors duration-300 whitespace-nowrap">FAQ</a></li>
+                </ul>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <a href="home.html?auth=login" class="hidden text-sm font-bold text-bark/60 transition-colors hover:text-mango sm:inline">
+                    Log In
+                </a>
+                <a href="home.html?auth=signup" class="flex items-center gap-2.5 rounded-full border border-bark/10 bg-white px-4 py-2 text-sm font-bold text-bark shadow-sm transition-all hover:-translate-y-0.5 hover:border-mango hover:shadow-md">
+                    <span class="grid h-7 w-7 place-items-center rounded-full bg-mango-soft">
+                        <svg viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5 text-bark">
+                            <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" />
+                        </svg>
+                    </span>
+                    Sign Up
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- ============ HERO SECTION ============ -->
+        <section id="hero" class="mx-auto max-w-7xl px-6 pb-12 pt-8 lg:px-10 lg:pb-16 lg:pt-12 relative overflow-visible w-full">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+
+            <div class="relative z-10 grid items-center gap-16 lg:grid-cols-2">
+                <div class="space-y-8 flex flex-col items-start" style="animation: fadeSlideUp 0.8s ease both 0.1s;">
+                    <span class="inline-block rounded-full border border-bark/10 bg-white px-4 py-1 text-xs font-bold uppercase tracking-widest text-mango">
+                        Every asset — always free
+                    </span>
+                    <h1 class="font-display text-6xl font-extrabold leading-[0.9] tracking-tight md:text-7xl lg:text-8xl text-bark max-w-xl">
+                        Free loot for <br />
+                        <span class="relative inline-block text-mango" style="min-width: 14ch; vertical-align: bottom; overflow: hidden; height: 1.15em;">
+                            <span class="absolute left-0 bottom-0 [animation:wordSwap7_14s_infinite]" style="white-space:nowrap;">Free 3D models</span>
+                            <span class="absolute left-0 bottom-0 opacity-0 [animation:wordSwap7_14s_infinite_2s]" style="white-space:nowrap;">Free SFX packs</span>
+                            <span class="absolute left-0 bottom-0 opacity-0 [animation:wordSwap7_14s_infinite_4s]" style="white-space:nowrap;">Boilerplate code</span>
+                            <span class="absolute left-0 bottom-0 opacity-0 [animation:wordSwap7_14s_infinite_6s]" style="white-space:nowrap;">Animations</span>
+                            <span class="absolute left-0 bottom-0 opacity-0 [animation:wordSwap7_14s_infinite_8s]" style="white-space:nowrap;">VFX &amp; maps</span>
+                            <span class="absolute left-0 bottom-0 opacity-0 [animation:wordSwap7_14s_infinite_10s]" style="white-space:nowrap;">Creator portfolios</span>
+                            <span class="absolute left-0 bottom-0 opacity-0 [animation:wordSwap7_14s_infinite_12s]" style="white-space:nowrap;">Indie devs</span>
+                        </span>
+                    </h1>
+                    <p class="max-w-md text-lg leading-relaxed text-bark/70 lg:text-xl">
+                        Download engine-ready 3D models, SFX, animations, scripts and UI kits — completely free, no account needed. Or hire a creator to build something custom just for your game.
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-4">
+                        <a href="#assets" class="rounded-2xl bg-mango px-8 py-4 text-lg font-bold text-bark transition-all hover:-translate-y-1 hover:shadow-xl">
+                            Explore Loot
+                        </a>
+                        <a href="#talent" class="rounded-2xl border-2 border-bark/10 px-8 py-4 text-lg font-bold transition-all hover:border-bark">
+                            Hire a Creator
+                        </a>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 pt-2">
+                        <span class="tag-chip"><i class="fad fa-cube"></i> 3D Models</span>
+                        <span class="tag-chip"><i class="fad fa-music"></i> SFX & Music</span>
+                        <span class="tag-chip"><i class="fad fa-sparkles"></i> Animations</span>
+                        <span class="tag-chip"><i class="fad fa-file-code"></i> Boilerplate Code</span>
+                        <span class="tag-chip"><i class="fad fa-fire-alt"></i> VFX</span>
+                        <span class="tag-chip"><i class="fad fa-map"></i> Maps</span>
+                    </div>
+                </div>
+
+                <div class="w-full flex justify-center items-center overflow-visible relative lg:translate-x-8">
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div class="w-[420px] h-[420px] rounded-full border border-dashed border-[#f0d8b8] opacity-60" style="animation: orb2 12s ease-in-out infinite;"></div>
+                        <div class="absolute w-[320px] h-[320px] rounded-full border border-[#ffd2aa] opacity-40" style="animation: orb1 9s ease-in-out infinite;"></div>
+                    </div>
+                    <model-viewer
+                        src="assets/mushroom_potion.glb"
+                        alt="Floating mushroom potion 3D model"
+                        camera-orbit="35deg 72deg auto"
+                        camera-target="auto auto auto"
+                        field-of-view="20deg"
+                        scale="5.5 5.5 5.5"
+                        exposure="1.3"
+                        shadow-intensity="0.4"
+                        reveal="auto"
+                        loading="eager"
+                        interaction-prompt="none"
+                        disable-zoom disable-pan disable-tap
+                        class="relative block w-full h-[450px] sm:h-[520px] lg:h-[600px] max-h-[75vh] [animation:floatModel_3.4s_ease-in-out_infinite]">
+                        <div slot="progress-bar" class="absolute inset-0 flex items-center justify-center bg-cream/10 z-20">
+                            <span class="loader"></span>
+                        </div>
+                    </model-viewer>
+
+                    <div class="absolute bottom-16 left-4 bg-white border border-[#f0e7dd] rounded-2xl px-3.5 py-2.5 shadow-xl flex items-center gap-2.5" style="animation: floatModelSlow 4s ease-in-out infinite 1s;">
+                        <div class="w-8 h-8 rounded-xl bg-[#fff0df] flex items-center justify-center text-base text-mango">
+                            <i class="fad fa-flask-potion"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black text-[#15110d]">Mushroom Potion</p>
+                            <p class="text-[10px] font-semibold text-[#8a7564]">2.4k downloads · Free</p>
+                        </div>
+                    </div>
+
+                    <div class="absolute top-24 right-2 bg-white border border-[#f0e7dd] rounded-2xl px-3 py-2 shadow-xl" style="animation: floatModel 3.8s ease-in-out infinite 0.6s;">
+                        <p class="stars">★★★★★</p>
+                        <p class="text-[10px] font-bold text-[#5c4a3c] mt-0.5">4.9 / 5.0</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ ABOUT SECTION ============ -->
+        <section id="about" class="mx-auto max-w-7xl scroll-mt-20 px-6 py-10 lg:py-12 lg:px-10">
+            <div class="grid items-center gap-20 lg:grid-cols-2">
+                <div class="relative order-2 lg:order-1">
+                    <div class="absolute inset-0 -z-10 rounded-[3rem] bg-gradient-to-br from-mango/15 to-transparent blur-2xl"></div>
+                    
+                    <div class="w-full flex justify-center items-center overflow-visible relative">
+                        <div class="corner-badge">Live Preview</div>
+                        <model-viewer
+                            src="assets/panda.glb"
+                            alt="Animated Panda character model"
+                            autoplay
+                            auto-rotate
+                            rotation-per-second="18deg"
+                            camera-orbit="0deg 72deg auto"
+                            field-of-view="18deg"
+                            exposure="1.2"
+                            interaction-prompt="none"
+                            disable-zoom disable-pan disable-tap
+                            class="relative block w-full h-[380px] sm:h-[440px] lg:h-[500px] max-h-[60vh]">
+                            <div slot="progress-bar" class="absolute inset-0 flex items-center justify-center bg-cream/10 z-20">
+                                <span class="loader"></span>
+                            </div>
+                        </model-viewer>
+
+                        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 bg-white border border-[#f0e7dd] rounded-2xl px-4 py-2.5 shadow-xl text-center whitespace-nowrap">
+                            <p class="text-xs font-black text-[#15110d]">Toy Trueno</p>
+                            <div class="flex items-center justify-center gap-2 mt-0.5">
+                                <span class="tag-chip" style="font-size:0.6rem; padding: 0.15rem 0.5rem;">Animated</span>
+                                <span class="tag-chip" style="font-size:0.6rem; padding: 0.15rem 0.5rem;">Low Poly</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <article class="order-1 space-y-8 lg:order-2">
+                    <p class="text-xs font-extrabold uppercase tracking-[0.3em] text-mango">
+                        What is LootYard?
+                    </p>
+                    <h2 class="font-display text-5xl font-extrabold leading-[1.05] tracking-tight md:text-6xl">
+                        Three things. <br />
+                        <span class="italic text-mango">One</span> place.
+                    </h2>
+                    <p class="max-w-lg text-lg leading-relaxed text-bark/70">
+                        A free game asset store, a creator portfolio hub, and a hiring marketplace — all in one. Whether you're shipping a game or showing your work, there's a spot for you here.
+                    </p>
+
+                    <ul class="space-y-5 pt-4">
+                        <li class="flex gap-5">
+                            <span class="grid size-8 shrink-0 place-items-center rounded-full bg-mango-soft font-display text-sm font-extrabold text-bark">
+                                1
+                            </span>
+                            <div class="min-w-0">
+                                <p class="font-display text-lg font-bold">Free asset store</p>
+                                <p class="mt-1 text-bark/60">Every 3D model, SFX pack, script and UI kit — free to download. No subscription, no limit.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-5">
+                            <span class="grid size-8 shrink-0 place-items-center rounded-full bg-mango-soft font-display text-sm font-extrabold text-bark">
+                                2
+                            </span>
+                            <div class="min-w-0">
+                                <p class="font-display text-lg font-bold">Creator portfolios</p>
+                                <p class="mt-1 text-bark/60">Every account gets a public portfolio — share free assets, post previews, get discovered.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-5">
+                            <span class="grid size-8 shrink-0 place-items-center rounded-full bg-mango-soft font-display text-sm font-extrabold text-bark">
+                                3
+                            </span>
+                            <div class="min-w-0">
+                                <p class="font-display text-lg font-bold">Hire for custom work</p>
+                                <p class="mt-1 text-bark/60">Need something built just for your game? Message a creator and unlock the full chat.</p>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="divider border-b border-bark/5 my-6"></div>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-[10px] font-bold text-[#8a7564]">3D Models</span>
+                                <span class="text-[10px] font-black text-[#ff9f4a]">4,800+ free</span>
+                            </div>
+                            <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-[10px] font-bold text-[#8a7564]">SFX & Music</span>
+                                <span class="text-[10px] font-black text-[#ff9f4a]">3,200+ free</span>
+                            </div>
+                            <div class="progress-bar"><div class="progress-fill" style="width:65%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-[10px] font-bold text-[#8a7564]">Scripts & UI</span>
+                                <span class="text-[10px] font-black text-[#ff9f4a]">1,900+ free</span>
+                            </div>
+                            <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- ============ HOW IT WORKS SECTION ============ -->
+        <section id="how-it-works" class="mx-auto max-w-7xl scroll-mt-20 px-6 py-10 lg:py-12 lg:px-10">
+            <div class="mb-16 text-center max-w-2xl mx-auto space-y-4">
+                <p class="text-xs font-extrabold uppercase tracking-[0.3em] text-mango">
+                    How it works
+                </p>
+                <h2 class="font-display text-4xl font-extrabold leading-[1.1] tracking-tight md:text-5xl">
+                    Built for developers. <br />
+                    Powered by <span class="italic text-mango">creators</span>.
+                </h2>
+                <p class="text-base text-bark/60">
+                    A streamlined pipeline built to connect game creators with high-quality, verified assets.
+                </p>
+            </div>
+
+            <div class="grid gap-10 lg:grid-cols-2">
+                <!-- For Developers -->
+                <div class="relative group rounded-[2.5rem] border border-bark/5 bg-white/70 p-8 md:p-10 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:border-bark/10">
+                    <div class="absolute -right-4 -top-4 text-5xl opacity-10 select-none text-bark">
+                        <i class="fad fa-gamepad"></i>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="inline-flex items-center gap-3">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-mango-soft text-lg text-bark">
+                                <i class="fad fa-gamepad"></i>
+                            </span>
+                            <h3 class="font-display text-2xl font-bold">For Game Developers</h3>
+                        </div>
+                        <p class="text-sm text-bark/60">
+                            Discover engine-ready resources to accelerate your development workflow without fees or barriers.
+                        </p>
+                        
+                        <div class="space-y-6 pt-4 border-t border-bark/5">
+                            <div class="flex gap-4">
+                                <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-bark text-xs font-bold text-cream">1</div>
+                                <div class="space-y-1">
+                                    <h4 class="font-bold text-sm">Browse & Search</h4>
+                                    <p class="text-xs text-bark/50">Explore a curated catalog of game assets. No signup is required to search and browse.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-bark text-xs font-bold text-cream">2</div>
+                                <div class="space-y-1">
+                                    <h4 class="font-bold text-sm">Quick Login to Download</h4>
+                                    <p class="text-xs text-bark/50">Sign in to download zip archives. Each package includes format variations and a clear commercial license.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-bark text-xs font-bold text-cream">3</div>
+                                <div class="space-y-1">
+                                    <h4 class="font-bold text-sm">Integrate & Launch</h4>
+                                    <p class="text-xs text-bark/50">Import assets directly into Roblox, Unity, Unreal, or Godot. Royalty-free commercial use permitted.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- For Creators -->
+                <div class="relative group rounded-[2.5rem] border border-bark/5 bg-white/70 p-8 md:p-10 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:border-bark/10">
+                    <div class="absolute -right-4 -top-4 text-5xl opacity-10 select-none text-bark">
+                        <i class="fad fa-rocket"></i>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="inline-flex items-center gap-3">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-mango-soft text-lg text-bark">
+                                <i class="fad fa-rocket"></i>
+                            </span>
+                            <h3 class="font-display text-2xl font-bold">For Asset Creators</h3>
+                        </div>
+                        <p class="text-sm text-bark/60">
+                            Build your audience, show off your skills, and connect with studios looking for custom work.
+                        </p>
+                        
+                        <div class="space-y-6 pt-4 border-t border-bark/5">
+                            <div class="flex gap-4">
+                                <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-bark text-xs font-bold text-cream">1</div>
+                                <div class="space-y-1">
+                                    <h4 class="font-bold text-sm">Detail the Form</h4>
+                                    <p class="text-xs text-bark/50">Input the asset name, descriptions, tags, categories, and confirm AI-generation usage status.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-bark text-xs font-bold text-cream">2</div>
+                                <div class="space-y-1">
+                                    <h4 class="font-bold text-sm">Upload File Formats</h4>
+                                    <p class="text-xs text-bark/50">Package your source formats (FBX, GLB, OBJ, Blend, WAV, etc.) inside a single ZIP file and upload.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-bark text-xs font-bold text-cream">3</div>
+                                <div class="space-y-1">
+                                    <h4 class="font-bold text-sm">Pass Verification Checks</h4>
+                                    <p class="text-xs text-bark/50">Certify copyright ownership and confirm that the upload is not an exact copy of existing work to publish.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ FREE ASSETS SECTION ============ -->
+        <section id="assets" class="mx-auto max-w-7xl scroll-mt-20 px-6 py-10 lg:py-12 lg:px-10">
+            <div class="mb-10 flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
+                <div class="max-w-xl space-y-6">
+                    <p class="text-xs font-extrabold uppercase tracking-[0.3em] text-mango">
+                        Free asset store
+                    </p>
+                    <h2 class="font-display text-5xl font-extrabold leading-[1.05] tracking-tight md:text-6xl">
+                        Every asset. <span class="italic text-mango">Free.</span>
+                    </h2>
+                    <p class="text-lg leading-relaxed text-bark/70">
+                        Browse freely — no account needed to look around. Sign up to download. Any engine, any language, any game.
+                    </p>
+                </div>
+                <a href="home.html" class="rounded-2xl bg-mango px-7 py-3.5 text-base font-bold text-bark transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                    Browse all assets →
+                </a>
+            </div>
+
+            <div class="grid gap-8 md:grid-cols-3">
+                <!-- Card 1 -->
+                <article class="group space-y-4">
+                    <div class="relative aspect-[4/3] overflow-hidden rounded-[2rem] border border-bark/5 bg-white shadow-sm">
+                        <img
+                            src="assets/asset-sword.jpg"
+                            alt="Glowing low-poly sword 3D asset"
+                            loading="lazy"
+                            class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <span class="absolute right-5 top-5 rounded-full bg-bark text-cream px-3 py-1 text-[10px] font-bold uppercase tracking-wider">
+                            Featured
+                        </span>
+                    </div>
+                    <div class="flex items-start justify-between gap-4 px-1">
+                        <div class="min-w-0">
+                            <h3 class="truncate font-display text-xl font-bold transition-colors group-hover:text-mango">
+                                Ember Blade
+                            </h3>
+                            <p class="mt-0.5 truncate text-xs font-medium text-bark/50">
+                                by ForgeMaster
+                            </p>
+                        </div>
+                        <div class="shrink-0 text-right">
+                            <p class="text-sm font-bold text-mango">Free</p>
+                            <p class="text-[10px] text-bark/40">3D · FBX / GLB</p>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 2 -->
+                <article class="group space-y-4">
+                    <div class="relative aspect-[4/3] overflow-hidden rounded-[2rem] border border-bark/5 bg-white shadow-sm">
+                        <img
+                            src="assets/asset-cloud-tea.jpg"
+                            alt="Cute cup of tea with cloud foam 3D asset"
+                            loading="lazy"
+                            class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <span class="absolute right-5 top-5 rounded-full bg-mango text-bark px-3 py-1 text-[10px] font-bold uppercase tracking-wider">
+                            Top pick
+                        </span>
+                    </div>
+                    <div class="flex items-start justify-between gap-4 px-1">
+                        <div class="min-w-0">
+                            <h3 class="truncate font-display text-xl font-bold transition-colors group-hover:text-mango">
+                                Cloud Tea
+                            </h3>
+                            <p class="mt-0.5 truncate text-xs font-medium text-bark/50">
+                                by BrewLabs
+                            </p>
+                        </div>
+                        <div class="shrink-0 text-right">
+                            <p class="text-sm font-bold text-mango">Free</p>
+                            <p class="text-[10px] text-bark/40">3D · Stylized</p>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 3 -->
+                <article class="group space-y-4">
+                    <div class="relative aspect-[4/3] overflow-hidden rounded-[2rem] border border-bark/5 bg-white shadow-sm">
+                        <img
+                            src="assets/asset-helmet.jpg"
+                            alt="Sci-fi helmet with orange visor 3D asset"
+                            loading="lazy"
+                            class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <span class="absolute right-5 top-5 rounded-full bg-bark text-cream px-3 py-1 text-[10px] font-bold uppercase tracking-wider">
+                            New
+                        </span>
+                    </div>
+                    <div class="flex items-start justify-between gap-4 px-1">
+                        <div class="min-w-0">
+                            <h3 class="truncate font-display text-xl font-bold transition-colors group-hover:text-mango">
+                                Pilot Visor X
+                            </h3>
+                            <p class="mt-0.5 truncate text-xs font-medium text-bark/50">
+                                by VoidGear
+                            </p>
+                        </div>
+                        <div class="shrink-0 text-right">
+                            <p class="text-sm font-bold text-mango">Free</p>
+                            <p class="text-[10px] text-bark/40">3D · Wearable</p>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <div class="mt-8 flex flex-wrap items-center gap-2 border-t border-bark/5 pt-6">
+                <span class="mr-3 text-xs font-bold uppercase tracking-widest text-bark/40">
+                    Browse by category
+                </span>
+                <button class="rounded-full border border-bark/10 bg-white px-4 py-1.5 text-xs font-bold text-bark/70 transition-colors hover:border-mango hover:bg-mango-soft hover:text-bark">All</button>
+                <button class="rounded-full border border-bark/10 bg-white px-4 py-1.5 text-xs font-bold text-bark/70 transition-colors hover:border-mango hover:bg-mango-soft hover:text-bark">3D Models</button>
+                <button class="rounded-full border border-bark/10 bg-white px-4 py-1.5 text-xs font-bold text-bark/70 transition-colors hover:border-mango hover:bg-mango-soft hover:text-bark">SFX</button>
+                <button class="rounded-full border border-bark/10 bg-white px-4 py-1.5 text-xs font-bold text-bark/70 transition-colors hover:border-mango hover:bg-mango-soft hover:text-bark">Music</button>
+                <button class="rounded-full border border-bark/10 bg-white px-4 py-1.5 text-xs font-bold text-bark/70 transition-colors hover:border-mango hover:bg-mango-soft hover:text-bark">Animations</button>
+                <button class="rounded-full border border-bark/10 bg-white px-4 py-1.5 text-xs font-bold text-bark/70 transition-colors hover:border-mango hover:bg-mango-soft hover:text-bark">Boilerplate</button>
+                <button class="rounded-full border border-bark/10 bg-white px-4 py-1.5 text-xs font-bold text-bark/70 transition-colors hover:border-mango hover:bg-mango-soft hover:text-bark">Maps</button>
+            </div>
+        </section>
+
+        <!-- ============ CREATOR PORTFOLIO SECTION ============ -->
+        <section id="talent" class="mx-auto max-w-7xl scroll-mt-20 px-6 py-10 lg:py-12 lg:px-10">
+            <div class="grid items-center gap-20 lg:grid-cols-2">
+                <article class="space-y-8">
+                    <p class="text-xs font-extrabold uppercase tracking-[0.3em] text-mango">
+                        Creator portfolios
+                    </p>
+                    <h2 class="font-display text-5xl font-extrabold leading-[1.05] tracking-tight md:text-6xl">
+                        Every account gets a portfolio. <br />
+                        Hiring starts with <span class="italic text-mango">one</span> message.
+                    </h2>
+                    <p class="max-w-lg text-lg leading-relaxed text-bark/70">
+                        Every user — creator or not — gets a public portfolio page. Reach any creator with a single intro message. If they reply, the full chat unlocks.
+                    </p>
+
+                    <div class="flex flex-wrap gap-4 pt-2">
+                        <a href="home.html" class="rounded-2xl bg-bark px-7 py-3.5 text-base font-bold text-cream transition-all hover:-translate-y-0.5 hover:bg-mango hover:text-bark">
+                            Browse portfolios
+                        </a>
+                        <a href="home.html" class="rounded-2xl border-2 border-bark/10 px-7 py-3.5 text-base font-bold transition-colors hover:border-bark">
+                            Create my portfolio
+                        </a>
+                    </div>
+
+                    <div class="grid gap-4 pt-4 sm:grid-cols-2">
+                        <!-- Arjun Kapoor -->
+                        <div class="flex items-center gap-4 rounded-2xl border border-bark/5 bg-white p-4 shadow-sm">
+                            <div class="grid size-12 shrink-0 place-items-center rounded-full bg-mango-soft font-display text-sm font-extrabold text-bark">
+                                AK
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <p class="truncate font-display font-bold">Arjun Kapoor</p>
+                                    <span class="text-[10px] font-bold uppercase text-emerald-600">
+                                        Open
+                                    </span>
+                                </div>
+                                <p class="truncate text-xs text-bark/50">3D Artist · 34 free assets</p>
+                            </div>
+                        </div>
+
+                        <!-- Sofia Larsen -->
+                        <div class="flex items-center gap-4 rounded-2xl border border-bark/5 bg-white p-4 shadow-sm">
+                            <div class="grid size-12 shrink-0 place-items-center rounded-full bg-mango-soft font-display text-sm font-extrabold text-bark">
+                                SL
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <p class="truncate font-display font-bold">Sofia Larsen</p>
+                                    <span class="text-[10px] font-bold uppercase text-mango">
+                                        Busy
+                                    </span>
+                                </div>
+                                <p class="truncate text-xs text-bark/50">Sound Designer · 21 SFX packs</p>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <div class="relative w-full flex justify-center items-center overflow-visible">
+                    <div class="absolute inset-0 -z-10 rounded-[3rem] bg-gradient-to-tr from-mango/15 to-transparent blur-2xl"></div>
+                    <div class="corner-badge">Portfolio</div>
+                    
+                    <model-viewer
+                        src="assets/cartoon_plane.glb"
+                        alt="Cartoon plane 3D model"
+                        auto-rotate
+                        rotation-per-second="14deg"
+                        camera-orbit="45deg 72deg auto"
+                        field-of-view="22deg"
+                        scale="2.2 2.2 2.2"
+                        exposure="1.2"
+                        interaction-prompt="none"
+                        disable-zoom disable-pan disable-tap
+                        class="relative block w-full h-[360px] sm:h-[420px] lg:h-[480px] max-h-[55vh] [animation:floatModelSlow_4s_ease-in-out_infinite] z-10">
+                        <div slot="progress-bar" class="absolute inset-0 flex items-center justify-center bg-cream/10 z-20">
+                            <span class="loader"></span>
+                        </div>
+                    </model-viewer>
+
+                    <!-- Chat conversation bubbles — anchored to bottom-left, well inside bounds -->
+                    <div class="absolute bottom-[-1.5rem] left-0 flex flex-col gap-2 z-20" style="max-width: 240px; animation: floatModel 4.5s ease-in-out infinite 1.5s;">
+                        <!-- User message bubble -->
+                        <div class="self-end chat-bubble-user px-3.5 py-2.5 shadow-lg">
+                            <p class="text-[10px] font-black text-[#ffd2aa] uppercase tracking-wider mb-1">First Message</p>
+                            <p class="text-xs font-medium text-white leading-snug">"Hey, I need a low-poly aircraft for my game…"</p>
+                        </div>
+                        <!-- Creator reply bubble -->
+                        <div class="self-start chat-bubble-reply px-3.5 py-2.5 shadow-lg">
+                            <div class="flex items-center gap-1.5 mb-1">
+                                <div class="w-4 h-4 rounded-full bg-[#ffd2aa] flex items-center justify-center text-[7px] font-black" style="color:#a0522d;">AK</div>
+                                <p class="text-[9px] font-black text-[#8a7564]">Arjun Kapoor</p>
+                            </div>
+                            <p class="text-xs font-medium text-[#15110d] leading-snug">"Yeah sure, I can do that! 🎉"</p>
+                        </div>
+                        <!-- Unlocked status pill -->
+                        <div class="self-start flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-full px-3 py-1.5 shadow-sm">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+                            <p class="text-[10px] font-bold text-green-700">Creator replied — chat unlocked</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ FAQ SECTION ============ -->
+        <section id="faq" class="mx-auto max-w-4xl scroll-mt-20 px-6 py-10 lg:py-12">
+            <div class="mb-16 text-center space-y-4">
+                <p class="text-xs font-extrabold uppercase tracking-[0.3em] text-mango">
+                    Frequently Asked Questions
+                </p>
+                <h2 class="font-display text-4xl font-extrabold leading-[1.1] tracking-tight md:text-5xl">
+                    Got questions? <br />
+                    We've got <span class="italic text-mango">answers</span>.
+                </h2>
+            </div>
+
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <details class="group rounded-3xl border border-bark/5 bg-white/70 p-6 shadow-sm backdrop-blur-sm transition-all duration-300 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex cursor-pointer items-center justify-between gap-4 focus:outline-none">
+                        <span class="font-display text-lg font-bold text-bark transition-colors group-hover:text-mango">
+                            Is downloading assets really free?
+                        </span>
+                        <span class="relative h-5 w-5 shrink-0">
+                            <!-- Vertical line -->
+                            <span class="absolute inset-0 m-auto h-5 w-0.5 bg-bark/40 transition-transform duration-300 group-open:rotate-90"></span>
+                            <!-- Horizontal line -->
+                            <span class="absolute inset-0 m-auto h-0.5 w-5 bg-bark/40 transition-transform duration-300 group-open:rotate-90"></span>
+                        </span>
+                    </summary>
+                    <p class="mt-4 border-t border-bark/5 pt-4 text-sm leading-relaxed text-bark/70">
+                        Yes, browsing and searching our entire catalog is 100% free with no account required. To download, simply log in to your account. Each download package includes engine-ready source files and a copy of the corresponding license.
+                    </p>
+                </details>
+
+                <!-- FAQ Item 2 -->
+                <details class="group rounded-3xl border border-bark/5 bg-white/70 p-6 shadow-sm backdrop-blur-sm transition-all duration-300 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex cursor-pointer items-center justify-between gap-4 focus:outline-none">
+                        <span class="font-display text-lg font-bold text-bark transition-colors group-hover:text-mango">
+                            What engines and file formats are supported?
+                        </span>
+                        <span class="relative h-5 w-5 shrink-0">
+                            <span class="absolute inset-0 m-auto h-5 w-0.5 bg-bark/40 transition-transform duration-300 group-open:rotate-90"></span>
+                            <span class="absolute inset-0 m-auto h-0.5 w-5 bg-bark/40 transition-transform duration-300 group-open:rotate-90"></span>
+                        </span>
+                    </summary>
+                    <p class="mt-4 border-t border-bark/5 pt-4 text-sm leading-relaxed text-bark/70">
+                        LootYard supports all major game development platforms including Roblox, Unity, Unreal Engine, and Godot. Assets are uploaded as ZIP packages containing standard formats like GLB, FBX, OBJ, Blend (for 3D models), anim files (for animations), and WAV or MP3 (for sound effects and music).
+                    </p>
+                </details>
+
+                <!-- FAQ Item 3 -->
+                <details class="group rounded-3xl border border-bark/5 bg-white/70 p-6 shadow-sm backdrop-blur-sm transition-all duration-300 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex cursor-pointer items-center justify-between gap-4 focus:outline-none">
+                        <span class="font-display text-lg font-bold text-bark transition-colors group-hover:text-mango">
+                            What licenses are applied to the assets?
+                        </span>
+                        <span class="relative h-5 w-5 shrink-0">
+                            <span class="absolute inset-0 m-auto h-5 w-0.5 bg-bark/40 transition-transform duration-300 group-open:rotate-90"></span>
+                            <span class="absolute inset-0 m-auto h-0.5 w-5 bg-bark/40 transition-transform duration-300 group-open:rotate-90"></span>
+                        </span>
+                    </summary>
+                    <p class="mt-4 border-t border-bark/5 pt-4 text-sm leading-relaxed text-bark/70">
+                        We support standard and permissive licenses. Free assets are released under Creative Commons CC0 (Public Domain) or a custom Royalty-Free license, allowing you to use them in commercial and personal games with no attribution required.
+                    </p>
+                </details>
+
+                <!-- FAQ Item 4 -->
+                <details class="group rounded-3xl border border-bark/5 bg-white/70 p-6 shadow-sm backdrop-blur-sm transition-all duration-300 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex cursor-pointer items-center justify-between gap-4 focus:outline-none">
+                        <span class="font-display text-lg font-bold text-bark transition-colors group-hover:text-mango">
+                            How do creators monetize and what is the platform fee?
+                        </span>
+                        <span class="relative h-5 w-5 shrink-0">
+                            <span class="absolute inset-0 m-auto h-5 w-0.5 bg-bark/40 transition-transform duration-300 group-open:rotate-90"></span>
+                            <span class="absolute inset-0 m-auto h-0.5 w-5 bg-bark/40 transition-transform duration-300 group-open:rotate-90"></span>
+                        </span>
+                    </summary>
+                    <p class="mt-4 border-t border-bark/5 pt-4 text-sm leading-relaxed text-bark/70">
+                        Creators build portfolios and showcase free assets to build their brand and attract direct hire contracts. When a creator is hired for custom work through the platform, LootYard processes the agreement and charges a flat 10% platform fee on payments.
+                    </p>
+                </details>
+
+                <!-- FAQ Item 5 -->
+                <details class="group rounded-3xl border border-bark/5 bg-white/70 p-6 shadow-sm backdrop-blur-sm transition-all duration-300 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex cursor-pointer items-center justify-between gap-4 focus:outline-none">
+                        <span class="font-display text-lg font-bold text-bark transition-colors group-hover:text-mango">
+                            How do creators upload assets and pass verification?
+                        </span>
+                        <span class="relative h-5 w-5 shrink-0">
+                            <span class="absolute inset-0 m-auto h-5 w-0.5 bg-bark/40 transition-transform duration-300 group-open:rotate-90"></span>
+                            <span class="absolute inset-0 m-auto h-0.5 w-5 bg-bark/40 transition-transform duration-300 group-open:rotate-90"></span>
+                        </span>
+                    </summary>
+                    <p class="mt-4 border-t border-bark/5 pt-4 text-sm leading-relaxed text-bark/70">
+                        Creators submit a details form containing the asset name, description, tags, categories, and specify whether AI was used in generation. Creators must also certify copyright ownership and guarantee the work is not a duplicate of existing assets on the platform.
+                    </p>
+                </details>
+            </div>
+        </section>
+
+        <!-- ============ CTA SECTION ============ -->
+        <section class="mx-auto max-w-7xl px-6 py-6 lg:px-10">
+            <div class="relative overflow-hidden rounded-[3rem] border border-bark/5 bg-gradient-to-br from-mango/10 via-mango-soft/5 to-transparent px-8 py-16 text-center md:py-20 backdrop-blur-sm">
+                <!-- Floating decorative circles -->
+                <div class="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-mango/10 blur-3xl pointer-events-none"></div>
+                <div class="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-mango-soft/20 blur-3xl pointer-events-none"></div>
+
+                <div class="relative max-w-2xl mx-auto space-y-8">
+                    <h2 class="font-display text-4xl font-extrabold leading-tight md:text-5xl text-bark">
+                        Build faster. Dream bigger. <br />
+                        No <span class="italic text-mango">paywalls</span>.
+                    </h2>
+                    <p class="text-base md:text-lg text-bark/70 leading-relaxed">
+                        Join game creators downloading verified engine-ready assets, showcasing their portfolios, and building the future of indie games.
+                    </p>
+                    <div class="pt-4">
+                        <a href="home.html" class="inline-flex items-center gap-2 rounded-2xl bg-bark px-8 py-4 text-lg font-extrabold text-cream shadow-lg shadow-bark/10 transition-all hover:-translate-y-1 hover:bg-mango hover:text-bark hover:shadow-xl hover:shadow-mango/15">
+                            Start exploring
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ STATS SECTION ============ -->
+        <section class="mx-auto max-w-7xl px-6 py-6 lg:px-10">
+            <div class="grid gap-6 md:grid-cols-4">
+                <!-- Stat Card 1 -->
+                <div class="bg-white/70 border border-bark/5 backdrop-blur-sm rounded-3xl p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <p class="font-display text-4xl lg:text-5xl font-black text-bark">12k+</p>
+                    <p class="mt-2 text-xs font-bold uppercase tracking-wider text-bark/40">Free Assets</p>
+                </div>
+                <!-- Stat Card 2 -->
+                <div class="bg-white/70 border border-bark/5 backdrop-blur-sm rounded-3xl p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <p class="font-display text-4xl lg:text-5xl font-black text-mango">100%</p>
+                    <p class="mt-2 text-xs font-bold uppercase tracking-wider text-bark/40">Always Free</p>
+                </div>
+                <!-- Stat Card 3 -->
+                <div class="bg-white/70 border border-bark/5 backdrop-blur-sm rounded-3xl p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <p class="font-display text-4xl lg:text-5xl font-black text-bark">2.4k</p>
+                    <p class="mt-2 text-xs font-bold uppercase tracking-wider text-bark/40">Active Creators</p>
+                </div>
+                <!-- Stat Card 4 -->
+                <div class="bg-white/70 border border-bark/5 backdrop-blur-sm rounded-3xl p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <p class="font-display text-4xl lg:text-5xl font-black text-bark">0</p>
+                    <p class="mt-2 text-xs font-bold uppercase tracking-wider text-bark/40">Paywalls</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="border-t border-bark/5 bg-cream">
+        <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-6 py-10 sm:flex-row lg:px-10">
+            <div class="flex items-center gap-2.5">
+                <img src="assets/chestnobg.png" alt="LootYard logo" class="h-9 w-9 object-contain">
+                <span class="font-hand text-2xl font-bold text-bark [text-shadow:0.5px_0_0_currentColor]">LootYard</span>
+                <span class="ml-2 text-xs text-bark/40">· Free assets, real creators</span>
+            </div>
+            <p class="text-xs text-bark/40">
+                © 2026 LootYard. All rights reserved.
+            </p>
+            <div class="flex gap-4 text-bark/40">
+                <a href="#" class="hover:text-mango transition-colors" aria-label="X">
+                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="#" class="hover:text-mango transition-colors" aria-label="GitHub">
+                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/></svg>
+                </a>
+                <a href="#" class="hover:text-mango transition-colors" aria-label="Discord">
+                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.094 13.094 0 0 1-1.873-.894.077.077 0 0 1-.008-.128c.126-.093.252-.19.372-.287a.075.075 0 0 1 .077-.011c3.92 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.009c.12.099.246.195.373.289a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.156 2.418z"/></svg>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const navIndicator = document.querySelector("#navIndicator");
+        const navLinks = document.querySelectorAll("[data-section-link]");
+        const sections = ["about", "how-it-works", "assets", "talent", "faq"].map(id => document.getElementById(id)).filter(Boolean);
+
+        function updateActiveNav() {
+            const offset = 120; // header height + buffer
+            let activeId = "";
+
+            for (const section of sections) {
+                const rect = section.getBoundingClientRect();
+                // Check if the top of the section is scrolled past the threshold offset
+                if (rect.top - offset <= 0) {
+                    activeId = section.id;
+                }
+            }
+
+            if (activeId) {
+                const activeLink = document.querySelector(`[data-section-link][href="#${activeId}"]`);
+                if (activeLink) {
+                    const activeIndex = Number(activeLink.dataset.index);
+                    if (navIndicator) {
+                        navIndicator.style.transform = `translateX(${activeIndex * 7}rem)`;
+                        navIndicator.style.opacity = "1";
+                    }
+                    navLinks.forEach(link => {
+                        const isActive = link === activeLink;
+                        link.classList.toggle("text-bark", isActive);
+                        link.classList.toggle("text-bark/50", !isActive);
+                    });
+                }
+            } else {
+                // We are at the Hero section / top of page
+                if (navIndicator) navIndicator.style.opacity = "0";
+                navLinks.forEach(link => {
+                    link.classList.remove("text-bark");
+                    link.classList.add("text-bark/50");
+                });
+            }
+        }
+
+        window.addEventListener("scroll", updateActiveNav, { passive: true });
+        window.addEventListener("resize", updateActiveNav);
+        // Hide loader slot on model-viewer load
+        document.querySelectorAll('model-viewer').forEach(viewer => {
+            viewer.addEventListener('load', () => {
+                const bar = viewer.querySelector('[slot="progress-bar"]');
+                if (bar) {
+                    bar.classList.add('hide');
+                }
+            });
+        });
+
+        updateActiveNav();
+    </script>
+</body>
+</html>

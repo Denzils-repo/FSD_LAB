@@ -1,8 +1,37 @@
-plan/sketch.excalidraw
-lab_exercises/Week1/assets/3d_models
+# ── Secrets & config ─────────────────────────────────────────────
 firebasecofigs.txt
-node_modules
+
+# ── Dependencies ─────────────────────────────────────────────────
+node_modules/
+
+# ── Local database ───────────────────────────────────────────────
+*.sqlite
+*.db
+
+# ── Antigravity IDE artifacts ────────────────────────────────────
+.skills-cache/
+.skills-loaded.json
+.antigravityignore
+
+# ── Large AI-generated image folders ────────────────────────────
+ai_gen_img/
+placeholder_assets/
+
+# ── Unused / archived 3D model assets ───────────────────────────
+**/assets/3d_models/not_used/
+lab_exercises/Week1/assets/3d_models/
+
+# ── Font zip archives (keep extracted fonts, skip zips) ─────────
+**/*.zip
+
+# ── Generated/scratch files ──────────────────────────────────────
 seed.js
+plan/sketch.excalidraw
+
+# ── Old lab docx copied into week4 ──────────────────────────────
+lab_exercises/week4/LAB3_EventHandling_2647216.docx
+
+# ── Folders not for submission ───────────────────────────────────
 Excercises/
-lovable
-yeezy
+lovable/
+yeezy/

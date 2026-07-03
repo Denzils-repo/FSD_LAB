@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creator Portfolio · LootYard</title>
+  <link rel="icon" type="image/png" href="assets/chestnobg.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: {
+        cream:'#fff8f1',bark:'#15110d',mango:'#ff9f4a','mango-soft':'#ffd2aa','mango-pale':'#fff0df',
+        taupe:'#8a7564',brown:'#5c4a3c',
+      }, fontFamily: {
+        display:['Bricolage Grotesque','sans-serif'],body:['Inter','sans-serif'],hand:['Caveat','cursive'],
+      }}}
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="mock_assets.js"></script>
+  <style>
+    :root{--cream:#fff8f1;--bark:#15110d;--mango:#ff9f4a;--mango-light:#ffd2aa;--mango-pale:#fff0df;--taupe:#8a7564;--brown:#5c4a3c;--card-bg:#fffcf8;--border:#f0e7dd;--header-h:68px;--footer-h:48px}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;overflow:hidden}
+    body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--bark)}
+    .font-display{font-family:'Bricolage Grotesque',sans-serif}
+    body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
+    #navbar{position:fixed;top:0;left:0;right:0;z-index:100;height:var(--header-h);background:rgba(255,248,241,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+    #navIndicator{position:absolute;left:4px;top:4px;height:calc(100% - 8px);width:7rem;border-radius:9999px;background:var(--mango-light);transition:transform 0.5s cubic-bezier(0.16,1,0.3,1),opacity 0.3s}
+    .search-bar{background:white;border:1.5px solid var(--border);border-radius:9999px;transition:border-color 0.2s,box-shadow 0.2s}
+    .search-bar:focus-within{border-color:var(--mango);box-shadow:0 0 0 3px rgba(255,159,74,0.15)}
+    .search-bar input{background:transparent;outline:none;font-family:'Inter',sans-serif}
+    #siteFooter{position:fixed;bottom:0;left:0;right:0;z-index:100;height:var(--footer-h);background:rgba(255,248,241,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border)}
+    #mainContent{margin-top:var(--header-h);height:calc(100vh - var(--header-h) - var(--footer-h));overflow-y:auto;overflow-x:hidden;position:relative}
+    #mainContent::-webkit-scrollbar{width:5px}#mainContent::-webkit-scrollbar-track{background:transparent}#mainContent::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    .sf-card{background:var(--card-bg);border:1.5px solid var(--border);border-radius:1.25rem}
+    .tag-chip{display:inline-flex;align-items:center;gap:0.35rem;background:var(--mango-pale);border:1px solid #f0d8b8;border-radius:9999px;padding:0.3rem 0.75rem;font-size:0.7rem;font-weight:700;color:var(--brown);white-space:nowrap}
+    .tag-chip-sm{display:inline-flex;align-items:center;gap:0.25rem;background:var(--mango-pale);border:1px solid #f0d8b8;border-radius:9999px;padding:0.2rem 0.6rem;font-size:0.65rem;font-weight:700;color:var(--brown);white-space:nowrap}
+    .stars{color:var(--mango);letter-spacing:0.04em}
+    .asset-card{background:var(--card-bg);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 400ms ease-in-out;position:relative;z-index:1}
+    .asset-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px -10px rgba(21,17,13,0.14);z-index:2}
+    .card-badge{position:absolute;top:6px;left:6px;background:var(--mango);color:white;font-size:0.6rem;font-weight:800;padding:1px 7px;border-radius:9999px;letter-spacing:0.04em;text-transform:uppercase;z-index:3}
+    .skeleton{background:linear-gradient(90deg,#f0e7dd 25%,#faf4ef 50%,#f0e7dd 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;pointer-events:none!important}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .social-link{display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.75rem;background:var(--cream);border:1px solid var(--border);border-radius:0.625rem;font-size:0.75rem;font-weight:500;color:var(--brown);text-decoration:none;transition:border-color 0.15s,background 0.15s}
+    .social-link:hover{border-color:var(--mango-light);background:var(--mango-pale)}
+    .social-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0}
+    .pov-toggle{display:flex;align-items:center;gap:0.4rem;background:var(--mango-pale);border:1px solid var(--mango-light);border-radius:0.625rem;padding:0.35rem 0.75rem;font-size:0.7rem;font-weight:700;color:var(--brown);cursor:pointer;letter-spacing:0.04em;transition:all 0.15s}
+    .pov-toggle:hover{background:var(--mango-light)}
+    .pov-dot{width:8px;height:8px;border-radius:50%;background:var(--mango);transition:background 0.2s}
+    .pov-dot.visitor{background:var(--taupe)}
+    .modal-overlay{position:fixed;inset:0;background:rgba(21,17,13,0.5);z-index:500;display:none;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s}
+    .modal-overlay.open{display:flex;opacity:1;pointer-events:auto}
+    .modal-box{background:var(--card-bg);border:1.5px solid var(--border);border-radius:1.5rem;padding:2rem;width:420px;max-width:calc(100vw - 2rem);transform:translateY(12px);transition:transform 0.22s}
+    .modal-overlay.open .modal-box{transform:translateY(0)}
+    .sf-input{width:100%;background:var(--cream);border:1px solid var(--border);border-radius:0.625rem;padding:0.55rem 0.75rem;font-size:0.875rem;color:var(--bark);font-family:'Inter',sans-serif;outline:none;transition:border-color 0.15s}
+    .sf-input:focus{border-color:var(--mango)}
+    .sf-label{display:block;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--taupe);margin-bottom:0.35rem}
+    .asset-popup{position:fixed;z-index:400;background:var(--card-bg);border:1.5px solid var(--border);border-radius:1rem;padding:1rem 1.1rem;width:260px;box-shadow:0 16px 48px rgba(21,17,13,0.14);display:none}
+    .asset-popup.open{display:block}
+    .review-card{background:var(--cream);border:1px solid var(--border);border-radius:0.875rem;padding:0.85rem 1rem}
+    .sort-dd{position:absolute;top:calc(100% + 6px);right:0;background:var(--card-bg);border:1.5px solid var(--border);border-radius:14px;padding:0.4rem;z-index:50;min-width:170px;box-shadow:0 16px 40px -10px rgba(21,17,13,0.16);opacity:0;pointer-events:none;transform:translateY(-6px);transition:all 0.2s ease}
+    .sort-dd.open{opacity:1;pointer-events:auto;transform:translateY(0)}
+    .sort-opt{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.65rem;border-radius:10px;font-size:0.75rem;font-weight:500;color:var(--brown);cursor:pointer;border:none;background:none;font-family:'Inter',sans-serif;transition:background 0.12s;text-align:left;width:100%}
+    .sort-opt:hover{background:var(--mango-pale)}
+    .sort-opt.active{color:var(--bark);font-weight:700}
+    .sort-opt.active .sort-check{opacity:1}
+    .sort-check{width:16px;height:16px;border-radius:50%;background:var(--mango);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;flex-shrink:0}
+    .not-found{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:1rem;color:var(--taupe);text-align:center;padding:2rem}
+    .not-found a{display:inline-flex;align-items:center;gap:0.5rem;padding:0.6rem 1.5rem;border-radius:9999px;background:var(--mango);color:var(--bark);font-weight:700;font-size:0.8rem;text-decoration:none;transition:all 0.15s}
+    .not-found a:hover{background:var(--bark);color:white}
+    #profileDropdown{position:absolute;top:calc(100% + 10px);right:0;width:220px;background:white;border:1.5px solid var(--border);border-radius:16px;box-shadow:0 20px 50px -10px rgba(21,17,13,0.18);padding:1rem;display:none;z-index:200}
+    #profileDropdown.open{display:block}
+    .dropdown-divider{height:1px;background:var(--border);margin:0.625rem 0}
+    .dropdown-item{display:block;width:100%;text-align:left;padding:0.45rem 0.5rem;border-radius:8px;font-size:0.8125rem;font-weight:500;color:var(--brown);cursor:pointer;transition:background 0.15s;background:none;border:none;font-family:'Inter',sans-serif}
+    .dropdown-item:hover{background:var(--mango-pale);color:var(--bark)}
+    .dropdown-item.danger:hover{background:#fff1f1;color:#c0392b}
+    .avatar-ring{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);background:var(--mango-pale);overflow:hidden;cursor:pointer;transition:border-color 0.18s;flex-shrink:0}
+    .avatar-ring:hover,.avatar-ring.open-state{border-color:var(--mango)}
+    .avatar-ring img{width:100%;height:100%;object-fit:cover;display:block}
+    #categorySelector{background-color:white;border:1.5px solid var(--border);border-radius:12px;padding:0.35rem 1.75rem 0.35rem 0.75rem;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;color:var(--brown);outline:none;cursor:pointer;transition:all 0.15s;appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a7564' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 0.6rem center;background-size:0.8em}
+    #categorySelector:hover{border-color:var(--mango-light);background-color:var(--mango-pale)}
+    .tl-line{position:absolute;left:8px;top:8px;bottom:8px;width:2px;background:linear-gradient(to bottom,var(--mango),var(--border))}
+    .tl-item{position:relative;padding-left:14px;cursor:pointer;transition:transform 0.2s ease}
+    .tl-item:hover{transform:translateX(4px)}
+    .tl-dot{position:absolute;left:-22px;top:4px;width:12px;height:12px;border-radius:50%;background:white;border:3px solid var(--mango);box-shadow:0 0 8px rgba(255,159,74,0.4);transition:all 0.2s ease;z-index:2}
+    .tl-item:hover .tl-dot{background:var(--mango);transform:scale(1.2);box-shadow:0 0 12px rgba(255,159,74,0.6)}
+  </style>
+</head>
+<body>
+
+<!-- ═══════ HEADER ═══════ -->
+<header id="navbar">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 h-full lg:px-10">
+    <a href="home.html" class="flex items-center gap-2 flex-1" aria-label="LootYard home">
+      <img src="assets/chestnobg.png" alt="LootYard" class="h-10 w-10 object-contain">
+      <span class="font-hand text-2xl font-bold leading-none text-bark [text-shadow:0.5px_0_0_currentColor]">LootYard</span>
+    </a>
+    <nav aria-label="Section navigation" class="relative flex justify-center">
+      <ul id="sectionNav" class="relative hidden items-center rounded-full bg-white/70 p-1 ring-1 ring-bark/5 font-body text-sm font-bold text-bark md:flex">
+        <span id="navIndicator" style="width:7rem;transform:translateX(0px);opacity:0;"></span>
+        <li class="relative z-10 text-center" style="width:7rem"><a href="home.html?tab=assets" class="block rounded-full px-4 py-2 text-bark/50 hover:text-bark transition-colors duration-300 whitespace-nowrap">Assets</a></li>
+        <li class="relative z-10 text-center" style="width:7rem"><a href="home.html?tab=talent" class="block rounded-full px-4 py-2 text-bark/50 hover:text-bark transition-colors duration-300 whitespace-nowrap">Talent</a></li>
+      </ul>
+    </nav>
+    <div class="flex items-center gap-4 flex-1 justify-end">
+      <div class="search-bar flex items-center gap-2 px-3 py-1.5 flex-1 max-w-xs">
+        <svg class="w-3.5 h-3.5 text-taupe flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+        <input id="searchInput" type="text" placeholder="Search assets…" class="text-xs flex-1 placeholder:text-[#bba898]" oninput="renderAssetGrid()">
+      </div>
+      <div class="relative flex-shrink-0" id="authArea">
+        <div id="guestButtons" class="flex items-center gap-3">
+          <button onclick="openAuth('login')" class="hidden text-xs font-bold text-bark/60 transition-colors hover:text-mango sm:inline">Log In</button>
+          <button onclick="openAuth('signup')" class="flex items-center gap-2 rounded-full border border-bark/10 bg-white px-3 py-1.5 text-xs font-bold text-bark shadow-sm transition-all hover:-translate-y-0.5 hover:border-mango hover:shadow-md">
+            <span class="grid h-6 w-6 place-items-center rounded-full bg-mango-soft">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="h-3 w-3 text-bark"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/></svg>
+            </span>
+            Sign Up
+          </button>
+        </div>
+        <div id="userArea" class="hidden">
+          <button class="avatar-ring" id="avatarBtn" onclick="toggleDropdown()">
+            <img id="avatarImg" src="" alt="avatar">
+          </button>
+          <div id="profileDropdown">
+            <div class="flex items-center gap-3 pb-2">
+              <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border border-[var(--border)]">
+                <img id="dropdownAvatar" src="" alt="avatar" class="w-full h-full object-cover">
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-bold text-[var(--bark)] truncate" id="dropdownName">—</p>
+                <p class="text-[10px] text-[var(--taupe)] truncate" id="dropdownEmail">—</p>
+              </div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" onclick="showPortfolio()">View Portfolio</button>
+            <button class="dropdown-item" onclick="showNotifications()">Notifications</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" onclick="signOut()">Log out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════ MAIN ═══════ -->
+<main id="mainContent" class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+
+  <!-- NOT FOUND STATE -->
+  <div id="notFoundState" class="not-found" style="display:none;">
+    <span style="font-size:3rem;">👤</span>
+    <h2 class="font-display text-xl font-bold text-[var(--bark)]">Creator not found</h2>
+    <p class="text-sm">We couldn't find this creator profile.</p>
+    <a href="home.html">← Back to LootYard</a>
+  </div>
+
+  <!-- PROFILE CONTENT -->
+  <div id="profileContent" style="display:none;">
+    <!-- Master two-column layout: left content | right sidebar -->
+    <div id="masterGrid" style="display:grid; grid-template-columns: 1fr 280px; gap: 1rem; align-items: start;">
+
+      <!-- ══ LEFT COLUMN ══ -->
+      <div style="display:flex; flex-direction:column; gap:1rem;">
+
+        <!-- BIO CARD -->
+        <div class="sf-card p-5" style="display:flex; flex-direction:column; gap:1rem;">
+          <!-- Avatar + Name + Toggle row -->
+          <div style="display:flex; align-items:flex-start; gap:1rem;">
+            <div style="position:relative; flex-shrink:0;" class="group">
+              <img id="profileAvatar" src="" alt="Creator Avatar" class="rounded-2xl border-2 border-[var(--mango-light)] object-cover bg-[var(--mango-pale)]" style="width:64px;height:64px;">
+              <button id="avatarEditBtn" onclick="toast('Edit mode coming soon')" class="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white" style="background:rgba(0,0,0,0.4); font-size:10px; font-weight:700;">Edit</button>
+            </div>
+            <div style="flex:1; min-width:0;">
+              <span style="font-size:9px; font-weight:900; color:var(--mango); text-transform:uppercase; letter-spacing:0.12em;">Creator</span>
+              <h1 class="font-display" style="font-size:1.5rem; font-weight:800; color:var(--bark); line-height:1.2; margin-top:2px;" id="profileName">—</h1>
+              <p style="font-size:0.7rem; color:var(--taupe); font-weight:600; margin-top:2px;" id="profileTitle">—</p>
+            </div>
+            <!-- POV toggle + edit -->
+            <div style="display:flex; align-items:center; gap:0.5rem; flex-shrink:0;">
+              <button id="editIntroBtn" onclick="toast('Edit mode coming soon')" class="flex items-center gap-1.5 rounded-xl" style="background:var(--bark); padding:0.35rem 0.65rem; font-size:0.7rem; font-weight:700; color:var(--cream); border:none; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.background='var(--mango)';this.style.color='var(--bark)'" onmouseout="this.style.background='var(--bark)';this.style.color='var(--cream)'">
+                <svg style="width:12px;height:12px;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                Edit
+              </button>
+              <button class="pov-toggle" id="povToggleBtn" onclick="togglePOV()">
+                <span class="pov-dot" id="povDot"></span>
+                <span id="povLabel">Owner view</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bio -->
+          <p style="font-size:0.8rem; line-height:1.6; color:rgba(21,17,13,0.65);" id="profileBio">—</p>
+
+          <!-- Stat pills -->
+          <div style="display:flex; flex-wrap:wrap; gap:0.5rem;" id="statsRow">
+            <div style="display:flex;align-items:center;gap:0.4rem;background:#ffd2aa;border:1px solid #f0d8b8;padding:0.25rem 0.75rem;border-radius:9999px;font-size:0.7rem;font-weight:700;color:var(--brown);">📦 <span id="statAssets" style="color:var(--bark);font-weight:800;">0</span> assets</div>
+            <div style="display:flex;align-items:center;gap:0.4rem;background:#ffd2aa;border:1px solid #f0d8b8;padding:0.25rem 0.75rem;border-radius:9999px;font-size:0.7rem;font-weight:700;color:var(--brown);">📥 <span id="statDownloads" style="color:var(--bark);font-weight:800;">0</span> dls</div>
+            <div style="display:flex;align-items:center;gap:0.4rem;background:#ffd2aa;border:1px solid #f0d8b8;padding:0.25rem 0.75rem;border-radius:9999px;font-size:0.7rem;font-weight:700;color:var(--brown);">⭐ <span id="statRating" style="color:var(--bark);font-weight:800;">0</span> rating</div>
+            <div style="display:flex;align-items:center;gap:0.4rem;background:#ffd2aa;border:1px solid #f0d8b8;padding:0.25rem 0.75rem;border-radius:9999px;font-size:0.7rem;font-weight:700;color:var(--brown);">💬 <span id="statReviews" style="color:var(--bark);font-weight:800;">0</span> reviews</div>
+          </div>
+
+          <!-- Skills -->
+          <div style="display:flex;flex-wrap:wrap;gap:0.4rem;" id="skillsRow"></div>
+        </div>
+
+        <!-- TOOLBAR -->
+        <div class="sf-card p-4" style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <label style="font-size:0.65rem;font-weight:700;color:var(--taupe);text-transform:uppercase;letter-spacing:0.08em;">Type:</label>
+            <select id="categorySelector" onchange="renderAssetGrid()" style="background:white;border:1.5px solid var(--border);border-radius:12px;padding:0.3rem 1.75rem 0.3rem 0.75rem;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;color:var(--brown);outline:none;cursor:pointer;appearance:none;background-image:url(\"data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a7564' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 0.6rem center;background-size:0.8em;">
+              <option value="all">All Assets</option>
+              <option value="characters">Characters</option>
+              <option value="props">Props</option>
+              <option value="weapons">Weapons</option>
+              <option value="vehicles">Vehicles</option>
+              <option value="environments">Environment</option>
+              <option value="vfx">VFX</option>
+              <option value="ui">UI Kits</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <label style="font-size:0.65rem;font-weight:700;color:var(--taupe);text-transform:uppercase;letter-spacing:0.08em;">Sort by:</label>
+            <div style="position:relative;" id="sortContainer">
+              <button id="sortBtn" onclick="toggleSort()" style="display:flex;align-items:center;gap:0.4rem;background:white;border:1.5px solid var(--border);border-radius:12px;padding:0.3rem 0.75rem;font-size:0.7rem;font-weight:700;color:var(--bark);cursor:pointer;font-family:'Inter',sans-serif;">
+                <span id="sortLabel">Newest</span>
+                <svg style="width:14px;height:14px;color:var(--taupe);" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+              </button>
+              <div class="sort-dd" id="sortDropdown">
+                <button class="sort-opt active" data-sort="newest" onclick="setSort(this,'newest','Newest')">Newest first</button>
+                <button class="sort-opt" data-sort="popular" onclick="setSort(this,'popular','Popular')">Most popular</button>
+                <button class="sort-opt" data-sort="downloads" onclick="setSort(this,'downloads','Downloads')">Most downloaded</button>
+                <button class="sort-opt" data-sort="az" onclick="setSort(this,'az','A → Z')">A → Z</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ASSET GRID -->
+        <section class="sf-card p-5">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid rgba(21,17,13,0.05);">
+            <h2 class="font-display" style="font-size:1.05rem;font-weight:700;color:var(--bark);">Portfolio Assets</h2>
+            <span style="font-size:0.7rem;color:var(--taupe);font-weight:600;background:var(--mango-pale);border:1px solid #f0d8b8;border-radius:9999px;padding:0.15rem 0.65rem;" id="assetCountBadge">0 assets</span>
+          </div>
+          <div id="assetGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;"></div>
+          <div id="emptyState" class="hidden" style="padding:4rem 0;text-align:center;"><div style="font-size:2.5rem;margin-bottom:0.75rem;">📭</div><p style="font-size:0.85rem;font-weight:700;color:rgba(21,17,13,0.5);">No assets in this category.</p></div>
+        </section>
+
+        <!-- REVIEWS -->
+        <section class="sf-card p-5">
+          <h2 class="font-display" style="font-size:1.05rem;font-weight:700;color:var(--bark);margin-bottom:1rem;">Community Reviews</h2>
+          <div id="reviewsGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem;"></div>
+          <div id="noReviews" class="hidden" style="padding:3rem 0;text-align:center;"><p style="font-size:0.85rem;color:var(--taupe);">No reviews yet for this creator's assets.</p></div>
+        </section>
+      </div>
+
+      <!-- ══ RIGHT SIDEBAR ══ -->
+      <div id="rightSidebar" style="display:flex; flex-direction:column; gap:1rem;">
+
+        <!-- HIRE CARD -->
+        <div id="commissionArea" class="sf-card p-5" style="display:flex;flex-direction:column;gap:0.75rem;background:#f0faf2;border-color:#c2e7cd;">
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <span style="width:10px;height:10px;border-radius:50%;background:#22c55e;flex-shrink:0;animation:pulse 2s infinite;"></span>
+            <span style="font-size:0.65rem;font-weight:900;color:#166534;text-transform:uppercase;letter-spacing:0.1em;">Open for hire</span>
+          </div>
+          <p style="font-size:0.7rem;color:rgba(5,46,22,0.55);line-height:1.5;">Available for commissions, freelance projects, and custom asset creation.</p>
+          <div style="font-size:0.72rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid rgba(187,247,208,0.5);">
+              <span style="color:rgba(5,46,22,0.5);font-weight:500;">Response</span><span style="font-weight:700;color:#14532d;">24h</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid rgba(187,247,208,0.5);">
+              <span style="color:rgba(5,46,22,0.5);font-weight:500;">Delivery</span><span style="font-weight:700;color:#14532d;">5–10 days</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;">
+              <span style="color:rgba(5,46,22,0.5);font-weight:500;">Starting rate</span><span style="font-weight:700;color:#14532d;">From $30</span>
+            </div>
+          </div>
+          <button onclick="openCommissionModal()" style="width:100%;background:#16a34a;color:white;border:none;border-radius:12px;padding:0.65rem;font-size:0.72rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.4rem;transition:background 0.15s;" onmouseover="this.style.background='#15803d'" onmouseout="this.style.background='#16a34a'">
+            <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Hire for a project
+          </button>
+        </div>
+
+        <!-- SOCIAL LINKS -->
+        <div class="sf-card p-5">
+          <p style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--taupe);margin-bottom:0.75rem;">Social links</p>
+          <div id="socialLinksContainer" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
+        </div>
+
+        <!-- WORK HISTORY TIMELINE -->
+        <div class="sf-card p-5">
+          <p style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--taupe);margin-bottom:1rem;">Work history</p>
+          <div class="relative pl-6" id="timelineContainer">
+            <div class="tl-line"></div>
+          </div>
+        </div>
+
+      </div><!-- end right sidebar -->
+    </div><!-- end masterGrid -->
+  </div>
+
+</main>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer id="siteFooter">
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-6 h-full lg:px-10">
+    <div class="flex items-center gap-2">
+      <img src="assets/chestnobg.png" alt="" class="h-6 w-6 object-contain">
+      <span class="font-hand text-base font-bold text-bark [text-shadow:0.5px_0_0_currentColor]">LootYard</span>
+      <span class="hidden sm:inline ml-1.5 text-[10px] text-bark/40">Free assets, real creators</span>
+    </div>
+    <p class="text-[10px] text-bark/40 hidden sm:block">© 2026 LootYard</p>
+    <div class="flex gap-3 text-bark/40">
+      <a href="#" class="hover:text-mango transition-colors" aria-label="X"><svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+      <a href="#" class="hover:text-mango transition-colors" aria-label="GitHub"><svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/></svg></a>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════ ASSET POPUP ═══════ -->
+<div class="asset-popup" id="assetPopup">
+  <button onclick="closePopup()" class="absolute top-2 right-3 text-lg text-[var(--taupe)] hover:text-[var(--bark)] leading-none cursor-pointer">&times;</button>
+  <div class="flex items-center gap-3 mb-3">
+    <img id="ppThumb" src="" alt="" class="w-12 h-12 rounded-xl object-cover border border-[var(--border)] flex-shrink-0 bg-[var(--mango-pale)]">
+    <div class="min-w-0">
+      <p class="text-sm font-bold text-[var(--bark)] leading-tight truncate" id="ppName"></p>
+      <p class="text-xs text-[var(--taupe)]" id="ppCat"></p>
+    </div>
+  </div>
+  <div class="space-y-1.5 text-xs">
+    <div class="flex justify-between"><span class="text-[var(--taupe)]">Downloads</span><span class="font-semibold text-[var(--bark)]" id="ppDl"></span></div>
+    <div class="flex justify-between"><span class="text-[var(--taupe)]">Rating</span><span class="font-semibold text-[var(--mango)]" id="ppRating"></span></div>
+    <div class="flex justify-between"><span class="text-[var(--taupe)]">Reviews</span><span class="font-semibold text-[var(--bark)]" id="ppReviews"></span></div>
+  </div>
+  <p class="text-xs text-bark/70 mt-2.5 pt-2.5 border-t border-[var(--border)] leading-relaxed line-clamp-3" id="ppDesc"></p>
+  <div id="ppTags" class="mt-2 flex flex-wrap gap-1"></div>
+</div>
+
+<!-- ═══════ COMMISSION MODAL ═══════ -->
+<div class="modal-overlay" id="commissionModal" onclick="closeModalOnOverlay(event,'commissionModal')">
+  <div class="modal-box">
+    <h3 class="font-display text-xl font-extrabold text-[var(--bark)] mb-1" id="commTitle">Commission Request</h3>
+    <p class="text-sm text-[var(--taupe)] mb-5" id="commSubtitle"></p>
+    <div class="mb-4"><label class="sf-label">Your name</label><input class="sf-input" id="cName" type="text" placeholder="Jane Smith"><p class="text-xs text-red-500 mt-1 hidden" id="cNameErr">Name is required.</p></div>
+    <div class="mb-4"><label class="sf-label">Your email</label><input class="sf-input" id="cEmail" type="email" placeholder="jane@example.com"><p class="text-xs text-red-500 mt-1 hidden" id="cEmailErr">Enter a valid email.</p></div>
+    <div class="mb-4"><label class="sf-label">Project requirements</label><textarea class="sf-input" id="cReqs" rows="3" placeholder="Describe what you need — asset type, style, engine, deadline..." style="resize:vertical"></textarea><p class="text-xs text-red-500 mt-1 hidden" id="cReqsErr">Please describe your project.</p></div>
+    <div class="grid grid-cols-2 gap-3 mb-4"><div><label class="sf-label">Budget</label><input class="sf-input" id="cBudget" type="text" placeholder="e.g. $200"></div><div><label class="sf-label">Deadline</label><input class="sf-input" id="cDeadline" type="date"></div></div>
+    <div id="commSuccess" class="hidden bg-[var(--mango-pale)] border border-[#f0d8b8] rounded-xl p-4 text-sm text-[var(--bark)] font-semibold text-center">✅ Commission request sent! You'll hear back within 24 hours.</div>
+    <div class="flex gap-2.5 justify-end mt-2" id="commActions">
+      <button onclick="closeModal('commissionModal')" class="rounded-xl border border-[var(--border)] bg-[var(--cream)] px-4 py-2 text-sm font-bold text-[var(--bark)] hover:bg-[var(--mango-pale)] transition-colors">Cancel</button>
+      <button onclick="submitCommission()" class="rounded-xl bg-[var(--mango)] px-5 py-2 text-sm font-bold text-[var(--bark)] hover:bg-[var(--bark)] hover:text-[var(--cream)] transition-all">Send request</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" style="position:fixed;bottom:calc(var(--footer-h) + 0.75rem);left:50%;transform:translateX(-50%) translateY(80px);background:var(--bark);color:white;padding:0.5rem 1rem;border-radius:9999px;font-size:0.75rem;font-weight:600;z-index:9998;transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);pointer-events:none;white-space:nowrap;"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   SHARED CONSTANTS (duplicated from home for standalone use)
+   ═══════════════════════════════════════════════════ */
+const CREATOR_MERGE_MAP = {
+    'ironforge':'neonpulse','mossyman':'leafwork','lootmaster':'stonearch','relic_hunter':'stonearch',
+    'wizardry':'wizardry','wizard_vfx':'wizardry','plasmacut':'plasmacut','volt_vfx':'plasmacut',
+    'quantum_vfx':'plasmacut','bladesmth':'bladesmth','armoury':'bladesmth',
+    'rocketboy':'hovercraft','hovercraft':'hovercraft','dronetech':'hovercraft','sandstorm':'hovercraft',
+    'cyberui':'cyberui','pixelpush':'cyberui','menumaster':'cyberui','rpg_ui':'cyberui',
+};
+const CREATOR_DISPLAY_NAMES = {
+    'leafwork':'LeafWork Studios','neonpulse':'NeonPulse','stonearch':'StoneArch','anya_3d':'Anya 3D',
+    'bladesmth':'BladeSmith','wizardry':'Wizardry FX','plasmacut':'PlasmaCut','hovercraft':'HoverCraft',
+    'skybound':'SkyBound','vfxlab':'VFX Lab','cyberui':'CyberUI',
+};
+const CATEGORY_TITLES = {
+    'characters':'Character Artist','props':'Props Artist','weapons':'Weapon Artist',
+    'vehicles':'Vehicle Artist','environments':'Environment Artist','vfx':'VFX Artist','ui':'UI Designer',
+};
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function thumbUrl(p){ return p.thumbnailUrl || 'assets/chestnobg.png'; }
+function avatarUrl(u){ return `https://api.dicebear.com/8.x/thumbs/svg?seed=${encodeURIComponent(u)}&backgroundColor=ffd2aa,fff0df,ffe4c4&shapeColor=ff9f4a,c0714a`; }
+
+/* ── Generate creator data (same logic as home) ──────────── */
+function generateCreators(assets) {
+    const active = assets.filter(a => a.status !== 'coming-soon');
+    const map = {};
+    active.forEach(a => {
+        const u = a.creator;
+        if (!map[u]) map[u] = { username:u, assetIds:[], categories:new Set(), allTags:[], totalRating:0, totalReviews:0, totalDownloads:0, thumbnails:[] };
+        const c = map[u];
+        c.assetIds.push(a.id); c.categories.add(a.category); c.allTags.push(...(a.tags||[]));
+        c.totalRating += a.rating; c.totalReviews += a.reviews; c.totalDownloads += a._downloads;
+        if (c.thumbnails.length < 3) c.thumbnails.push(a.thumbnailUrl);
+    });
+    return Object.values(map).map(c => {
+        const count = c.assetIds.length;
+        const avgRating = Math.round((c.totalRating / count) * 10) / 10;
+        const catTitles = [...c.categories].sort().map(cat => CATEGORY_TITLES[cat] || cat).slice(0, 2);
+        const title = catTitles.join(' & ');
+        const tagCount = {}; c.allTags.forEach(t => tagCount[t] = (tagCount[t]||0)+1);
+        const skills = Object.entries(tagCount).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([t])=>t);
+        const bios = {
+            'characters&environments':'Creating charming stylized characters and immersive environments for indie games. Specializing in cohesive art direction across '+count+' published assets.',
+            'characters':'Crafting detailed and versatile character models with expressive design and clean topology. '+count+' asset'+(count>1?'s':'')+' published on LootYard.',
+            'environments':'Building modular and immersive environment kits that snap together seamlessly. '+count+' asset'+(count>1?'s':'')+' published, covering '+c.categories.size+' categor'+(c.categories.size>1?'ies':'y')+'.',
+            'weapons':'Crafting hand-painted and PBR fantasy weapons for RPGs and adventure games. Every blade tells a story. '+count+' asset'+(count>1?'s':'')+' available.',
+            'vehicles':'Engineering detailed vehicle models with working animations and optimized meshes. '+count+' asset'+(count>1?'s':'')+' ready for open-world and racing game projects.',
+            'vfx':'Producing optimized particle effects and VFX for real-time game engines. '+count+' asset'+(count>1?'s':'')+' available with GPU-ready flipbooks.',
+            'ui':'Designing clean, functional game UI components from HUDs to inventory systems. '+count+' asset'+(count>1?'s':'')+' published with consistent visual language.',
+        };
+        const cats = [...c.categories];
+        const bio = bios[cats.sort().join('&')] || (['weapons','props'].includes(cats[0]) ? 'Specializing in high-quality game-ready '+(skills[0]||'3D')+' assets. '+count+' published asset'+(count>1?'s':'')+' on LootYard.' : (['characters','environments','props','vfx','ui'].includes(cats[0]) ? 'Specializing in high-quality game-ready '+(skills[0]||'3D')+' assets. '+count+' published asset'+(count>1?'s':'')+' on LootYard.' : 'Specializing in high-quality game-ready assets.'));
+        return { username:c.username, displayName:CREATOR_DISPLAY_NAMES[c.username]||c.username, title, bio, skills, assetCount:count, avgRating, totalReviews:c.totalReviews, totalDownloads:c.totalDownloads, categories:cats, assetIds:c.assetIds, thumbnails:c.thumbnails };
+    }).sort((a,b) => b.assetCount - a.assetCount);
+}
+
+/* ── Load data ──────────────────────────────────────────── */
+let creator = null;
+let creatorAssets = [];
+let creatorReviews = [];
+
+function initData() {
+    // Preprocess MOCK_ASSETS (just like home.html)
+    if (typeof MOCK_ASSETS !== 'undefined') {
+        MOCK_ASSETS.forEach((a, i) => {
+            if (!a.author) a.author = a.creator;
+            if (!a.desc) a.desc = a.description;
+
+            const m = CREATOR_MERGE_MAP[a.creator];
+            if (m) { a.creator = m; a.author = m; }
+
+            const revs = (typeof MOCK_REVIEWS !== 'undefined') ? (MOCK_REVIEWS[a.id]||[]) : [];
+            if (revs.length > 0) {
+                a.rating = Math.round((revs.reduce((s,r)=>s+r.rating,0)/revs.length)*10)/10;
+            } else {
+                a.rating = Math.round((4.2+(i%5)*0.15)*10)/10;
+            }
+            a.reviews = revs.length;
+            a._idx = i;
+            a._downloads = revs.length*120+Math.floor(Math.random()*800)+200;
+        });
+    }
+
+    // Prefer data passed from home page
+    let creators = (typeof window.GENERATED_CREATORS !== 'undefined') ? window.GENERATED_CREATORS : null;
+
+    // Fallback: generate locally
+    if (!creators && typeof MOCK_ASSETS !== 'undefined') {
+        creators = generateCreators(MOCK_ASSETS);
+    }
+
+    // Get creator from URL
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('creator');
+    if (!username || !creators) { showNotFound(); return; }
+
+    creator = creators.find(c => c.username === username);
+    if (!creator) { showNotFound(); return; }
+
+    creatorAssets = (typeof MOCK_ASSETS !== 'undefined')
+        ? MOCK_ASSETS.filter(a => a.status !== 'coming-soon' && a.creator === username)
+        : [];
+
+    creatorReviews = (typeof MOCK_REVIEWS !== 'undefined')
+        ? creator.assetIds.flatMap(id => (MOCK_REVIEWS[id] || []).map(r => ({...r, assetTitle: (MOCK_ASSETS.find(a=>a.id===id)||{}).title || ''})))
+        : [];
+
+    showProfile();
+}
+
+/* ── Render functions ──────────────────────────────────────── */
+function showProfile() {
+    document.getElementById('notFoundState').style.display = 'none';
+    document.getElementById('profileContent').style.display = 'block';
+
+    document.getElementById('profileAvatar').src = avatarUrl(creator.username);
+    document.getElementById('profileName').textContent = creator.displayName;
+    document.getElementById('profileTitle').textContent = creator.title;
+    document.getElementById('profileBio').textContent = creator.bio;
+    document.getElementById('statAssets').textContent = creator.assetCount;
+    document.getElementById('statDownloads').textContent = fmtDl(creator.totalDownloads);
+    document.getElementById('statRating').textContent = creator.avgRating;
+    document.getElementById('statReviews').textContent = creator.totalReviews;
+
+    // Skills
+    document.getElementById('skillsRow').innerHTML = creator.skills.map(s =>
+        `<span class="tag-chip-sm">${s}</span>`
+    ).join('');
+
+    // Commission area: show only in visitor mode
+    updateCommissionVisibility();
+
+    renderAssetGrid();
+    renderReviews();
+    renderTimeline();
+    renderSocialLinks();
+
+    // Set nav indicator opacity to 0 since portfolio is not a navbar tab
+    const ind = document.getElementById('navIndicator');
+    if (ind) ind.style.opacity = '0';
+
+    // POV default: owner
+    isOwner = true;
+    updatePOVUI();
+}
+
+function showNotFound() {
+    document.getElementById('notFoundState').style.display = 'flex';
+    document.getElementById('profileContent').style.display = 'none';
+}
+
+function fmtDl(n) { return n >= 1000 ? (n/1000).toFixed(n%1000===0?0:1)+'k' : n; }
+
+function renderAssetGrid() {
+    let filtered = [...creatorAssets];
+    
+    // Category filter from categorySelector dropdown
+    const cat = document.getElementById('categorySelector').value;
+    if (cat !== 'all') {
+        filtered = filtered.filter(a => a.category === cat);
+    }
+
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    if (q) filtered = filtered.filter(a => a.title.toLowerCase().includes(q) || (a.tags||[]).some(t => t.toLowerCase().includes(q)));
+
+    if (currentSort === 'newest') filtered.sort((a,b) => b._idx - a._idx);
+    else if (currentSort === 'popular') filtered.sort((a,b) => b.rating - a.rating);
+    else if (currentSort === 'downloads') filtered.sort((a,b) => b._downloads - a._downloads);
+    else if (currentSort === 'az') filtered.sort((a,b) => a.title.localeCompare(b.title));
+
+    const grid = document.getElementById('assetGrid');
+    const empty = document.getElementById('emptyState');
+    document.getElementById('assetCountBadge').textContent = filtered.length + ' asset' + (filtered.length !== 1 ? 's' : '');
+
+    if (filtered.length === 0) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+
+    grid.innerHTML = filtered.map(a => `
+        <div class="asset-card" onclick="showPopup(event,'${a.id}')">
+            ${a.rating >= 4.8 ? '<div class="card-badge">Hot</div>' : ''}
+            <div class="relative aspect-[4/3] overflow-hidden bg-[var(--mango-pale)]">
+                <div class="skeleton absolute inset-0"></div>
+                <img src="${thumbUrl(a)}" alt="${a.title}" loading="lazy" class="w-full h-full object-cover relative z-[1]" onload="this.previousElementSibling.style.display='none'">
+            </div>
+            <div class="p-3">
+                <h3 class="text-xs font-bold text-[var(--bark)] truncate">${a.title}</h3>
+                <div class="flex items-center justify-between mt-1">
+                    <div class="stars text-[11px]">${'★'.repeat(Math.floor(a.rating))}</div>
+                    <span class="text-[9px] text-[var(--taupe)]">${a.rating} (${a.reviews||0})</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderReviews() {
+    const grid = document.getElementById('reviewsGrid');
+    const noRev = document.getElementById('noReviews');
+    if (creatorReviews.length === 0) { grid.innerHTML = ''; noRev.classList.remove('hidden'); return; }
+    noRev.classList.add('hidden');
+
+    grid.innerHTML = creatorReviews.slice(0, 8).map(r => `
+        <div class="review-card">
+            <div class="flex items-center gap-2 mb-2">
+                <img src="${avatarUrl(r.username)}" width="28" height="28" class="w-7 h-7 rounded-full border border-[var(--border)] object-cover flex-shrink-0" alt="">
+                <div class="min-w-0">
+                    <p class="text-xs font-bold text-[var(--bark)]">${r.username}</p>
+                    <p class="text-[10px] text-[var(--taupe)]">${r.assetTitle}</p>
+                </div>
+                <div class="ml-auto flex gap-0.5">${'<span class="star-filled text-xs text-[var(--mango)]">★</span>'.repeat(r.rating)+'<span class="star-empty text-xs text-[var(--border)]">★</span>'.repeat(5-r.rating)}</div>
+            </div>
+            <p class="text-xs leading-relaxed text-bark/70">${r.comment}</p>
+        </div>
+    `).join('');
+}
+
+function renderTimeline() {
+    const sorted = [...creatorAssets].sort((a,b) => b._idx - a._idx);
+    const container = document.getElementById('timelineContainer');
+    
+    if (sorted.length === 0) {
+        container.innerHTML = `<p class="text-xs text-[var(--taupe)]">No work history yet.</p>`;
+        return;
+    }
+
+    const html = sorted.map((a, i) => {
+        const monthIndex = a._idx >= 12 ? 0 : (a._idx % 12);
+        const year = 2025 + Math.floor(a._idx / 12);
+        const monthName = MONTHS[monthIndex] || 'Jan';
+        const dateStr = `${monthName} ${year}`;
+        
+        return `
+        <div class="tl-item mb-5 last:mb-0 group" onclick="showPopup(event,'${a.id}')">
+            <div class="tl-dot"></div>
+            <div class="min-w-0">
+                <span class="text-[9px] font-black text-mango uppercase tracking-widest">${dateStr}</span>
+                <p class="text-xs font-extrabold text-[var(--bark)] truncate mt-0.5 group-hover:text-mango transition-colors">${a.title}</p>
+                <div class="flex items-center gap-2 mt-1 text-[10px] text-[var(--taupe)] font-semibold">
+                    <span>${(CATEGORY_TITLES[a.category]||a.category)}</span>
+                    <span>·</span>
+                    <span class="text-mango font-bold">📥 ${fmtDl(a._downloads)}</span>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+    
+    container.innerHTML = `<div class="tl-line"></div>${html}`;
+}
+
+function renderSocialLinks() {
+    const u = creator.username;
+    const links = [
+        { platform:'GitHub', icon:'<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/></svg>', handle:u },
+        { platform:'X / Twitter', icon:'<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>', handle:u },
+        { platform:'Discord', icon:'<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515A13 13 0 0 0 15 6a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25A19.736 19.736 0 0 0 3.677 4.37C.533 9.046-.32 13.58.099 18.057a19.9 19.9 0 0 0 5.993 3.03c.462-.63.874-1.295 1.226-1.994a13.094 13.094 0 0 1-1.873-.894.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .078.01c3.928 1.793 8.18 1.793 12.062 0a.075.075 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892c.36.698.772 1.362 1.225 1.993a19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66z"/></svg>', handle:u },
+        { platform:'ArtStation', icon:'<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3H1v18h22V3zM7 13h10v8H7z"/></svg>', handle:u },
+    ];
+
+    document.getElementById('socialLinksContainer').innerHTML = links.map(l => `
+        <a href="#" class="social-link" onclick="return false">
+            <div class="social-icon" style="background:#fff0df">${l.icon}</div>
+            <span class="text-[var(--brown)] truncate">${l.handle}</span>
+            <svg class="w-3 h-3 text-[var(--taupe)] ml-auto" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 17l10-10"/></svg>
+        </a>
+    `).join('');
+}
+
+/* ── POV toggle ─────────────────────────────────────── */
+let isOwner = true;
+
+function togglePOV() {
+    isOwner = !isOwner;
+    updatePOVUI();
+}
+
+function updatePOVUI() {
+    document.getElementById('povLabel').textContent = isOwner ? 'Owner view' : 'Visitor view';
+    const dot = document.getElementById('povDot');
+    dot.classList.toggle('visitor', !isOwner);
+    document.getElementById('editIntroBtn').style.display = isOwner ? '' : 'none';
+    updateCommissionVisibility();
+}
+
+function updateCommissionVisibility() {
+    const hireCard = document.getElementById('commissionArea');
+    const masterGrid = document.getElementById('masterGrid');
+    if (isOwner) {
+        // Owner: hide hire card, sidebar shrinks but stays (links/timeline visible)
+        hireCard.style.display = 'none';
+    } else {
+        // Visitor: show hire card
+        hireCard.style.display = '';
+    }
+}
+
+/* ── Sort ─────────────────────────────────────── */
+let currentSort = 'newest';
+
+function toggleSort() { document.getElementById('sortDropdown').classList.toggle('open'); }
+document.addEventListener('click', e => { if (!e.target.closest('#sortContainer')) document.getElementById('sortDropdown').classList.remove('open'); });
+
+function setSort(el, key, label) {
+    document.querySelectorAll('.sort-opt').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+    currentSort = key;
+    document.getElementById('sortLabel').textContent = label;
+    document.getElementById('sortDropdown').classList.remove('open');
+    renderAssetGrid();
+}
+
+/* ── Asset popup ─────────────────────────────────────── */
+function showPopup(e, id) {
+    e.stopPropagation();
+    const a = creatorAssets.find(x => x.id === id);
+    if (!a) return;
+    document.getElementById('ppThumb').src = thumbUrl(a);
+    document.getElementById('ppName').textContent = a.title;
+    document.getElementById('ppCat').textContent = (CATEGORY_TITLES[a.category] || a.category);
+    document.getElementById('ppDl').textContent = fmtDl(a._downloads) + ' downloads';
+    document.getElementById('ppRating').textContent = a.rating + ' / 5';
+    document.getElementById('ppReviews').textContent = (a.reviews||0) + ' reviews';
+    document.getElementById('ppDesc').textContent = a.desc || a.description;
+    document.getElementById('ppTags').innerHTML = (a.tags||[]).map(t => `<span class="tag-chip-sm">${t}</span>`).join('');
+
+    const popup = document.getElementById('assetPopup');
+    popup.classList.add('open');
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pw = 260;
+    let left = rect.left + rect.width/2 - pw/2;
+    if (left + pw > window.innerWidth - 12) left = window.innerWidth - pw - 12;
+    if (left < 8) left = 8;
+    let top = rect.bottom + 8;
+    if (top + 300 > window.innerHeight) top = rect.top - 300 - 8;
+    popup.style.left = left + 'px';
+    popup.style.top = top + 'px';
+}
+
+function closePopup() { document.getElementById('assetPopup').classList.remove('open'); }
+document.addEventListener('click', e => { const p = document.getElementById('assetPopup'); if (p && !p.contains(e.target)) p.classList.remove('open'); });
+
+/* ── Commission modal ─────────────────────────────── */
+function openCommissionModal() {
+    document.getElementById('commTitle').textContent = 'Commission ' + creator.displayName;
+    document.getElementById('commSubtitle').textContent = 'Describe your project — ' + creator.displayName + ' typically responds within 24 hours.';
+    document.getElementById('commissionSuccess').classList.add('hidden');
+    document.getElementById('commActions').style.display = '';
+    ['cName','cEmail','cReqs','cBudget','cDeadline'].forEach(id => {
+        document.getElementById(id).value = '';
+        const err = document.getElementById(id+'Err');
+        if (err) err.classList.add('hidden');
+    });
+    document.getElementById('commissionModal').classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModalOnOverlay(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+
+function submitCommission() {
+    let valid = true;
+    const name = document.getElementById('cName').value.trim();
+    const email = document.getElementById('cEmail').value.trim();
+    const reqs = document.getElementById('cReqs').value.trim();
+    document.getElementById('cNameErr').classList.toggle('hidden', !!name);
+    document.getElementById('cEmailErr').classList.toggle('hidden', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+    document.getElementById('cReqsErr').classList.toggle('hidden', !!reqs);
+    if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !reqs) return;
+    document.getElementById('commissionSuccess').classList.remove('hidden');
+    document.getElementById('commActions').style.display = 'none';
+}
+
+/* ── Toast ─────────────────────────────────────────────── */
+function toast(msg) {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.style.transform = 'translateX(-50%) translateY(80px)', 2500);
+}
+
+/* ── Firebase Auth initialization ──────────── */
+const firebaseConfig = {
+  apiKey: "AIzaSyBxFuzLh-o7jqUr6LInMQbpkP3zny1h1kk",
+  authDomain: "lootyard-xyz.firebaseapp.com",
+  projectId: "lootyard-xyz",
+  storageBucket: "lootyard-xyz.firebasestorage.app",
+  messagingSenderId: "376623956358",
+  appId: "1:376623956358:web:79a5609ecc0888534a6c07",
+  measurementId: "G-V9FXDS2Q5Y"
+};
+if (typeof firebase !== 'undefined') {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById('guestButtons').classList.add('hidden');
+            document.getElementById('userArea').classList.remove('hidden');
+            updateAvatarUI(user);
+        } else {
+            document.getElementById('guestButtons').classList.remove('hidden');
+            document.getElementById('userArea').classList.add('hidden');
+        }
+    });
+}
+
+function updateAvatarUI(user) {
+    const avatar = user.photoURL || avatarUrl(user.displayName || user.email);
+    document.getElementById('avatarImg').src = avatar;
+    document.getElementById('dropdownAvatar').src = avatar;
+    document.getElementById('dropdownName').textContent = user.displayName || user.email.split('@')[0];
+    document.getElementById('dropdownEmail').textContent = user.email;
+}
+
+function toggleDropdown() {
+    const dd = document.getElementById('profileDropdown');
+    dd.classList.toggle('open');
+}
+
+document.addEventListener('click', e => {
+    const btn = document.getElementById('avatarBtn');
+    const dd = document.getElementById('profileDropdown');
+    if (btn && dd && !btn.contains(e.target) && !dd.contains(e.target)) {
+        dd.classList.remove('open');
+    }
+});
+
+function signOut() {
+    if (typeof firebase !== 'undefined') {
+        firebase.auth().signOut().then(() => {
+            window.location.reload();
+        }).catch(err => {
+            console.error('Error signing out', err);
+        });
+    }
+}
+
+function showPortfolio() {
+    if (typeof firebase !== 'undefined') {
+        const user = firebase.auth().currentUser;
+        if (user) {
+            window.location.href = 'portfolio.html?creator=anya_3d'; // fallback or dynamic lookup
+        } else {
+            openAuth('login');
+        }
+    }
+}
+
+function showNotifications() {
+    toast('No new notifications.');
+}
+
+function openAuth(mode) {
+    window.location.href = `home.html?auth=${mode}`;
+}
+
+/* ── Init ─────────────────────────────────────────────── */
+initData();
+</script>
+</body>
+</html>
