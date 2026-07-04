@@ -14,12 +14,20 @@ node_modules/
 .antigravityignore
 
 # ── Large AI-generated image folders ────────────────────────────
-ai_gen_img/
+# Root ai_gen_img/ IS used by home.html / mock_assets.js — keep it tracked.
+# Only ignore the duplicate copies that live inside each week folder.
+lab_exercises/week3/ai_gen_img/
+lab_exercises/week4/public/ai_gen_img/
 placeholder_assets/
+
 
 # ── Unused / archived 3D model assets ───────────────────────────
 **/assets/3d_models/not_used/
 lab_exercises/Week1/assets/3d_models/
+
+# ── Large 3D model files (>50 MB) — keep locally, skip git ──────
+**/cartoon_plane.glb
+
 
 # ── Font zip archives (keep extracted fonts, skip zips) ─────────
 **/*.zip
