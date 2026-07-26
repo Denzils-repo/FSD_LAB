@@ -1,0 +1,45 @@
+# === DEPENDENCIES ===
+node_modules/
+
+# === BUILD OUTPUT ===
+dist/
+dist-ssr/
+
+# === LOGS ===
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# === ENVIRONMENT & SECRETS ===
+.env
+.env.*
+!.env.example
+
+# === SQLITE DATABASE ===
+# Keep schema + init script, ignore the actual DB file
+database/*.db
+database/*.db-shm
+database/*.db-wal
+
+# === OS FILES ===
+.DS_Store
+Thumbs.db
+
+# === EDITOR ===
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# === VITE ===
+*.local
+
+# === WORD DOCS (generated, not source) ===
+*.docx

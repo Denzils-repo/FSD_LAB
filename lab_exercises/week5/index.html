@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LootYard — Free game assets, always (React)</title>
+    <meta name="description" content="Engine-ready 3D models, SFX, animations and code — completely free, no account needed. Or hire a creator for custom work.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              cream: '#fff8f1',
+              bark: '#15110d',
+              mango: '#ff9f4a',
+              'mango-soft': '#ffd2aa',
+              'mango-pale': '#fff0df',
+              taupe: '#8a7564',
+              brown: '#5c4a3c',
+            },
+            fontFamily: {
+              display: ['Bricolage Grotesque', 'sans-serif'],
+              body: ['Inter', 'sans-serif'],
+              hand: ['Caveat', 'cursive'],
+            }
+          }
+        }
+      }
+    </script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/hung1001/font-awesome-pro@4cac1a6/css/all.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
